@@ -1,0 +1,4 @@
+/* Local fallback to avoid external Font Awesome CDN.
+   This hides FA icons to prevent missing-glyph squares when FA fonts are not present.
+   To restore icons locally, replace this file with a self-hosted Font Awesome build. */
+.fa { display: none !important; }

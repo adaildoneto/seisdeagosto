@@ -1,0 +1,18 @@
+/* Theme Name: seideagosto
+Theme URI: 
+Author: Adaildo Neto
+Author URI: mailto:adaildo.neto@gmail.com
+Description: Tema WordPress personalizado "seideagosto" criado por Adaildo Neto. Inclui blocos Gutenberg dinâmicos (destaques, grid de notícias com paginação opcional, colunistas, clima, câmbio), construtor de páginas para Arquivos/Busca via Customizer e estilização baseada em variáveis de tema.
+Tags: one-column, custom-menu, featured-images, theme-options, translation-ready, bootstrap
+Version: 1.0.0
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: u_correio68
+This theme, like WordPress, is licensed under the GPL.
+
+Resource Licenses: Bootstrap: http://getbootstrap.com | https://github.com/twbs/bootstrap/blob/master/LICENSE (Code licensed under MIT, documentation under CC BY 3.0.) jQuery: https://jquery.org | (Code licensed under MIT) */
+/* This file is just used to identify the theme in WordPress. */
+/* Don't add custom styles here, but in assets/sass/theme.scss */

@@ -1,0 +1,20 @@
+{
+    "apiVersion": 2,
+    "name": "u-correio68/destaque-grande",
+    "title": "Destaque Grande",
+    "category": "widgets",
+    "icon": "star-filled",
+    "description": "Bloco de destaque grande para a home.",
+    "attributes": {
+        "numberOfPosts": {
+            "type": "number",
+            "default": 1
+        },
+        "category": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    
+    "renderCallback": "u_correio68_render_destaque_grande"
+}

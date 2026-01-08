@@ -1,0 +1,27 @@
+{
+    "apiVersion": 2,
+    "name": "u-correio68/lista-noticias",
+    "title": "Lista de Notícias",
+    "category": "widgets",
+    "icon": "list-view",
+    "description": "Bloco para listar notícias em grade.",
+    "attributes": {
+        "numberOfPosts": {
+            "type": "number",
+            "default": 9
+        },
+        "offset": {
+            "type": "number",
+            "default": 3
+        },
+        "columns": {
+            "type": "number",
+            "default": 3
+        },
+        "category": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "renderCallback": "u_correio68_render_lista_noticias"
+}

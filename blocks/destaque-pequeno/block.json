@@ -1,0 +1,23 @@
+{
+    "apiVersion": 2,
+    "name": "u-correio68/destaque-pequeno",
+    "title": "Destaque Pequeno",
+    "category": "widgets",
+    "icon": "star-half",
+    "description": "Bloco de destaques menores.",
+    "attributes": {
+        "numberOfPosts": {
+            "type": "number",
+            "default": 2
+        },
+        "offset": {
+            "type": "number",
+            "default": 1
+        },
+        "category": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "renderCallback": "u_correio68_render_destaque_pequeno"
+}
