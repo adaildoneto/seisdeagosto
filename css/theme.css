@@ -729,6 +729,18 @@ a.article:hover {
 /* Ensure Bootstrap's text-primary maps to theme primary on singles */
 .single-post .text-primary { color: var(--u68-primary-color, #0a4579) !important; }
 
+/* Global: links follow theme primary color everywhere (non-buttons) */
+a:not(.btn) {
+  color: var(--u68-primary-color, #0a4579);
+}
+a:not(.btn):hover {
+  color: var(--u68-primary-color, #0a4579);
+  text-decoration: underline;
+}
+
+/* Global: map Bootstrap text-primary to theme primary color */
+.text-primary { color: var(--u68-primary-color, #0a4579) !important; }
+
 /* Mobile specific for navbar categorias */
 @media (max-width: 768px) {
   .navbar-categorias {
