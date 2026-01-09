@@ -898,6 +898,16 @@ function u_correio68_render_category_highlight( $attributes ) {
                         $icones = function_exists('get_field') ? get_field( 'icones', $post->ID ) : '';
                         $chamada = function_exists('get_field') ? get_field( 'chamada', $post->ID ) : '';
                         ?>
+                        <!-- Top row: Badge (left) and Date (right) -->
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <?php if ( !empty( $chamada ) ) : ?>
+                                <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
+                                    <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                    <span><?php echo esc_html($chamada); ?></span>
+                                </span>
+                            <?php endif; ?>
+                            <small class="text-muted" style="font-size: 0.8rem;"><i class="fa fa-clock-o"></i> <?php echo get_the_date('d/m/Y', $post->ID); ?></small>
+                        </div>
                         <div class="d-flex align-items-start">
                             <div class="flex-shrink-0 mr-3" style="width: 90px; height: 90px; overflow: hidden; border-radius: 4px;">
                                 <?php 
@@ -922,15 +932,6 @@ function u_correio68_render_category_highlight( $attributes ) {
                                 <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="text-decoration-none">
                                     <h6 class="mb-1" style="line-height: 1.4; font-size: 0.95rem; color: #333; font-weight: 600; <?php echo esc_attr( $titleStyle ); ?>"><?php echo get_the_title( $post->ID ); ?></h6>
                                 </a>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <small class="text-muted" style="font-size: 0.8rem;"><i class="fa fa-clock-o"></i> <?php echo get_the_date('d/m/Y', $post->ID); ?></small>
-                                    <?php if ( !empty( $chamada ) ) : ?>
-                                        <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
-                                            <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
-                                            <span><?php echo esc_html($chamada); ?></span>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
                             </div>
                         </div>
                     </div>
