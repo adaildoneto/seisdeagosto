@@ -1265,7 +1265,16 @@ function u_correio68_render_weather( $attributes ) {
     ?>
     <div class="weather-block minimal card spaces p-3 weather-eyecandy">
         <div class="d-flex align-items-center">
-            <i class="fa <?php echo esc_attr( $fa ); ?> weather-fa-icon" aria-hidden="true"></i>
+            <div class="weather-icon icon-<?php echo esc_attr( $icon ); ?>">
+                <div class="icon-base"></div>
+                <?php if ( in_array( $icon, array('rain','storm'), true ) ) : ?>
+                    <div class="rain"></div>
+                <?php endif; ?>
+                <?php if ( $showWind ) : ?>
+                    <div class="wind"></div>
+                <?php endif; ?>
+            </div>
+            <i class="fa <?php echo esc_attr( $fa ); ?> weather-fa-icon ml-3" aria-hidden="true"></i>
             <div class="ml-3">
                 <div class="h4 mb-1" style="font-weight:700;">&nbsp;<?php echo esc_html( round( $temp ) ) . ' ' . esc_html( $temp_unit ); ?></div>
                 <div class="small text-muted"><?php echo esc_html( $desc ); ?><?php echo $city ? ' • ' . esc_html( $city ) : ''; ?></div>
