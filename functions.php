@@ -510,7 +510,8 @@ if ( ! function_exists( 'u_correio68_enqueue_scripts' ) ) :
     wp_deregister_script( 'u_correio68-script' );
 
     wp_deregister_script( 'u_correio68-slick' );
-    wp_enqueue_script( 'u_correio68-slick', get_template_directory_uri() . '/slick/slick.min.js');
+    wp_enqueue_script( 'u_correio68-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
+    wp_enqueue_script( 'u_correio68-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_correio68-slick'), null, true );
 
     /* Pinegrow generated Enqueue Scripts End */
 

@@ -741,6 +741,17 @@ a:not(.btn):hover {
 /* Global: map Bootstrap text-primary to theme primary color */
 .text-primary { color: var(--u68-primary-color, #0a4579) !important; }
 
+/* Slick carousel adjustments for Colunistas Grid on mobile */
+@media (max-width: 767.98px) {
+  .colunistas-grid.slick-initialized .col-6,
+  .colunistas-grid.slick-initialized .col-sm-6,
+  .colunistas-grid.slick-initialized .col-md-4,
+  .colunistas-grid.slick-initialized .col-lg-3 {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+}
+
 /* Mobile specific for navbar categorias */
 @media (max-width: 768px) {
   .navbar-categorias {
