@@ -1,7 +1,7 @@
 <?php
-if ( ! function_exists( 'u_correio68_setup' ) ) :
+if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
-function u_correio68_setup() {
+function u_seisbarra8_setup() {
 
     /*
      * Make theme available for translation.
@@ -9,7 +9,7 @@ function u_correio68_setup() {
      */
     /* Pinegrow generated Load Text Domain Begin */
     // Load legacy and new text domains to prevent translation issues during rename
-    load_theme_textdomain( 'u_correio68', get_template_directory() . '/languages' );
+    load_theme_textdomain( 'u_seisbarra8', get_template_directory() . '/languages' );
     load_theme_textdomain( 'seideagosto', get_template_directory() . '/languages' );
     /* Pinegrow generated Load Text Domain End */
 
@@ -29,7 +29,7 @@ function u_correio68_setup() {
         /**
          * SEO and Open Graph meta for single posts.
          */
-        function u_correio68_single_seo_opengraph() {
+        function u_seisbarra8_single_seo_opengraph() {
             if ( ! is_single() ) return;
 
             global $post;
@@ -146,12 +146,12 @@ function u_correio68_setup() {
 
             echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
         }
-        add_action( 'wp_head', 'u_correio68_single_seo_opengraph', 5 );
+        add_action( 'wp_head', 'u_seisbarra8_single_seo_opengraph', 5 );
 
     // Add menus.
     register_nav_menus( array(
-        'primary' => __( 'Primary Menu', 'u_correio68' ),
-        'social'  => __( 'Social Links Menu', 'u_correio68' ),
+        'primary' => __( 'Primary Menu', 'u_seisbarra8' ),
+        'social'  => __( 'Social Links Menu', 'u_seisbarra8' ),
     ) );
 
 /*
@@ -159,7 +159,7 @@ function u_correio68_setup() {
      */
     /* Pinegrow generated Register Menus Begin */
 
-    register_nav_menu(  'categorias', __( 'Categorias para a capa do site', 'u_correio68' )  );
+    register_nav_menu(  'categorias', __( 'Categorias para a capa do site', 'u_seisbarra8' )  );
 
     /* Pinegrow generated Register Menus End */
 
@@ -203,14 +203,14 @@ function u_correio68_setup() {
     add_editor_style( 'css/theme.css' );
     add_editor_style( 'bootstrap/css/bootstrap.css' );
 }
-endif; // u_correio68_setup
+endif; // u_seisbarra8_setup
 
-add_action( 'after_setup_theme', 'u_correio68_setup' );
+add_action( 'after_setup_theme', 'u_seisbarra8_setup' );
 
 
-if ( ! function_exists( 'u_correio68_init' ) ) :
+if ( ! function_exists( 'u_seisbarra8_init' ) ) :
 
-function u_correio68_init() {
+function u_seisbarra8_init() {
 
 
     // Use categories and tags with attachments
@@ -232,14 +232,14 @@ function u_correio68_init() {
     /* Pinegrow generated Taxonomies End */
 
 }
-endif; // u_correio68_setup
+endif; // u_seisbarra8_setup
 
-add_action( 'init', 'u_correio68_init' );
+add_action( 'init', 'u_seisbarra8_init' );
 
 
-if ( ! function_exists( 'u_correio68_custom_image_sizes_names' ) ) :
+if ( ! function_exists( 'u_seisbarra8_custom_image_sizes_names' ) ) :
 
-function u_correio68_custom_image_sizes_names( $sizes ) {
+function u_seisbarra8_custom_image_sizes_names( $sizes ) {
 
     /*
      * Add names of custom image sizes.
@@ -254,14 +254,14 @@ function u_correio68_custom_image_sizes_names( $sizes ) {
     /* Pinegrow generated Image Sizes Names End */
     return $sizes;
 }
-add_action( 'image_size_names_choose', 'u_correio68_custom_image_sizes_names' );
-endif;// u_correio68_custom_image_sizes_names
+add_action( 'image_size_names_choose', 'u_seisbarra8_custom_image_sizes_names' );
+endif;// u_seisbarra8_custom_image_sizes_names
 
 
 
-if ( ! function_exists( 'u_correio68_widgets_init' ) ) :
+if ( ! function_exists( 'u_seisbarra8_widgets_init' ) ) :
 
-function u_correio68_widgets_init() {
+function u_seisbarra8_widgets_init() {
 
     /*
      * Register widget areas.
@@ -269,7 +269,7 @@ function u_correio68_widgets_init() {
     /* Pinegrow generated Register Sidebars Begin */
 
     register_sidebar( array(
-        'name' => __( 'navbarlateral', 'u_correio68' ),
+        'name' => __( 'navbarlateral', 'u_seisbarra8' ),
         'id' => 'navbarlateral',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -288,7 +288,7 @@ function u_correio68_widgets_init() {
     ) );
     
     register_sidebar( array(
-        'name' => __( 'bannervertical', 'u_correio68' ),
+        'name' => __( 'bannervertical', 'u_seisbarra8' ),
         'id' => 'banneraleac-vertical',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -297,7 +297,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'temperatura', 'u_correio68' ),
+        'name' => __( 'temperatura', 'u_seisbarra8' ),
         'id' => 'temperatura',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -306,7 +306,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Banner Colunistas', 'u_correio68' ),
+        'name' => __( 'Banner Colunistas', 'u_seisbarra8' ),
         'id' => 'banner_colunistas',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -315,7 +315,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'banner ALEAC', 'u_correio68' ),
+        'name' => __( 'banner ALEAC', 'u_seisbarra8' ),
         'id' => 'bannneraleac',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -324,7 +324,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Grupo Whatsapp', 'u_correio68' ),
+        'name' => __( 'Grupo Whatsapp', 'u_seisbarra8' ),
         'id' => 'whatsappcorreio68',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -333,7 +333,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Colunistas 68', 'u_correio68' ),
+        'name' => __( 'Colunistas 68', 'u_seisbarra8' ),
         'id' => 'colunistas',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -342,7 +342,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Na Rota do Boi', 'u_correio68' ),
+        'name' => __( 'Na Rota do Boi', 'u_seisbarra8' ),
         'id' => 'narotadoboi',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -351,7 +351,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Right Sidebar', 'u_correio68' ),
+        'name' => __( 'Right Sidebar', 'u_seisbarra8' ),
         'id' => 'right-sidebar',
         'description' => 'Right Sidebar widget area',
         'before_widget' => '<aside id="%1$s" class="widget %2$s">',
@@ -361,7 +361,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'banner Footer', 'u_correio68' ),
+        'name' => __( 'banner Footer', 'u_seisbarra8' ),
         'id' => 'bannerfooter',
         'before_widget' => '<div id="%1$s" class="widget %2$s">',
         'after_widget' => '</div>',
@@ -370,7 +370,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Banners do Cabral', 'u_correio68' ),
+        'name' => __( 'Banners do Cabral', 'u_seisbarra8' ),
         'id' => 'cabralize',
         'description' => 'Area dos banners do Cabral',
         'before_widget' => '<aside id="%1$s" class="widget %2$s">',
@@ -380,7 +380,7 @@ function u_correio68_widgets_init() {
     ) );
 
     register_sidebar( array(
-        'name' => __( 'Left Sidebar', 'u_correio68' ),
+        'name' => __( 'Left Sidebar', 'u_seisbarra8' ),
         'id' => 'left-sidebar',
         'description' => 'Left Sidebar widget area',
         'before_widget' => '<aside id="%1$s" class="widget %2$s">',
@@ -391,31 +391,31 @@ function u_correio68_widgets_init() {
 
     /* Pinegrow generated Register Sidebars End */
 }
-add_action( 'widgets_init', 'u_correio68_widgets_init' );
-endif;// u_correio68_widgets_init
+add_action( 'widgets_init', 'u_seisbarra8_widgets_init' );
+endif;// u_seisbarra8_widgets_init
 
 
 
-if ( ! function_exists( 'u_correio68_customize_register' ) ) :
+if ( ! function_exists( 'u_seisbarra8_customize_register' ) ) :
 
-function u_correio68_customize_register( $wp_customize ) {
+function u_seisbarra8_customize_register( $wp_customize ) {
     
     $pgwp_sanitize = function_exists('pgwp_sanitize_placeholder') ? 'pgwp_sanitize_placeholder' : null;
 
     // ====================
     // PAINEL: Configurações do Layout
     // ====================
-    $wp_customize->add_panel( 'u_correio68_layout_panel', array(
-        'title'       => __( '📐 Layout e Estrutura', 'u_correio68' ),
-        'description' => __( 'Configure a estrutura e layout do site', 'u_correio68' ),
+    $wp_customize->add_panel( 'u_seisbarra8_layout_panel', array(
+        'title'       => __( '📐 Layout e Estrutura', 'u_seisbarra8' ),
+        'description' => __( 'Configure a estrutura e layout do site', 'u_seisbarra8' ),
         'priority'    => 25,
     ) );
 
     // Seção: Sidebars
-    $wp_customize->add_section( 'u_correio68_sidebars', array(
-        'title'       => __( 'Barras Laterais', 'u_correio68' ),
-        'description' => __( 'Ative ou desative as barras laterais do site', 'u_correio68' ),
-        'panel'       => 'u_correio68_layout_panel',
+    $wp_customize->add_section( 'u_seisbarra8_sidebars', array(
+        'title'       => __( 'Barras Laterais', 'u_seisbarra8' ),
+        'description' => __( 'Ative ou desative as barras laterais do site', 'u_seisbarra8' ),
+        'panel'       => 'u_seisbarra8_layout_panel',
         'priority'    => 10,
     ));
 
@@ -426,10 +426,10 @@ function u_correio68_customize_register( $wp_customize ) {
     ));
 
     $wp_customize->add_control( 'show_right_sidebar', array(
-        'label'       => __( 'Exibir Barra Lateral Direita', 'u_correio68' ),
-        'description' => __( 'Marque para ativar a barra lateral direita', 'u_correio68' ),
+        'label'       => __( 'Exibir Barra Lateral Direita', 'u_seisbarra8' ),
+        'description' => __( 'Marque para ativar a barra lateral direita', 'u_seisbarra8' ),
         'type'        => 'checkbox',
-        'section'     => 'u_correio68_sidebars',
+        'section'     => 'u_seisbarra8_sidebars',
     ));
 
     $wp_customize->add_setting( 'show_left_sidebar', array(
@@ -439,26 +439,26 @@ function u_correio68_customize_register( $wp_customize ) {
     ));
 
     $wp_customize->add_control( 'show_left_sidebar', array(
-        'label'       => __( 'Exibir Barra Lateral Esquerda', 'u_correio68' ),
-        'description' => __( 'Marque para ativar a barra lateral esquerda', 'u_correio68' ),
+        'label'       => __( 'Exibir Barra Lateral Esquerda', 'u_seisbarra8' ),
+        'description' => __( 'Marque para ativar a barra lateral esquerda', 'u_seisbarra8' ),
         'type'        => 'checkbox',
-        'section'     => 'u_correio68_sidebars',
+        'section'     => 'u_seisbarra8_sidebars',
     ));
 
     // ====================
     // PAINEL: Conteúdo do Site
     // ====================
-    $wp_customize->add_panel( 'u_correio68_content_panel', array(
-        'title'       => __( '📝 Conteúdo', 'u_correio68' ),
-        'description' => __( 'Personalize textos e conteúdos do site', 'u_correio68' ),
+    $wp_customize->add_panel( 'u_seisbarra8_content_panel', array(
+        'title'       => __( '📝 Conteúdo', 'u_seisbarra8' ),
+        'description' => __( 'Personalize textos e conteúdos do site', 'u_seisbarra8' ),
         'priority'    => 35,
     ) );
 
     // Seção: Rodapé
-    $wp_customize->add_section( 'u_correio68_footer', array(
-        'title'       => __( 'Rodapé', 'u_correio68' ),
-        'description' => __( 'Personalize o texto do rodapé', 'u_correio68' ),
-        'panel'       => 'u_correio68_content_panel',
+    $wp_customize->add_section( 'u_seisbarra8_footer', array(
+        'title'       => __( 'Rodapé', 'u_seisbarra8' ),
+        'description' => __( 'Personalize o texto do rodapé', 'u_seisbarra8' ),
+        'panel'       => 'u_seisbarra8_content_panel',
         'priority'    => 10,
     ));
 
@@ -469,100 +469,164 @@ function u_correio68_customize_register( $wp_customize ) {
     ));
 
     $wp_customize->add_control( 'footer_text', array(
-        'label'       => __( 'Texto do Rodapé', 'u_correio68' ),
-        'description' => __( 'HTML permitido: <i>, <b>, <a>, <span>', 'u_correio68' ),
+        'label'       => __( 'Texto do Rodapé', 'u_seisbarra8' ),
+        'description' => __( 'HTML permitido: <i>, <b>, <a>, <span>', 'u_seisbarra8' ),
         'type'        => 'textarea',
-        'section'     => 'u_correio68_footer',
+        'section'     => 'u_seisbarra8_footer',
     ));
 
     /* Pinegrow generated Customizer Controls End */
 
 }
-add_action( 'customize_register', 'u_correio68_customize_register' );
-endif;// u_correio68_customize_register
+add_action( 'customize_register', 'u_seisbarra8_customize_register' );
+endif;// u_seisbarra8_customize_register
 
 
-if ( ! function_exists( 'u_correio68_enqueue_scripts' ) ) :
-    function u_correio68_enqueue_scripts() {
+if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
+    function u_seisbarra8_enqueue_scripts() {
 
         /* Pinegrow generated Enqueue Scripts Begin */
           
 
+    // Ensure core jQuery is loaded
     wp_enqueue_script( 'jquery');
+    // Alias $ to jQuery for legacy scripts expecting global $
+    wp_add_inline_script( 'jquery', 'window.$ = window.$ || window.jQuery;', 'after' );
+    // Add jQuery Migrate for compatibility with plugins/themes using deprecated APIs (e.g., $.load, $.bind)
+    if ( wp_script_is( 'jquery-migrate', 'registered' ) ) {
+        wp_enqueue_script( 'jquery-migrate' );
+    }
 
-    wp_enqueue_script( 'u_correio68-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_correio68-bootstrap'), null, true );
+    wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap'), null, true );
 
-    wp_enqueue_script( 'u_correio68-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), null, true );
+    wp_enqueue_script( 'u_seisbarra8-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), null, true );
 
-    wp_enqueue_script( 'u_correio68-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), null, true );
+    wp_enqueue_script( 'u_seisbarra8-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), null, true );
 
-    wp_enqueue_script( 'u_correio68-bootstrap', get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', array('jquery', 'u_correio68-popper'), null, true );
+    wp_enqueue_script( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', array('jquery', 'u_seisbarra8-popper'), null, true );
 
-    wp_enqueue_script( 'u_correio68-outline', get_template_directory_uri() . '/assets/js/outline.js', null, null, true );
+    wp_enqueue_script( 'u_seisbarra8-outline', get_template_directory_uri() . '/assets/js/outline.js', null, null, true );
 
-    wp_deregister_script( 'u_correio68-plugins' );
-    wp_enqueue_script( 'u_correio68-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', false, null, true);
+    wp_deregister_script( 'u_seisbarra8-plugins' );
+    wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), null, true);
 
-    wp_deregister_script( 'u_correio68-bskitscripts' );
-    wp_enqueue_script( 'u_correio68-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', false, null, true);
+    wp_deregister_script( 'u_seisbarra8-bskitscripts' );
+    wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), null, true);
 
     // Remove external Google Maps API to avoid CDN/external dependency
-    wp_deregister_script( 'u_correio68-script' );
+    wp_deregister_script( 'u_seisbarra8-script' );
 
-    wp_deregister_script( 'u_correio68-slick' );
-    wp_enqueue_script( 'u_correio68-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
-    wp_enqueue_script( 'u_correio68-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_correio68-slick'), null, true );
+    wp_deregister_script( 'u_seisbarra8-slick' );
+    wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
+    wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+    // Weather forecast slider init (uses slick)
+    wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+    // Post-load i18n for weekday names (pt-BR)
+    wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), null, true );
 
     /* Pinegrow generated Enqueue Scripts End */
 
         /* Pinegrow generated Enqueue Styles Begin */
 
-    wp_deregister_style( 'u_correio68-bootstrap' );
-    wp_enqueue_style( 'u_correio68-bootstrap', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-bootstrap' );
+    wp_enqueue_style( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css', false, null, 'all');
 
-    wp_deregister_style( 'u_correio68-theme' );
-    wp_enqueue_style( 'u_correio68-theme', get_template_directory_uri() . '/css/theme.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-theme' );
+    wp_enqueue_style( 'u_seisbarra8-theme', get_template_directory_uri() . '/css/theme.css', false, null, 'all');
+    // Inline CSS to align icon colors and spacing with theme variables
+    wp_add_inline_style( 'u_seisbarra8-theme', '
+    .weather-forecast .fa.icon-color-primary { color: var(--u68-primary-color, #007bff); }
+    .weather-forecast .fa.icon-color-accent { color: var(--u68-badge-color, #ff5722); }
+    .weather-forecast .forecast-day { padding: 8px; margin: 0; }
+    .weather-forecast .metrics { display: flex; align-items: center; gap: 6px; }
+    .weather-forecast .metrics .fa { margin-right: 4px; }
+    .weather-forecast .day-name, .weather-forecast .day-date { font-weight: 700; font-size: 1.05rem; }
+    .weather-forecast-slider .slick-slide { outline: none; }
+    .weather-forecast-slider .slick-dots li button:before { color: var(--u68-primary-color, #007bff); }
+    .weather-forecast .fa.icon-color-primary { color: var(--u68-primary-color, #007bff); }
+    .weather-forecast .fa.icon-color-accent { color: var(--u68-badge-color, #ff5722); }
+    .weather-forecast .daily-card { padding: 8px; margin: 0; }
+    .weather-forecast .metrics { display: flex; align-items: center; gap: 6px; }
+    .weather-forecast .metrics .fa { margin-right: 4px; }
+    .weather-forecast .day-name { font-weight: 600; }
+    .weather-forecast-slider .slick-slide { outline: none; }
+    .weather-forecast-slider .slick-dots li button:before { color: var(--u68-primary-color, #007bff); }
+    ' );
+    // Inline CSS for current-day header alignment and emphasis
+    wp_add_inline_style( 'u_seisbarra8-theme', '
+    .weather-block .current-wrap { display:flex; flex-direction:column; align-items:center; text-align:center; }
+    .weather-block .current-info { width:100%; }
+    .weather-block .current-info .city { font-weight:700; color: var(--u68-primary-color, #007bff); font-size:0.95rem; display:block; }
+    .weather-block .current-info .condition { font-weight:600; color: var(--u68-badge-color, #ff5722); font-size:0.9rem; display:block; }
+    .weather-block .current-meta-inline { display:flex; flex-direction:column; gap:4px; align-items:center; }
+    .weather-block .current-meta-inline > div { display:flex; align-items:center; justify-content:center; }
+    .weather-block .current-meta-inline i { font-size:0.9rem; margin-right:6px; }
+    .weather-block .meta-bottom { gap:6px; margin-top:8px; display:flex; flex-direction:column; align-items:center; }
+    .weather-block .meta-bottom > div { display:flex; align-items:center; justify-content:center; }
+    .weather-block .meta-bottom > div i { margin-right:6px; }
+    .weather-block .wind-info, .weather-block .rain-info { font-size:0.95rem; color:#2c3e50; font-weight:500; }
+    .weather-block .current-temp { font-weight:800; font-size:2rem; line-height:1; color: var(--u68-primary-color, #007bff); }
+    .weather-block .current-temp .temp-unit { font-size:0.9rem; opacity:0.85; margin-left:2px; }
+    .weather-block .weather-fa-icon { font-size:28px; }
+        .weather-block .fa.icon-color-primary { color: var(--u68-primary-color, #007bff); }
+        .weather-block .fa.icon-color-accent { color: var(--u68-badge-color, #ff5722); }
+        .weather-block .current-info { min-width:0; }
+    ' );
 
-    wp_deregister_style( 'u_correio68-woocommerce' );
-    wp_enqueue_style( 'u_correio68-woocommerce', get_template_directory_uri() . '/css/woocommerce.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-woocommerce' );
+    wp_enqueue_style( 'u_seisbarra8-woocommerce', get_template_directory_uri() . '/css/woocommerce.css', false, null, 'all');
 
-    wp_deregister_style( 'u_correio68-blocks' );
-    wp_enqueue_style( 'u_correio68-blocks', get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-blocks' );
+    wp_enqueue_style( 'u_seisbarra8-blocks', get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css', false, null, 'all');
 
-    wp_deregister_style( 'u_correio68-plugins' );
-    wp_enqueue_style( 'u_correio68-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-plugins' );
+    wp_enqueue_style( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css', false, null, 'all');
 
-    wp_deregister_style( 'u_correio68-stylelibrary' );
-    wp_enqueue_style( 'u_correio68-stylelibrary', get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-stylelibrary' );
+    wp_enqueue_style( 'u_seisbarra8-stylelibrary', get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css', false, null, 'all');
 
     // Remove Google Fonts to avoid CDN/external dependency (use local fonts instead)
-    wp_deregister_style( 'u_correio68-style' );
-    wp_deregister_style( 'u_correio68-style-1' );
+    wp_deregister_style( 'u_seisbarra8-style' );
+    wp_deregister_style( 'u_seisbarra8-style-1' );
     // Enqueue local self-hosted fonts (Open Sans, Lato)
-    wp_enqueue_style( 'u_correio68-local-fonts', get_template_directory_uri() . '/css/fonts-local.css', false, null, 'all');
+    wp_enqueue_style( 'u_seisbarra8-local-fonts', get_template_directory_uri() . '/css/fonts-local.css', false, null, 'all');
+    // Absolute font-face URLs to avoid 404s when relative paths are rewritten
+    // Use stylesheet directory to respect child themes and ensure correct base URI
+    $u68_theme_uri = get_stylesheet_directory_uri();
+    $u68_font_faces = "
+@font-face { font-family: 'Open Sans'; src: url('{$u68_theme_uri}/assets/fonts/open-sans/OpenSans-Variable.ttf') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sans'; src: url('{$u68_theme_uri}/assets/fonts/open-sans/OpenSans-Italic-Variable.ttf') format('truetype'); font-weight: 300 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-LightItalic.ttf') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-BoldItalic.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
+";
+    wp_add_inline_style( 'u_seisbarra8-local-fonts', $u68_font_faces );
 
     // Prefer local Font Awesome 4.7 if present; otherwise fallback to hiding icons to avoid broken glyphs
-    wp_deregister_style( 'u_correio68-fontawesome' );
+    wp_deregister_style( 'u_seisbarra8-fontawesome' );
     $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
     if ( file_exists( $fa_vendor_css ) ) {
-        wp_enqueue_style( 'u_correio68-fontawesome', get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', false, '4.7.0', 'all');
+        wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', false, '4.7.0', 'all');
     } else {
-        wp_enqueue_style( 'u_correio68-fontawesome', get_template_directory_uri() . '/css/local-fa-fallback.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/css/local-fa-fallback.css', false, null, 'all');
     }
 
-    wp_deregister_style( 'u_correio68-slick' );
-    wp_enqueue_style( 'u_correio68-slick', get_template_directory_uri() . '/slick/slick.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-slick' );
+    wp_enqueue_style( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.css', false, null, 'all');
 
-    wp_deregister_style( 'u_correio68-slicktheme' );
-    wp_enqueue_style( 'u_correio68-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-slicktheme' );
+    wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
 
-    wp_deregister_style( 'u_correio68-style-2' );
-    wp_enqueue_style( 'u_correio68-style-2', get_bloginfo('stylesheet_url'), false, null, 'all');
+    wp_deregister_style( 'u_seisbarra8-style-2' );
+    wp_enqueue_style( 'u_seisbarra8-style-2', get_bloginfo('stylesheet_url'), false, null, 'all');
 
     /* Pinegrow generated Enqueue Styles End */
 
     }
-    add_action( 'wp_enqueue_scripts', 'u_correio68_enqueue_scripts' );
+    add_action( 'wp_enqueue_scripts', 'u_seisbarra8_enqueue_scripts' );
 endif;
 
 function pgwp_sanitize_placeholder($input) { return $input; }
@@ -599,4 +663,113 @@ require_once "inc/customizer.php";
         }
     }
 
+    // Register custom Block Pattern category for this theme
+    add_action( 'init', function() {
+        if ( function_exists( 'register_block_pattern_category' ) ) {
+            register_block_pattern_category( 'seisdeagosto', array(
+                'label' => __( 'Seis de Agosto', 'u_seisbarra8' ),
+            ) );
+        }
+    } );
+
+    // Create synced patterns (Reusable Blocks) from existing /patterns files
+    add_action( 'init', function() {
+        // Ensure the reusable blocks post type exists
+        if ( ! post_type_exists( 'wp_block' ) ) return;
+
+        $defs = array(
+            array(
+                'file'  => 'patterns/destaques-home.php',
+                'title' => __( 'Destaques da Capa (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-destaques-home'
+            ),
+            array(
+                'file'  => 'patterns/categoria-destaque.php',
+                'title' => __( 'Categoria em Destaque (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-categoria-destaque'
+            ),
+            array(
+                'file'  => 'patterns/destaque-misto.php',
+                'title' => __( 'Destaque Misto (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-destaque-misto'
+            ),
+            array(
+                'file'  => 'patterns/mais-lidas.php',
+                'title' => __( 'Top Mais Lidas (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-mais-lidas'
+            ),
+            array(
+                'file'  => 'patterns/noticias-grid-bloco.php',
+                'title' => __( 'Notícias (Bloco do Tema) (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-noticias-grid-bloco'
+            ),
+            array(
+                'file'  => 'patterns/colunistas-destaque.php',
+                'title' => __( 'Colunistas em Destaque (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-colunistas-destaque'
+            ),
+            array(
+                'file'  => 'patterns/previsao-tempo.php',
+                'title' => __( 'Previsão do Tempo (Sincronizado)', 'u_seisbarra8' ),
+                'slug'  => 'seisdeagosto-previsao-tempo'
+            ),
+        );
+
+        foreach ( $defs as $def ) {
+            // Skip if already exists
+            $existing = get_page_by_path( $def['slug'], OBJECT, 'wp_block' );
+            if ( $existing ) continue;
+
+            $path = get_theme_file_path( $def['file'] );
+            if ( ! $path || ! file_exists( $path ) ) continue;
+
+            $raw = file_get_contents( $path );
+            if ( false === $raw ) continue;
+
+            // Strip PHP header (pattern metadata) to keep only block markup
+            $content = preg_replace( '/^<\?php.*?\?>\s*/s', '', $raw );
+            if ( empty( $content ) ) continue;
+
+            wp_insert_post( array(
+                'post_type'    => 'wp_block',
+                'post_status'  => 'publish',
+                'post_title'   => $def['title'],
+                'post_name'    => $def['slug'],
+                'post_content' => $content,
+            ) );
+        }
+    }, 20 );
+
+    
+    // Utility: Flush weather cache (transients) via URL flag for admins
+    function u_seisbarra8_flush_weather_cache() {
+        global $wpdb;
+        $prefix_like = $wpdb->esc_like( 'u68_weather_v2_' ) . '%';
+        // Delete cached values
+        $transients = $wpdb->get_col( $wpdb->prepare(
+            "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+            '_transient_' . $prefix_like
+        ) );
+        if ( ! empty( $transients ) ) {
+            foreach ( $transients as $option_name ) {
+                $t_key = str_replace( '_transient_', '', $option_name );
+                delete_transient( $t_key );
+            }
+        }
+        // Remove timeouts for completeness
+        $timeouts = $wpdb->get_col( $wpdb->prepare(
+            "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+            '_transient_timeout_' . $prefix_like
+        ) );
+        if ( ! empty( $timeouts ) ) {
+            foreach ( $timeouts as $option_name ) {
+                delete_option( $option_name );
+            }
+        }
+    }
+    add_action( 'init', function() {
+        if ( is_user_logged_in() && current_user_can( 'manage_options' ) && isset( $_GET['flush_weather'] ) ) {
+            u_seisbarra8_flush_weather_cache();
+        }
+    } );
     

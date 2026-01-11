@@ -1,0 +1,112 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.5/theme.json",
+  "version": 2,
+  "settings": {
+    "color": {
+      "palette": [
+        { "slug": "primary",   "name": "Primary",   "color": "#0a4579" },
+        { "slug": "accent",    "name": "Accent",    "color": "#ec940d" },
+        { "slug": "secondary", "name": "Secondary", "color": "#6c757d" },
+        { "slug": "success",   "name": "Success",   "color": "#198754" },
+        { "slug": "danger",    "name": "Danger",    "color": "#dc3545" },
+        { "slug": "warning",   "name": "Warning",   "color": "#ffc107" },
+        { "slug": "info",      "name": "Info",      "color": "#0dcaf0" },
+        { "slug": "dark",      "name": "Dark",      "color": "#212529" },
+        { "slug": "light",     "name": "Light",     "color": "#f8f9fa" }
+      ],
+      "defaultPalette": false,
+      "link": true,
+      "text": true,
+      "background": true
+    },
+    "typography": {
+      "fluid": true,
+      "fontFamilies": [
+        {
+          "slug": "lato",
+          "name": "Lato",
+          "fontFamily": "\"Lato\", sans-serif",
+          "fontFace": [
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "300", "src": [ "assets/fonts/lato/Lato-Light.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "300", "src": [ "assets/fonts/lato/Lato-LightItalic.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "400", "src": [ "assets/fonts/lato/Lato-Regular.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "400", "src": [ "assets/fonts/lato/Lato-Italic.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "700", "src": [ "assets/fonts/lato/Lato-Bold.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "700", "src": [ "assets/fonts/lato/Lato-BoldItalic.ttf" ] }
+          ]
+        },
+        {
+          "slug": "open-sans",
+          "name": "Open Sans",
+          "fontFamily": "\"Open Sans\", sans-serif",
+          "fontFace": [
+            { "fontFamily": "Open Sans", "fontStyle": "normal", "fontWeight": "300 800", "src": [ "assets/fonts/open-sans/OpenSans-Variable.ttf" ] },
+            { "fontFamily": "Open Sans", "fontStyle": "italic", "fontWeight": "300 800", "src": [ "assets/fonts/open-sans/OpenSans-Italic-Variable.ttf" ] }
+          ]
+        }
+      ],
+      "fontSizes": [
+        { "slug": "sm", "size": "0.875rem", "name": "Small" },
+        { "slug": "md", "size": "1rem", "name": "Medium" },
+        { "slug": "lg", "size": "1.25rem", "name": "Large" },
+        { "slug": "xl", "size": "1.5rem", "name": "XL" },
+        { "slug": "title-md", "size": "19px", "name": "Title Medium" },
+        { "slug": "title-lg", "size": "35px", "name": "Title Large" }
+      ]
+    },
+    "spacing": {
+      "units": [ "px", "rem", "em", "%" ],
+      "margin": true,
+      "padding": true,
+      "blockGap": true
+    },
+    "border": {
+      "radius": true,
+      "style": true,
+      "color": true,
+      "width": true
+    },
+    "layout": {
+      "contentSize": "720px",
+      "wideSize": "1140px"
+    },
+    "custom": {
+      "--u68-primary-color": "var(--wp--preset--color--primary)",
+      "--u68-badge-color": "var(--wp--preset--color--accent)",
+      "--u68-title-large-size": "var(--wp--preset--font-size--title-lg)",
+      "--u68-title-medium-size": "var(--wp--preset--font-size--title-md)"
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#ffffff",
+      "text": "#000000"
+    },
+    "typography": {
+      "fontFamily": "var(--wp--preset--font-family--open-sans)"
+    },
+    "elements": {
+      "heading": {
+        "typography": {
+          "fontFamily": "var(--wp--preset--font-family--lato)",
+          "fontWeight": "700"
+        }
+      },
+      "link": {
+        "color": { "text": "var(--wp--preset--color--primary)" }
+      }
+    }
+  }
+  ,
+  "patterns": [
+    "seisdeagosto/hero-banner",
+    "seisdeagosto/noticias-grid",
+    "seisdeagosto/colunistas-destaque",
+    "seisdeagosto/destaques-home",
+    "seisdeagosto/categoria-destaque",
+    "seisdeagosto/destaque-misto",
+    "seisdeagosto/mais-lidas",
+    "seisdeagosto/noticias-grid-bloco",
+    "seisdeagosto/previsao-tempo"
+  ]
+}

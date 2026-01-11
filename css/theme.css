@@ -998,6 +998,90 @@ body {
 .weather-block .icon-storm .icon-base { background: #8e44ad; opacity: .12; }
 .weather-block .icon-snow .icon-base { background: #bdc3c7; opacity: .12; }
 
+/* Weather header layout - centered vertical */
+.weather-block .current-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.weather-block .current-wrap .weather-icon {
+  margin-bottom: 12px;
+}
+.weather-block .current-info {
+  width: 100%;
+}
+.weather-block .current-temp {
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--u68-primary-color, #007bff);
+  margin-bottom: 8px;
+}
+.weather-block .current-temp .temp-unit {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  margin-left: 2px;
+}
+.weather-block .current-meta-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.weather-block .current-meta-inline > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+.weather-block .current-meta-inline .city {
+  font-weight: 700;
+  color: var(--u68-primary-color, #007bff);
+}
+.weather-block .current-meta-inline .condition {
+  font-weight: 600;
+  color: var(--u68-badge-color, #ff5722);
+  font-size: 0.9rem;
+}
+.weather-block .current-meta-inline i {
+  font-size: 0.9rem;
+  margin-right: 6px;
+}
+
+/* Weather info (wind and rain) - text display styles centered */
+.weather-block .wind-info,
+.weather-block .rain-info {
+  font-size: 0.95rem;
+  color: #2c3e50;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.weather-block .wind-info span,
+.weather-block .rain-info span {
+  display: inline-block;
+}
+.weather-block .wind-info i,
+.weather-block .rain-info i {
+  font-size: 1rem;
+  margin-right: 6px;
+}
+.weather-block .meta-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+}
+.weather-block .meta-bottom > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Currency Monitor minimal styles */
 .currency-monitor {
   border: 1px solid #e9ecef;

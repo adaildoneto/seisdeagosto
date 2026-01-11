@@ -15,6 +15,24 @@
             "default": ""
         }
     },
-    
+    "example": {
+        "attributes": {
+            "numberOfPosts": 1,
+            "category": ""
+        },
+        "viewportWidth": 700
+    },
+    "supports": {
+        "color": { "text": true, "background": true, "link": true },
+        "spacing": { "margin": true, "padding": true, "blockGap": true },
+        "typography": {
+            "fontSize": true, "lineHeight": true,
+            "fontStyle": true, "fontWeight": true,
+            "letterSpacing": true, "textTransform": true
+        },
+        "border": { "color": true, "style": true, "width": true, "radius": true }
+    },
+    "editorScript": "u-correio68-custom-blocks",
+    "editorStyle": "file:./editor.css",
     "renderCallback": "u_correio68_render_destaque_grande"
 }

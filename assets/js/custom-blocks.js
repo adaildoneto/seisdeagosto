@@ -12,6 +12,7 @@
     var Button = wp.components.Button;
     var ToggleControl = wp.components.ToggleControl;
     var ServerSideRender = wp.serverSideRender;
+    var addFilter = wp.hooks && wp.hooks.addFilter ? wp.hooks.addFilter : function(){};
 
     var TYPOGRAPHY_DEFAULTS = {
         fontSize: 16,
@@ -157,37 +158,127 @@
         }
     });
 
-    // Colunistas Grid
+    // Colunistas Grid (lightweight editor preview)
     registerBlockType('u-correio68/colunistas-grid', {
         title: 'Grid de Colunistas',
         icon: 'groups',
         category: 'layout',
         supports: { inserter: false },
+        attributes: {
+            previewColumns: { type: 'number', default: 4 }
+        },
         edit: function(props) {
+            var attributes = props.attributes || {};
+            var setAttributes = props.setAttributes;
+            var cols = (typeof attributes.previewColumns === 'number' && attributes.previewColumns > 0) ? attributes.previewColumns : 4;
             return el(
-                'div',
-                { className: 'row colunistas-grid' },
-                el(InnerBlocks, {
-                    allowedBlocks: ['u-correio68/colunista-item']
-                })
+                wp.element.Fragment,
+                null,
+                el('div', {
+                    style: {
+                        border: '1px dashed #cbd3da',
+                        padding: '8px',
+                        marginBottom: '8px',
+                        background: '#f9fafb',
+                        color: '#6c757d',
+                        fontSize: '12px'
+                    }
+                }, 'Grid de Colunistas (preview simples)'),
+                el(
+                    InspectorControls,
+                    null,
+                    el(
+                        PanelBody,
+                        { title: 'Preview', initialOpen: true },
+                        el(RangeControl, {
+                            label: 'Colunas no preview',
+                            value: cols,
+                            min: 2,
+                            max: 6,
+                            onChange: function(val) { setAttributes({ previewColumns: val }); }
+                        })
+                    )
+                ),
+                el(
+                    'div',
+                    { className: 'row colunistas-grid colunistas-grid-editor', style: { display: 'grid', gridTemplateColumns: 'repeat(' + cols + ', minmax(0, 1fr))', gap: '12px', alignItems: 'start' } },
+                    el(InnerBlocks, {
+                        allowedBlocks: ['u-correio68/colunista-item'],
+                        orientation: 'horizontal',
+                        template: [
+                            ['u-correio68/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                            ['u-correio68/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                            ['u-correio68/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                            ['u-correio68/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }]
+                        ],
+                        templateLock: false,
+                        templateInsertUpdatesSelection: true,
+                        renderAppender: 'button'
+                    })
+                )
             );
         },
         save: function() {
             return el(InnerBlocks.Content);
         }
     });
-    // Duplicate registration under new namespace for forward compatibility
+    // Duplicate registration under new namespace for forward compatibility (lightweight preview)
     registerBlockType('seideagosto/colunistas-grid', {
         title: 'Grid de Colunistas',
         icon: 'groups',
         category: 'layout',
+        attributes: {
+            previewColumns: { type: 'number', default: 4 }
+        },
         edit: function(props) {
+            var attributes = props.attributes || {};
+            var setAttributes = props.setAttributes;
+            var cols = (typeof attributes.previewColumns === 'number' && attributes.previewColumns > 0) ? attributes.previewColumns : 4;
             return el(
-                'div',
-                { className: 'row colunistas-grid' },
-                el(InnerBlocks, {
-                    allowedBlocks: ['seideagosto/colunista-item']
-                })
+                wp.element.Fragment,
+                null,
+                el('div', {
+                    style: {
+                        border: '1px dashed #cbd3da',
+                        padding: '8px',
+                        marginBottom: '8px',
+                        background: '#f9fafb',
+                        color: '#6c757d',
+                        fontSize: '12px'
+                    }
+                }, 'Grid de Colunistas (preview simples)'),
+                el(
+                    InspectorControls,
+                    null,
+                    el(
+                        PanelBody,
+                        { title: 'Preview', initialOpen: true },
+                        el(RangeControl, {
+                            label: 'Colunas no preview',
+                            value: cols,
+                            min: 2,
+                            max: 6,
+                            onChange: function(val) { setAttributes({ previewColumns: val }); }
+                        })
+                    )
+                ),
+                el(
+                    'div',
+                    { className: 'row colunistas-grid colunistas-grid-editor', style: { display: 'grid', gridTemplateColumns: 'repeat(' + cols + ', minmax(0, 1fr))', gap: '12px', alignItems: 'start' } },
+                    el(InnerBlocks, {
+                        allowedBlocks: ['seideagosto/colunista-item'],
+                        orientation: 'horizontal',
+                        template: [
+                            ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                            ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                            ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                            ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }]
+                        ],
+                        templateLock: false,
+                        templateInsertUpdatesSelection: true,
+                        renderAppender: 'button'
+                    })
+                )
             );
         },
         save: function() {
@@ -195,7 +286,7 @@
         }
     });
 
-    // Colunista Item
+    // Colunista Item (lightweight editor preview)
     registerBlockType('u-correio68/colunista-item', {
         title: 'Colunista Item',
         icon: 'admin-users',
@@ -214,18 +305,6 @@
         edit: function(props) {
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
-
-            var latestTitle = '';
-            var catId = attributes.categoryId && attributes.categoryId !== '0' ? parseInt(attributes.categoryId) : 0;
-            try {
-                if (catId > 0 && wp && wp.data && wp.data.select) {
-                    var posts = wp.data.select('core').getEntityRecords('postType', 'post', { per_page: 1, categories: [catId], status: 'publish' });
-                    if (posts && posts.length > 0 && posts[0] && posts[0].title && posts[0].title.rendered) {
-                        latestTitle = posts[0].title.rendered.replace(/<[^>]*>?/gm, '');
-                    }
-                }
-            } catch (e) {}
-
             return el(
                 wp.element.Fragment,
                 null,
@@ -258,31 +337,30 @@
                         })
                     )
                 ),
-                el(
-                    PanelBody,
-                    { title: 'Imagem do Colunista', initialOpen: false },
-                    el(MediaUpload, {
-                        onSelect: function(media) { setAttributes({ imageUrl: media && media.url ? media.url : '' }); },
-                        allowedTypes: ['image'],
-                        value: attributes.imageUrl,
-                        render: function(obj) {
-                            return el(Button, { isPrimary: true, onClick: obj.open }, attributes.imageUrl ? 'Trocar imagem' : 'Selecionar imagem');
-                        }
-                    }),
-                    attributes.imageUrl ? el('div', { className: 'mt-2' }, el('img', { src: attributes.imageUrl, style: { maxWidth: '160px', borderRadius: '50%' } })) : null
-                ),
-                el(ServerSideRender, {
-                    block: 'u-correio68/colunista-item',
-                    attributes: attributes,
-                    className: 'col-preview'
-                })
+                el('div', {
+                    style: {
+                        border: '1px solid #e9ecef',
+                        borderRadius: '6px',
+                        padding: '12px',
+                        background: '#fff'
+                    }
+                },
+                    el('div', { style: { display: 'flex', alignItems: 'center' } },
+                        attributes.imageUrl ? el('img', { src: attributes.imageUrl, style: { width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', marginRight: '10px' } }) : el('div', { style: { width: '48px', height: '48px', borderRadius: '50%', background: '#dee2e6', marginRight: '10px' } }),
+                        el('div', null,
+                            el('div', { style: { fontWeight: 600, fontSize: '14px' } }, attributes.name || 'Nome do Colunista'),
+                            el('div', { style: { color: '#6c757d', fontSize: '12px' } }, attributes.columnTitle || 'Título da Coluna')
+                        )
+                    ),
+                    el('div', { style: { marginTop: '8px', color: '#6c757d', fontSize: '12px' } }, 'Preview simples (não reflete o layout final)')
+                )
             );
         },
         save: function() {
             return null; // Dynamic block
         }
     });
-    // Duplicate registration under new namespace for forward compatibility
+    // Duplicate registration under new namespace for forward compatibility (lightweight editor preview)
     registerBlockType('seideagosto/colunista-item', {
         title: 'Colunista Item',
         icon: 'admin-users',
@@ -300,18 +378,6 @@
         edit: function(props) {
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
-
-            var latestTitle = '';
-            var catId = attributes.categoryId && attributes.categoryId !== '0' ? parseInt(attributes.categoryId) : 0;
-            try {
-                if (catId > 0 && wp && wp.data && wp.data.select) {
-                    var posts = wp.data.select('core').getEntityRecords('postType', 'post', { per_page: 1, categories: [catId], status: 'publish' });
-                    if (posts && posts.length > 0 && posts[0] && posts[0].title && posts[0].title.rendered) {
-                        latestTitle = posts[0].title.rendered.replace(/<[^>]*>?/gm, '');
-                    }
-                }
-            } catch (e) {}
-
             return el(
                 wp.element.Fragment,
                 null,
@@ -344,24 +410,23 @@
                         })
                     )
                 ),
-                el(
-                    PanelBody,
-                    { title: 'Imagem do Colunista', initialOpen: false },
-                    el(MediaUpload, {
-                        onSelect: function(media) { setAttributes({ imageUrl: media && media.url ? media.url : '' }); },
-                        allowedTypes: ['image'],
-                        value: attributes.imageUrl,
-                        render: function(obj) {
-                            return el(Button, { isPrimary: true, onClick: obj.open }, attributes.imageUrl ? 'Trocar imagem' : 'Selecionar imagem');
-                        }
-                    }),
-                    attributes.imageUrl ? el('div', { className: 'mt-2' }, el('img', { src: attributes.imageUrl, style: { maxWidth: '160px', borderRadius: '50%' } })) : null
-                ),
-                el(ServerSideRender, {
-                    block: 'seideagosto/colunista-item',
-                    attributes: attributes,
-                    className: 'col-preview'
-                })
+                el('div', {
+                    style: {
+                        border: '1px solid #e9ecef',
+                        borderRadius: '6px',
+                        padding: '12px',
+                        background: '#fff'
+                    }
+                },
+                    el('div', { style: { display: 'flex', alignItems: 'center' } },
+                        attributes.imageUrl ? el('img', { src: attributes.imageUrl, style: { width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', marginRight: '10px' } }) : el('div', { style: { width: '48px', height: '48px', borderRadius: '50%', background: '#dee2e6', marginRight: '10px' } }),
+                        el('div', null,
+                            el('div', { style: { fontWeight: 600, fontSize: '14px' } }, attributes.name || 'Nome do Colunista'),
+                            el('div', { style: { color: '#6c757d', fontSize: '12px' } }, attributes.columnTitle || 'Título da Coluna')
+                        )
+                    ),
+                    el('div', { style: { marginTop: '8px', color: '#6c757d', fontSize: '12px' } }, 'Preview simples (não reflete o layout final)')
+                )
             );
         },
         save: function() {
@@ -730,7 +795,8 @@
             title: { type: 'string', default: 'Mais lidas' },
             count: { type: 'number', default: 5 },
             metaKey: { type: 'string', default: 'post_views_count' },
-            categoryId: { type: 'string', default: '0' }
+            categoryId: { type: 'string', default: '0' },
+            period: { type: 'string', default: 'year' }
         },
         edit: function(props) {
             var attributes = props.attributes;
@@ -755,6 +821,17 @@
                             value: attributes.categoryId,
                             options: uCorreio68Blocks.categories,
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
+                        }),
+                        el(SelectControl, {
+                            label: 'Período',
+                            value: attributes.period,
+                            options: [
+                                { label: 'Última semana', value: 'week' },
+                                { label: 'Últimos 30 dias', value: '30days' },
+                                { label: 'Últimos 90 dias', value: '90days' },
+                                { label: 'Último ano', value: 'year' }
+                            ],
+                            onChange: function(val) { setAttributes({ period: val }); }
                         }),
                         el(RangeControl, {
                             label: 'Quantidade (Top N)',
@@ -790,7 +867,8 @@
             title: { type: 'string', default: 'Mais lidas' },
             count: { type: 'number', default: 5 },
             metaKey: { type: 'string', default: 'post_views_count' },
-            categoryId: { type: 'string', default: '0' }
+            categoryId: { type: 'string', default: '0' },
+            period: { type: 'string', default: 'year' }
         },
         edit: function(props) {
             var attributes = props.attributes;
@@ -815,6 +893,17 @@
                             value: attributes.categoryId,
                             options: (typeof seideagostoBlocks !== 'undefined' ? seideagostoBlocks.categories : uCorreio68Blocks.categories),
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
+                        }),
+                        el(SelectControl, {
+                            label: 'Período',
+                            value: attributes.period,
+                            options: [
+                                { label: 'Última semana', value: 'week' },
+                                { label: 'Últimos 30 dias', value: '30days' },
+                                { label: 'Últimos 90 dias', value: '90days' },
+                                { label: 'Último ano', value: 'year' }
+                            ],
+                            onChange: function(val) { setAttributes({ period: val }); }
                         }),
                         el(RangeControl, {
                             label: 'Quantidade (Top N)',
@@ -855,6 +944,8 @@
             units: { type: 'string', default: 'c' }, // c or f
             showWind: { type: 'boolean', default: true },
             showRain: { type: 'boolean', default: true },
+            forecastDays: { type: 'number', default: 5 }, // 3, 5, or 7 days
+            showForecast: { type: 'boolean', default: true }, // Show/hide forecast
         },
         edit: function(props) {
             var attributes = props.attributes;
@@ -917,7 +1008,26 @@
                                 { label: 'Não', value: 'no' }
                             ],
                             onChange: function(val) { setAttributes({ showRain: val === 'yes' }); }
-                        })
+                        }),
+                        el(SelectControl, {
+                            label: 'Mostrar Previsão',
+                            value: attributes.showForecast ? 'yes' : 'no',
+                            options: [
+                                { label: 'Sim', value: 'yes' },
+                                { label: 'Não', value: 'no' }
+                            ],
+                            onChange: function(val) { setAttributes({ showForecast: val === 'yes' }); }
+                        }),
+                        attributes.showForecast ? el(SelectControl, {
+                            label: 'Dias de Previsão',
+                            value: attributes.forecastDays.toString(),
+                            options: [
+                                { label: '3 dias', value: '3' },
+                                { label: '5 dias', value: '5' },
+                                { label: '7 dias', value: '7' }
+                            ],
+                            onChange: function(val) { setAttributes({ forecastDays: parseInt(val) }); }
+                        }) : null
                     )
                 ),
                 el(ServerSideRender, {
@@ -940,6 +1050,8 @@
             units: { type: 'string', default: 'c' }, // c or f
             showWind: { type: 'boolean', default: true },
             showRain: { type: 'boolean', default: true },
+            forecastDays: { type: 'number', default: 5 }, // 3, 5, or 7 days
+            showForecast: { type: 'boolean', default: true }, // Show/hide forecast
         },
         edit: function(props) {
             var attributes = props.attributes;
@@ -1002,7 +1114,26 @@
                                 { label: 'Não', value: 'no' }
                             ],
                             onChange: function(val) { setAttributes({ showRain: val === 'yes' }); }
-                        })
+                        }),
+                        el(SelectControl, {
+                            label: 'Mostrar Previsão',
+                            value: attributes.showForecast ? 'yes' : 'no',
+                            options: [
+                                { label: 'Sim', value: 'yes' },
+                                { label: 'Não', value: 'no' }
+                            ],
+                            onChange: function(val) { setAttributes({ showForecast: val === 'yes' }); }
+                        }),
+                        attributes.showForecast ? el(SelectControl, {
+                            label: 'Dias de Previsão',
+                            value: attributes.forecastDays.toString(),
+                            options: [
+                                { label: '3 dias', value: '3' },
+                                { label: '5 dias', value: '5' },
+                                { label: '7 dias', value: '7' }
+                            ],
+                            onChange: function(val) { setAttributes({ forecastDays: parseInt(val) }); }
+                        }) : null
                     )
                 ),
                 el(ServerSideRender, {
@@ -1292,6 +1423,53 @@
             );
         },
         save: function() { return null; }
+    });
+
+    // Attach ServerSideRender previews to metadata-registered blocks
+    try {
+        addFilter('blocks.registerBlockType', 'seisdeagosto/ssr-previews', function(settings, name) {
+            var targets = [
+                'u-correio68/destaque-grande',
+                'u-correio68/destaque-pequeno',
+                'u-correio68/lista-noticias'
+            ];
+            if (targets.indexOf(name) !== -1) {
+                var originalSave = settings.save;
+                settings.edit = function(props) {
+                    return el(ServerSideRender, { block: name, attributes: props.attributes });
+                };
+                settings.save = function() { return null; };
+            }
+            return settings;
+        });
+    } catch (e) {
+        // no-op if hooks not available
+    }
+
+    // Fallback: if blocks already registered before filters, override via domReady
+    wp.domReady(function() {
+        var targets = [
+            'u-correio68/destaque-grande',
+            'u-correio68/destaque-pequeno',
+            'u-correio68/lista-noticias'
+        ];
+        targets.forEach(function(name) {
+            var existing = wp.blocks.getBlockType(name);
+            if (existing) {
+                try {
+                    wp.blocks.unregisterBlockType(name);
+                    var merged = Object.assign({}, existing, {
+                        edit: function(props) {
+                            return el(ServerSideRender, { block: name, attributes: props.attributes });
+                        },
+                        save: function() { return null; }
+                    });
+                    wp.blocks.registerBlockType(name, merged);
+                } catch (err) {
+                    // ignore
+                }
+            }
+        });
     });
 
 })(window.wp);
