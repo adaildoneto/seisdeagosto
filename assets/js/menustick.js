@@ -100,28 +100,33 @@ $(document).ready(function(){
 $(document).ready(function(){
 	var btnDelete = document.getElementById('clear');
       var inputFocus = document.getElementById('inputFocus');
-      //- btnDelete.on('click', function(e) {
-      //-   e.preventDefault();
-      //-   inputFocus.classList.add('isFocus')
-      //- })
-      //- inputFocus.addEventListener('click', function() {
-      //-   this.classList.add('isFocus')
-      //- })
-      btnDelete.addEventListener('click', function(e)
-      {
-        e.preventDefault();
-        inputFocus.value = ''
-      })
-      document.addEventListener('click', function(e)
-      {
-        if (document.getElementById('first').contains(e.target))
+      
+      // Only add event listeners if elements exist
+      if (btnDelete && inputFocus) {
+        //- btnDelete.on('click', function(e) {
+        //-   e.preventDefault();
+        //-   inputFocus.classList.add('isFocus')
+        //- })
+        //- inputFocus.addEventListener('click', function() {
+        //-   this.classList.add('isFocus')
+        //- })
+        btnDelete.addEventListener('click', function(e)
         {
-          inputFocus.classList.add('isFocus')
-        }
-        else
+          e.preventDefault();
+          inputFocus.value = ''
+        })
+        document.addEventListener('click', function(e)
         {
-          // Clicked outside the box
-          inputFocus.classList.remove('isFocus')
-        }
-      });
+          var firstElement = document.getElementById('first');
+          if (firstElement && firstElement.contains(e.target))
+          {
+            inputFocus.classList.add('isFocus')
+          }
+          else
+          {
+            // Clicked outside the box
+            inputFocus.classList.remove('isFocus')
+          }
+        });
+      }
     });
