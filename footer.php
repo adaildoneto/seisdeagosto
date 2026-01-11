@@ -13,7 +13,7 @@
                                 <div class="col-md-12">
                                     <footer class="site-footer" id="colophon">
                                         <div class="site-info">
-                                            <p class="text-ce text-center text-white"><?php echo get_theme_mod( 'footer_text', 'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>Correio68.com</b>' ); ?></p>
+                                            <p class="text-ce text-center text-white"><?php echo get_theme_mod( 'footer_text', 'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>6barra8.com</b>' ); ?></p>
                                         </div>
                                         <!-- .site-info -->
                                     </footer>

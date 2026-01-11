@@ -202,6 +202,7 @@ function u_seisbarra8_setup() {
     add_theme_support( 'editor-styles' );
     add_editor_style( 'css/theme.css' );
     add_editor_style( 'bootstrap/css/bootstrap.css' );
+    add_editor_style( 'css/blocks-layout.css' );
 }
 endif; // u_seisbarra8_setup
 
@@ -463,7 +464,7 @@ function u_seisbarra8_customize_register( $wp_customize ) {
     ));
 
     $wp_customize->add_setting( 'footer_text', array(
-        'default'           => 'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>Correio68.com</b>',
+        'default'           => 'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>6barra8.com</b>',
         'type'              => 'theme_mod',
         'sanitize_callback' => 'wp_kses_post',
     ));
@@ -603,6 +604,9 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
 
     wp_deregister_style( 'u_seisbarra8-slicktheme' );
     wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
+
+    // Enqueue blocks layout CSS
+    wp_enqueue_style( 'seideagosto-blocks-layout', get_template_directory_uri() . '/css/blocks-layout.css', false, null, 'all');
 
     // Check if local fonts exist, otherwise fallback to Google Fonts CDN
     $stylesheet_dir = get_stylesheet_directory();
@@ -789,3 +793,98 @@ require_once "inc/customizer.php";
         }
     } );
     
+function u68_get_currencyfreaks_api_key() {
+    $opt = get_option( 'u68_currencyfreaks_api_key', '' );
+    if ( is_string( $opt ) ) {
+        $opt = trim( $opt );
+    }
+    if ( ! empty( $opt ) ) {
+        return $opt;
+    }
+    $key = '';
+    if ( defined( 'CURRENCYFREAKS_API_KEY' ) ) {
+        $key = CURRENCYFREAKS_API_KEY;
+    } elseif ( getenv( 'CURRENCYFREAKS_API_KEY' ) ) {
+        $key = getenv( 'CURRENCYFREAKS_API_KEY' );
+    }
+    $key = is_string( $key ) ? trim( $key ) : '';
+    return $key;
+}
+
+function u68_currencyfreaks_admin_notice() {
+    if ( ! is_admin() ) return;
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    $key = u68_get_currencyfreaks_api_key();
+    if ( $key ) return;
+    $settings_url = esc_url( admin_url( 'options-general.php?page=u68-currencyfreaks' ) );
+    echo '<div class="notice notice-warning"><p><strong>Bloco Câmbio:</strong> faltando API key do CurrencyFreaks. Configure em <a href="' . $settings_url . '">Configurações → CurrencyFreaks</a>, ou defina <code>CURRENCYFREAKS_API_KEY</code> no wp-config.php/variável de ambiente.</p></div>';
+}
+add_action( 'admin_notices', 'u68_currencyfreaks_admin_notice' );
+
+// Settings page to store CurrencyFreaks API key
+function u68_currencyfreaks_register_settings() {
+    register_setting( 'u68_currencyfreaks', 'u68_currencyfreaks_api_key', array(
+        'type' => 'string',
+        'sanitize_callback' => 'sanitize_text_field',
+        'default' => ''
+    ) );
+
+    add_settings_section( 'u68_currencyfreaks_main', 'Configuração da API', function() {
+        echo '<p>Informe sua API key do CurrencyFreaks para habilitar as cotações em tempo real. A chave não é armazenada no código-fonte do tema.</p>';
+    }, 'u68-currencyfreaks' );
+
+    add_settings_field( 'u68_currencyfreaks_api_key_field', 'API Key', function() {
+        $val = esc_attr( get_option( 'u68_currencyfreaks_api_key', '' ) );
+        echo '<input type="text" name="u68_currencyfreaks_api_key" value="' . $val . '" class="regular-text" />';
+    }, 'u68-currencyfreaks', 'u68_currencyfreaks_main' );
+}
+add_action( 'admin_init', 'u68_currencyfreaks_register_settings' );
+
+function u68_currencyfreaks_settings_page_render() {
+    echo '<div class="wrap">';
+    echo '<h1>CurrencyFreaks</h1>';
+    echo '<form method="post" action="options.php">';
+    settings_fields( 'u68_currencyfreaks' );
+    do_settings_sections( 'u68-currencyfreaks' );
+    submit_button();
+    echo '</form>';
+    echo '</div>';
+}
+
+function u68_currencyfreaks_settings_menu() {
+    add_options_page( 'CurrencyFreaks', 'CurrencyFreaks', 'manage_options', 'u68-currencyfreaks', 'u68_currencyfreaks_settings_page_render' );
+}
+add_action( 'admin_menu', 'u68_currencyfreaks_settings_menu' );
+
+// Log REST API errors to help diagnose save issues
+function u68_rest_error_logger( $response, $server, $request ) {
+    try {
+        $is_error = false;
+        $messages = array();
+        $code = '';
+
+        if ( is_wp_error( $response ) ) {
+            $is_error = true;
+            $messages = $response->get_error_messages();
+            $code = $response->get_error_code();
+        } elseif ( $response instanceof WP_REST_Response ) {
+            $data = $response->get_data();
+            if ( is_wp_error( $data ) ) {
+                $is_error = true;
+                $messages = $data->get_error_messages();
+                $code = $data->get_error_code();
+            }
+        }
+
+        if ( $is_error ) {
+            $route = method_exists( $request, 'get_route' ) ? $request->get_route() : 'unknown';
+            $method = method_exists( $request, 'get_method' ) ? $request->get_method() : 'UNKNOWN';
+            error_log( '[u68] REST error on ' . $method . ' ' . $route . ' code=' . $code . ' messages=' . implode( '; ', (array) $messages ) );
+        }
+    } catch ( Exception $e ) {
+        // Avoid breaking responses due to logging
+    }
+    return $response;
+}
+add_filter( 'rest_post_dispatch', 'u68_rest_error_logger', 10, 3 );
+

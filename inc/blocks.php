@@ -67,7 +67,7 @@ function u_correio68_apply_category_filter( array $args, $categoryId ) {
 function u_correio68_register_custom_blocks() {
     // Register the block editor script
     wp_register_script(
-        'u-correio68-custom-blocks',
+        'seideagosto-blocks',
         get_template_directory_uri() . '/assets/js/custom-blocks.js',
         array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-data', 'wp-server-side-render', 'wp-hooks', 'wp-dom-ready' ),
         filemtime( get_template_directory() . '/assets/js/custom-blocks.js' )
@@ -97,17 +97,17 @@ function u_correio68_register_custom_blocks() {
 
     // Pass data to JS
     wp_localize_script(
-        'u-correio68-custom-blocks',
-        'uCorreio68Blocks',
+        'seideagosto-blocks',
+        'seideagostoBlocks',
         array(
             'categories' => $cat_options,
             'sidebars'   => $sidebar_options
         )
     );
-    // Also expose under new namespace for forward compatibility
+    // Backward compatibility - also expose as old name
     wp_localize_script(
-        'u-correio68-custom-blocks',
-        'seideagostoBlocks',
+        'seideagosto-blocks',
+        'uCorreio68Blocks',
         array(
             'categories' => $cat_options,
             'sidebars'   => $sidebar_options
@@ -118,19 +118,8 @@ function u_correio68_register_custom_blocks() {
     $typography_light   = u_correio68_typography_attribute_schema( '#FFFFFF' );
 
     // Register Destaques Home Block
-    register_block_type( 'u-correio68/destaques-home', array(
-        'editor_script' => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_destaques_home',
-        'attributes' => array(
-            'categoryId' => array(
-                'type' => 'string',
-                'default' => '0',
-            ),
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/destaques-home', array(
-        'editor_script' => 'u-correio68-custom-blocks',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaques_home',
         'attributes' => array(
             'categoryId' => array(
@@ -141,30 +130,14 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register Colunistas Grid Block
-    register_block_type( 'u-correio68/colunistas-grid', array(
-        'editor_script' => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_colunistas_grid',
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/colunistas-grid', array(
-        'editor_script' => 'u-correio68-custom-blocks',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_colunistas_grid',
     ) );
 
     // Register Colunista Item Block
-    register_block_type( 'u-correio68/colunista-item', array(
-        'editor_script' => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_colunista_item',
-        'attributes' => array(
-            'name' => array( 'type' => 'string', 'default' => '' ),
-            'columnTitle' => array( 'type' => 'string', 'default' => '' ),
-            'imageUrl' => array( 'type' => 'string', 'default' => '' ),
-            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/colunista-item', array(
-        'editor_script' => 'u-correio68-custom-blocks',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_colunista_item',
         'attributes' => array(
             'name' => array( 'type' => 'string', 'default' => '' ),
@@ -175,23 +148,8 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register News Grid Block
-    register_block_type( 'u-correio68/news-grid', array(
-        'editor_script' => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_news_grid',
-        'attributes' => array_merge(
-            array(
-                'categoryId'    => array( 'type' => 'string', 'default' => '0' ),
-                'numberOfPosts' => array( 'type' => 'number', 'default' => 9 ),
-                'offset'        => array( 'type' => 'number', 'default' => 0 ),
-                'columns'       => array( 'type' => 'number', 'default' => 3 ),
-                'paginate'      => array( 'type' => 'boolean', 'default' => false ),
-            ),
-            $typography_default
-        ),
-    ) );
-    // Forward-compatible registration under new namespace (editor will expose once JS registers)
     register_block_type( 'seideagosto/news-grid', array(
-        'editor_script' => 'u-correio68-custom-blocks',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_news_grid',
         'attributes' => array_merge(
             array(
@@ -206,22 +164,8 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register Category Highlight Block (1 Big + 3 List)
-    register_block_type( 'u-correio68/category-highlight', array(
-        'editor_script' => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_category_highlight',
-        'attributes' => array_merge(
-            array(
-                'categoryId' => array( 'type' => 'string', 'default' => '0' ),
-                'title'      => array( 'type' => 'string', 'default' => '' ),
-                'bigCount'   => array( 'type' => 'number', 'default' => 1 ),
-                'listCount'  => array( 'type' => 'number', 'default' => 3 ),
-            ),
-            $typography_default
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/category-highlight', array(
-        'editor_script' => 'u-correio68-custom-blocks',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_category_highlight',
         'attributes' => array_merge(
             array(
@@ -235,19 +179,8 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register Destaque Misto (2 Big + List + 1 Column)
-    register_block_type( 'u-correio68/destaque-misto', array(
-        'editor_script' => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_destaque_misto',
-        'attributes' => array_merge(
-            array(
-                'categoryId' => array( 'type' => 'string', 'default' => '0' ),
-            ),
-            $typography_light
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/destaque-misto', array(
-        'editor_script' => 'u-correio68-custom-blocks',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaque_misto',
         'attributes' => array_merge(
             array(
@@ -258,20 +191,8 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register Top Most Read (Top 5) Block
-    register_block_type( 'u-correio68/top-most-read', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_top_most_read',
-        'attributes'      => array(
-            'title'      => array( 'type' => 'string', 'default' => 'Mais lidas' ),
-            'count'      => array( 'type' => 'number', 'default' => 5 ),
-            'metaKey'    => array( 'type' => 'string', 'default' => 'post_views_count' ),
-            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
-            'period'     => array( 'type' => 'string', 'default' => 'year' ), // year, 90days, 30days, week
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/top-most-read', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
+        'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_top_most_read',
         'attributes'      => array(
             'title'      => array( 'type' => 'string', 'default' => 'Mais lidas' ),
@@ -283,23 +204,8 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register Weather Block
-    register_block_type( 'u-correio68/weather', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_weather',
-        'attributes'      => array(
-            'cityName'      => array( 'type' => 'string', 'default' => '' ),
-            'latitude'      => array( 'type' => 'string', 'default' => '' ),
-            'longitude'     => array( 'type' => 'string', 'default' => '' ),
-            'units'         => array( 'type' => 'string', 'default' => 'c' ), // 'c' Celsius, 'f' Fahrenheit
-            'showWind'      => array( 'type' => 'boolean', 'default' => true ),
-            'showRain'      => array( 'type' => 'boolean', 'default' => true ),
-            'forecastDays'  => array( 'type' => 'number', 'default' => 5 ), // 3, 5, or 7 days
-            'showForecast'  => array( 'type' => 'boolean', 'default' => true ), // Show/hide forecast
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/weather', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
+        'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_weather',
         'attributes'      => array(
             'cityName'      => array( 'type' => 'string', 'default' => '' ),
@@ -314,52 +220,135 @@ function u_correio68_register_custom_blocks() {
     ) );
 
     // Register Currency Monitor Block
-    register_block_type( 'u-correio68/currency-monitor', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
-        'render_callback' => 'u_correio68_render_currency_monitor',
-        'attributes'      => array(
-            'provider'    => array( 'type' => 'string',  'default' => 'exchangerate' ),
-            'base'        => array( 'type' => 'string', 'default' => 'BRL' ),
-            'showBRL'     => array( 'type' => 'boolean', 'default' => true ),
-            'showUSD'     => array( 'type' => 'boolean', 'default' => true ),
-            'showBOB'     => array( 'type' => 'boolean', 'default' => true ),
-            'showPEN'     => array( 'type' => 'boolean', 'default' => true ),
-            'spread'      => array( 'type' => 'number',  'default' => 0.5 ), // percent
-            'showUpdated' => array( 'type' => 'boolean', 'default' => true ),
-        ),
-    ) );
-    // Forward-compatible registration under new namespace
     register_block_type( 'seideagosto/currency-monitor', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
+        'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_currency_monitor',
         'attributes'      => array(
-            'provider'    => array( 'type' => 'string',  'default' => 'exchangerate' ),
+            'provider'    => array( 'type' => 'string',  'default' => 'currencyfreaks' ),
             'base'        => array( 'type' => 'string', 'default' => 'BRL' ),
+            'baseAmount'  => array( 'type' => 'number', 'default' => 100 ),
             'showBRL'     => array( 'type' => 'boolean', 'default' => true ),
             'showUSD'     => array( 'type' => 'boolean', 'default' => true ),
-            'showBOB'     => array( 'type' => 'boolean', 'default' => true ),
+            'showEUR'     => array( 'type' => 'boolean', 'default' => true ),
             'showPEN'     => array( 'type' => 'boolean', 'default' => true ),
-            'spread'      => array( 'type' => 'number',  'default' => 0.5 ), // percent
+            'showARS'     => array( 'type' => 'boolean', 'default' => true ),
+            'showBOB'     => array( 'type' => 'boolean', 'default' => true ),
+            'showCLP'     => array( 'type' => 'boolean', 'default' => false ),
+            'showCOP'     => array( 'type' => 'boolean', 'default' => false ),
+            'showUYU'     => array( 'type' => 'boolean', 'default' => false ),
+            'showPYG'     => array( 'type' => 'boolean', 'default' => false ),
+            'showMXN'     => array( 'type' => 'boolean', 'default' => false ),
+            'spread'      => array( 'type' => 'number',  'default' => 0 ), // percent
             'showUpdated' => array( 'type' => 'boolean', 'default' => true ),
+            'slidesToShow'=> array( 'type' => 'number',  'default' => 2 ), // slides per view
+            'autoplay'    => array( 'type' => 'boolean', 'default' => true ),
+            'autoplaySpeed' => array( 'type' => 'number', 'default' => 3000 ),
+            'showFlags'   => array( 'type' => 'boolean', 'default' => true ),
+            'showNames'   => array( 'type' => 'boolean', 'default' => true ),
         ),
     ) );
 
     // Register Sidebar Area Block (render a selected widget area)
-    register_block_type( 'u-correio68/sidebar-area', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
+    register_block_type( 'seideagosto/sidebar-area', array(
+        'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_sidebar_area',
         'attributes'      => array(
             'sidebarId' => array( 'type' => 'string', 'default' => 'right-sidebar' ),
             'title'     => array( 'type' => 'string', 'default' => '' ),
         ),
     ) );
-    // Forward-compatible registration under new namespace
-    register_block_type( 'seideagosto/sidebar-area', array(
-        'editor_script'   => 'u-correio68-custom-blocks',
+
+    // ============================================================================
+    // BACKWARD COMPATIBILITY: Register old blocks ONLY for rendering frontend
+    // (These will be auto-migrated in editor to seideagosto/ namespace)
+    // ============================================================================
+    register_block_type( 'correio68/destaques-home', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_destaques_home',
+        'attributes'      => array( 'categoryId' => array( 'type' => 'string', 'default' => '0' ) ),
+    ) );
+    register_block_type( 'correio68/colunistas-grid', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_colunistas_grid',
+        'attributes'      => array(),
+    ) );
+    register_block_type( 'correio68/colunista-item', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_colunista_item',
+        'attributes'      => array( 'authorId' => array( 'type' => 'number', 'default' => 0 ) ),
+    ) );
+    register_block_type( 'correio68/news-grid', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_news_grid',
+        'attributes'      => array(
+            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+            'numberOfPosts' => array( 'type' => 'number', 'default' => 6 ),
+            'columns' => array( 'type' => 'number', 'default' => 3 ),
+            'paginate' => array( 'type' => 'boolean', 'default' => false ),
+        ) + u_correio68_typography_attribute_schema(),
+    ) );
+    register_block_type( 'correio68/category-highlight', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_category_highlight',
+        'attributes'      => array(
+            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+            'title' => array( 'type' => 'string', 'default' => '' ),
+            'bigCount' => array( 'type' => 'number', 'default' => 1 ),
+            'listCount' => array( 'type' => 'number', 'default' => 3 ),
+        ) + u_correio68_typography_attribute_schema(),
+    ) );
+    register_block_type( 'correio68/destaque-misto', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_destaque_misto',
+        'attributes'      => array(
+            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+            'title' => array( 'type' => 'string', 'default' => '' ),
+            'bigCount' => array( 'type' => 'number', 'default' => 1 ),
+            'mediumCount' => array( 'type' => 'number', 'default' => 2 ),
+            'smallCount' => array( 'type' => 'number', 'default' => 3 ),
+        ) + u_correio68_typography_attribute_schema(),
+    ) );
+    register_block_type( 'correio68/top-most-read', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_top_most_read',
+        'attributes'      => array(
+            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+            'period' => array( 'type' => 'string', 'default' => 'year' ),
+        ),
+    ) );
+    register_block_type( 'correio68/currency-monitor', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_currency_monitor',
+        'attributes'      => array(
+            'provider' => array( 'type' => 'string', 'default' => 'currencyfreaks' ),
+            'base' => array( 'type' => 'string', 'default' => 'BRL' ),
+            'baseAmount' => array( 'type' => 'number', 'default' => 100 ),
+            'showBRL' => array( 'type' => 'boolean', 'default' => true ),
+            'showUSD' => array( 'type' => 'boolean', 'default' => true ),
+            'showEUR' => array( 'type' => 'boolean', 'default' => true ),
+            'showPEN' => array( 'type' => 'boolean', 'default' => true ),
+            'showARS' => array( 'type' => 'boolean', 'default' => true ),
+            'showBOB' => array( 'type' => 'boolean', 'default' => true ),
+            'showCLP' => array( 'type' => 'boolean', 'default' => false ),
+            'showCOP' => array( 'type' => 'boolean', 'default' => false ),
+            'showUYU' => array( 'type' => 'boolean', 'default' => false ),
+            'showPYG' => array( 'type' => 'boolean', 'default' => false ),
+            'showMXN' => array( 'type' => 'boolean', 'default' => false ),
+            'spread' => array( 'type' => 'number', 'default' => 0 ),
+            'showUpdated' => array( 'type' => 'boolean', 'default' => true ),
+            'slidesToShow' => array( 'type' => 'number', 'default' => 2 ),
+            'autoplay' => array( 'type' => 'boolean', 'default' => true ),
+            'autoplaySpeed' => array( 'type' => 'number', 'default' => 3000 ),
+            'showFlags' => array( 'type' => 'boolean', 'default' => true ),
+            'showNames' => array( 'type' => 'boolean', 'default' => true ),
+        ),
+    ) );
+    register_block_type( 'correio68/sidebar-area', array(
+        'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_sidebar_area',
         'attributes'      => array(
             'sidebarId' => array( 'type' => 'string', 'default' => 'right-sidebar' ),
-            'title'     => array( 'type' => 'string', 'default' => '' ),
+            'title' => array( 'type' => 'string', 'default' => '' ),
         ),
     ) );
 
@@ -507,6 +496,7 @@ function u_correio68_render_destaques_home( $attributes ) {
         'order'          => 'DESC',
         'orderby'        => 'date',
         'ignore_sticky_posts' => true,
+        'post__not_in'   => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
     if ( $category_id ) {
         $args_all['cat'] = $category_id;
@@ -689,9 +679,9 @@ function u_correio68_render_news_grid( $attributes ) {
         $eid = intval( $eid );
         if ( $eid > 0 ) { $excludeIds[] = $eid; }
     }
-    if ( ! empty( $excludeIds ) ) {
-        $excludeIds = array_values( array_unique( $excludeIds ) );
-    }
+    // Merge PG_Helper shown posts with excludeIds
+    $shownPosts = class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array();
+    $excludeIds = array_values( array_unique( array_merge( $excludeIds, $shownPosts ) ) );
     
     // Validar e limitar colunas entre 2 e 6
     $columns = max(2, min(6, $columns));
@@ -721,9 +711,11 @@ function u_correio68_render_news_grid( $attributes ) {
                 if ( isset( $p->ID ) ) { $ids[] = intval( $p->ID ); }
             }
         }
-        // Exclude specified IDs
-        if ( ! empty( $excludeIds ) ) {
-            $ids = array_values( array_diff( $ids, $excludeIds ) );
+        // Exclude specified IDs and already shown posts
+        $shownPosts = class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array();
+        $allExcludeIds = array_unique( array_merge( $excludeIds, $shownPosts ) );
+        if ( ! empty( $allExcludeIds ) ) {
+            $ids = array_values( array_diff( $ids, $allExcludeIds ) );
         }
         if ( empty( $ids ) ) {
             $query = new WP_Query( array( 'post__in' => array(0) ) );
@@ -755,8 +747,12 @@ function u_correio68_render_news_grid( $attributes ) {
         } else {
             $args['offset'] = max( 0, $offset );
         }
+        // Merge PG_Helper shown posts with excludeIds
+        $shownPosts = class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array();
         if ( ! empty( $excludeIds ) ) {
-            $args['post__not_in'] = $excludeIds;
+            $args['post__not_in'] = array_unique( array_merge( $excludeIds, $shownPosts ) );
+        } elseif ( ! empty( $shownPosts ) ) {
+            $args['post__not_in'] = $shownPosts;
         }
         $args = u_correio68_apply_category_filter( $args, $categoryId );
         $query = new WP_Query( $args );
@@ -884,6 +880,7 @@ function u_correio68_render_category_highlight( $attributes ) {
         'order'               => 'DESC',
         'orderby'             => 'date',
         'ignore_sticky_posts' => true,
+        'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
 
     $args = u_correio68_apply_category_filter( $args, $categoryId );
@@ -1020,7 +1017,8 @@ function u_correio68_render_colunista_item( $attributes ) {
                 $args = [
                     'posts_per_page' => 1,
                     'cat'            => $categoryId,
-                    'order'          => 'DESC'
+                    'order'          => 'DESC',
+                    'post__not_in'   => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
                 ];
                 $query = new WP_Query($args);
 
@@ -1061,6 +1059,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
         'order'               => 'DESC',
         'orderby'             => 'date',
         'post_status'         => 'publish',
+        'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
 
     $args = u_correio68_apply_category_filter( $args, $categoryId );
@@ -1186,6 +1185,7 @@ function u_correio68_render_top_most_read( $attributes ) {
         'ignore_sticky_posts' => true,
         'post_status'         => 'publish',
         'date_query'          => array( $date_query ),
+        'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
     $args = u_correio68_apply_category_filter( $args, $categoryId );
 
@@ -1201,6 +1201,7 @@ function u_correio68_render_top_most_read( $attributes ) {
             'ignore_sticky_posts' => true,
             'post_status'         => 'publish',
             'date_query'          => array( $date_query ),
+            'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
         );
         $args_fallback = u_correio68_apply_category_filter( $args_fallback, $categoryId );
         $query = new WP_Query( $args_fallback );
@@ -1371,9 +1372,12 @@ function u_correio68_render_weather( $attributes ) {
                     <?php endif; ?>
                     <div class="condition"><i class="fa fa-info-circle icon-color-accent mr-1" aria-hidden="true"></i> <?php echo esc_html( $desc ); ?></div>
                 </div>
-                <div class="meta-bottom d-flex flex-column align-items-center">
+                <div class="meta-bottom d-flex align-items-center justify-content-center" style="gap: 8px; flex-wrap: nowrap;">
                     <?php if ( $showWind && is_numeric( $windspeed ) ) : ?>
-                        <div class="wind-info d-flex align-items-center justify-content-center mb-1"><i class="fa fa-flag icon-color-primary mr-2" aria-hidden="true"></i> <span>Vento: <?php echo esc_html( round( $windspeed ) ); ?> <?php echo esc_html( $wind_unit ); ?></span></div>
+                        <span class="badge badge-pill" style="background-color: #007bff; color: white; padding: 6px 12px; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                            <i class="fa fa-flag" aria-hidden="true"></i>
+                            <span><?php echo esc_html( round( $windspeed ) ); ?> <?php echo esc_html( $wind_unit ); ?></span>
+                        </span>
                     <?php endif; ?>
                     <?php
                     // Show today precipitation probability or sum if available
@@ -1386,9 +1390,9 @@ function u_correio68_render_weather( $attributes ) {
                     }
                     if ( $showRain ) {
                         if ( is_int( $header_prpct ) ) {
-                            echo '<div class="rain-info d-flex align-items-center justify-content-center"><i class="fa fa-tint icon-color-accent mr-2" aria-hidden="true"></i> <span>Chuva: ' . esc_html( $header_prpct ) . '%</span></div>';
+                            echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 6px 12px; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"><i class="fa fa-tint" aria-hidden="true"></i> <span>' . esc_html( $header_prpct ) . '%</span></span>';
                         } elseif ( is_float( $header_prsum ) ) {
-                            echo '<div class="rain-info d-flex align-items-center justify-content-center"><i class="fa fa-tint icon-color-accent mr-2" aria-hidden="true"></i> <span>Chuva: ' . esc_html( round( $header_prsum, 1 ) ) . ' mm</span></div>';
+                            echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 6px 12px; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"><i class="fa fa-tint" aria-hidden="true"></i> <span>' . esc_html( round( $header_prsum, 1 ) ) . ' mm</span></span>';
                         }
                     }
                     ?>
@@ -1437,16 +1441,17 @@ function u_correio68_render_weather( $attributes ) {
                     echo '<span class="day-name">' . esc_html( date_i18n( 'l', strtotime( $date ) ) ) . '</span>';
                     echo '<span class="day-date ml-2">' . esc_html( date_i18n( 'j/m', strtotime( $date ) ) ) . '</span>';
                     echo '</div>';
-                    // Temps inline
-                    echo '<div class="mb-1 metrics temps d-flex align-items-center">';
-                    echo '<span class="mr-3"><i class="fa fa-thermometer-full mr-1 icon-color-primary" aria-hidden="true"></i> Máx: ' . ( is_numeric( $tmax ) ? esc_html( $tmax ) . ' ' . esc_html( $temp_unit ) : '-' ) . '</span>';
-                    echo '<span><i class="fa fa-thermometer-empty mr-1 icon-color-primary" aria-hidden="true"></i> Mín: ' . ( is_numeric( $tmin ) ? esc_html( $tmin ) . ' ' . esc_html( $temp_unit ) : '-' ) . '</span>';
+                    // Temps inline com badges
+                    echo '<div class="mb-1 metrics temps d-flex align-items-center" style="gap: 6px; flex-wrap: wrap;">';
+                    echo '<span class="badge badge-pill" style="background-color: #ffc107; color: #333; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-thermometer-full" aria-hidden="true"></i> Máx: ' . ( is_numeric( $tmax ) ? esc_html( $tmax ) . '°' : '-' ) . '</span>';
+                    echo '<span class="badge badge-pill" style="background-color: #ffc107; color: #333; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-thermometer-empty" aria-hidden="true"></i> Mín: ' . ( is_numeric( $tmin ) ? esc_html( $tmin ) . '°' : '-' ) . '</span>';
                     echo '</div>';
-                    // Rain metric
-                    if ( is_numeric( $prpct ) ) echo '<div class="mb-1 metrics"><i class="fa fa-tint mr-1 icon-color-accent" aria-hidden="true"></i> Prob. de chuva: ' . esc_html( $prpct ) . '%</div>';
-                    elseif ( is_numeric( $prsum ) ) echo '<div class="mb-1 metrics"><i class="fa fa-tint mr-1 icon-color-accent" aria-hidden="true"></i> Chuva: ' . esc_html( round( $prsum, 1 ) ) . ' mm</div>';
-                // Wind metric
-                if ( is_numeric( $wmax ) ) echo '<div class="mb-1 metrics"><i class="fa fa-flag mr-1 icon-color-primary" aria-hidden="true"></i> Vento máx: ' . esc_html( round( $wmax ) ) . ' ' . esc_html( $wind_unit ) . '</div>';
+                    // Rain & Wind badges inline
+                    echo '<div class="mb-1 metrics d-flex align-items-center" style="gap: 6px; flex-wrap: wrap;">';
+                    if ( is_numeric( $prpct ) ) echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-tint" aria-hidden="true"></i> ' . esc_html( $prpct ) . '%</span>';
+                    elseif ( is_numeric( $prsum ) ) echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-tint" aria-hidden="true"></i> ' . esc_html( round( $prsum, 1 ) ) . ' mm</span>';
+                    if ( is_numeric( $wmax ) ) echo '<span class="badge badge-pill" style="background-color: #007bff; color: white; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-flag" aria-hidden="true"></i> ' . esc_html( round( $wmax ) ) . ' ' . esc_html( $wind_unit ) . '</span>';
+                    echo '</div>';
                 echo '</div>';
             }
             echo '</div>';
@@ -1463,49 +1468,125 @@ function u_correio68_render_weather( $attributes ) {
  * Render Callback: Currency Monitor (exchangerate.host)
  */
 function u_correio68_render_currency_monitor( $attributes ) {
+    // Enqueue Slick on frontend only if not already enqueued
+    if ( ! is_admin() && function_exists( 'wp_enqueue_style' ) ) {
+        wp_enqueue_style( 'slick-css', get_template_directory_uri() . '/slick/slick.css', array(), '1.8.1' );
+        wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/slick/slick.min.js', array( 'jquery' ), '1.8.1', true );
+    }
+
     $provider    = isset( $attributes['provider'] ) ? sanitize_text_field( $attributes['provider'] ) : 'exchangerate';
     $base        = isset( $attributes['base'] ) ? strtoupper( sanitize_text_field( $attributes['base'] ) ) : 'BRL';
+    $base_amount = isset( $attributes['baseAmount'] ) ? floatval( $attributes['baseAmount'] ) : 100;
     $show_brl    = ! empty( $attributes['showBRL'] );
     $show_usd    = ! empty( $attributes['showUSD'] );
-    $show_bob    = ! empty( $attributes['showBOB'] );
+    $show_eur    = ! empty( $attributes['showEUR'] );
     $show_pen    = ! empty( $attributes['showPEN'] );
-    $spread_pct  = isset( $attributes['spread'] ) ? floatval( $attributes['spread'] ) : 0.5;
+    $show_ars    = ! empty( $attributes['showARS'] );
+    $show_bob    = ! empty( $attributes['showBOB'] );
+    $show_clp    = ! empty( $attributes['showCLP'] );
+    $show_cop    = ! empty( $attributes['showCOP'] );
+    $show_uyu    = ! empty( $attributes['showUYU'] );
+    $show_pyg    = ! empty( $attributes['showPYG'] );
+    $show_mxn    = ! empty( $attributes['showMXN'] );
+    $spread_pct  = isset( $attributes['spread'] ) ? floatval( $attributes['spread'] ) : 0;
     $show_updated= ! empty( $attributes['showUpdated'] );
+    $slides_to_show = isset( $attributes['slidesToShow'] ) ? intval( $attributes['slidesToShow'] ) : 2;
+    $autoplay    = isset( $attributes['autoplay'] ) ? ! empty( $attributes['autoplay'] ) : true;
+    $autoplay_speed = isset( $attributes['autoplaySpeed'] ) ? intval( $attributes['autoplaySpeed'] ) : 3000;
+    $show_flags  = isset( $attributes['showFlags'] ) ? ! empty( $attributes['showFlags'] ) : true;
+    $show_names  = isset( $attributes['showNames'] ) ? ! empty( $attributes['showNames'] ) : true;
+
+    // Currency metadata: name, icon (emoji flag), decimal places, symbol
+    $currency_info = array(
+        'BRL' => array( 'name' => 'Real Brasileiro', 'flag' => '🇧🇷', 'decimals' => 2, 'symbol' => 'R$' ),
+        'USD' => array( 'name' => 'Dólar Americano', 'flag' => '🇺🇸', 'decimals' => 2, 'symbol' => '$' ),
+        'EUR' => array( 'name' => 'Euro', 'flag' => '🇪🇺', 'decimals' => 2, 'symbol' => '€' ),
+        'PEN' => array( 'name' => 'Sol Peruano', 'flag' => '🇵🇪', 'decimals' => 2, 'symbol' => 'S/' ),
+        'ARS' => array( 'name' => 'Peso Argentino', 'flag' => '🇦🇷', 'decimals' => 2, 'symbol' => '$' ),
+        'BOB' => array( 'name' => 'Boliviano', 'flag' => '🇧🇴', 'decimals' => 2, 'symbol' => 'Bs.' ),
+        'CLP' => array( 'name' => 'Peso Chileno', 'flag' => '🇨🇱', 'decimals' => 0, 'symbol' => '$' ),
+        'COP' => array( 'name' => 'Peso Colombiano', 'flag' => '🇨🇴', 'decimals' => 0, 'symbol' => '$' ),
+        'UYU' => array( 'name' => 'Peso Uruguaio', 'flag' => '🇺🇾', 'decimals' => 2, 'symbol' => '$' ),
+        'PYG' => array( 'name' => 'Guaraní', 'flag' => '🇵🇾', 'decimals' => 0, 'symbol' => '₲' ),
+        'MXN' => array( 'name' => 'Peso Mexicano', 'flag' => '🇲🇽', 'decimals' => 2, 'symbol' => '$' ),
+    );
 
     // Symbols list
     $symbols = array();
     if ( $show_usd ) $symbols[] = 'USD';
-    if ( $show_bob ) $symbols[] = 'BOB';
+    if ( $show_eur ) $symbols[] = 'EUR';
     if ( $show_pen ) $symbols[] = 'PEN';
-    // BRL will be displayed as 1.0000 if requested
-
-    $names = array(
-        'BRL' => 'Real Brasileiro',
-        'USD' => 'Dólar Americano',
-        'BOB' => 'Boliviano',
-        'PEN' => 'Sol Peruano',
-    );
+    if ( $show_ars ) $symbols[] = 'ARS';
+    if ( $show_bob ) $symbols[] = 'BOB';
+    if ( $show_clp ) $symbols[] = 'CLP';
+    if ( $show_cop ) $symbols[] = 'COP';
+    if ( $show_uyu ) $symbols[] = 'UYU';
+    if ( $show_pyg ) $symbols[] = 'PYG';
+    if ( $show_mxn ) $symbols[] = 'MXN';
 
     // Fetch rates
     $rates = array();
     $updated_at = '';
     if ( ! empty( $symbols ) ) {
-        $cache_key = 'u68_fx_' . md5( $provider . '|' . $base . '|' . implode(',', $symbols) );
-        $cached = get_transient( $cache_key );
+        $cache_key      = 'u68_fx_' . md5( $provider . '|' . $base . '|' . implode(',', $symbols) );
+        $cached         = get_transient( $cache_key );
+        $lastgood_store = get_option( 'u68_fx_lastgood', array() );
+        $lastgood       = isset( $lastgood_store[ $cache_key ] ) ? $lastgood_store[ $cache_key ] : array();
+        $timeout        = 4; // keep requests snappy
+
         if ( false === $cached ) {
             if ( $provider === 'frankfurter' ) {
                 $api_url = add_query_arg( array(
                     'from' => $base,
                     'to'   => implode(',', $symbols),
                 ), 'https://api.frankfurter.app/latest' );
-                $res = wp_remote_get( $api_url, array( 'timeout' => 8 ) );
+                $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
                 if ( ! is_wp_error( $res ) ) {
                     $body = wp_remote_retrieve_body( $res );
                     $json = json_decode( $body, true );
                     if ( ! empty( $json['rates'] ) ) {
                         $rates = $json['rates'];
                         $updated_at = isset( $json['date'] ) ? sanitize_text_field( $json['date'] ) : '';
-                        set_transient( $cache_key, array('rates'=>$rates,'updated'=>$updated_at), 10 * MINUTE_IN_SECONDS );
+                    }
+                }
+            } elseif ( $provider === 'currencyfreaks' ) {
+                // currencyfreaks.com - API key from settings/constant/env
+                $api_key = function_exists('u68_get_currencyfreaks_api_key') ? u68_get_currencyfreaks_api_key() : '';
+                if ( ! empty( $api_key ) ) {
+                    // Free plan has USD base; request BRL plus target symbols for conversion
+                    $req_symbols = array_unique( array_merge( $symbols, array( 'BRL' ) ) );
+                    $api_url = add_query_arg( array(
+                        'apikey'  => $api_key,
+                        'symbols' => implode( ',', $req_symbols ),
+                    ), 'https://api.currencyfreaks.com/v2.0/rates/latest' );
+                    $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
+                    if ( ! is_wp_error( $res ) ) {
+                        $body = wp_remote_retrieve_body( $res );
+                        $json = json_decode( $body, true );
+                        if ( ! empty( $json['rates'] ) ) {
+                            foreach ( $req_symbols as $sym ) {
+                                if ( isset( $json['rates'][ $sym ] ) ) {
+                                    $rates[ $sym ] = floatval( $json['rates'][ $sym ] );
+                                }
+                            }
+                            $updated_at = isset( $json['date'] ) ? sanitize_text_field( $json['date'] ) : '';
+                        }
+                    }
+                }
+            } elseif ( $provider === 'erapi' ) {
+                // open.er-api.com (rápida e gratuita)
+                $api_url = 'https://open.er-api.com/v6/latest/' . rawurlencode( $base );
+                $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
+                if ( ! is_wp_error( $res ) ) {
+                    $body = wp_remote_retrieve_body( $res );
+                    $json = json_decode( $body, true );
+                    if ( isset( $json['result'] ) && $json['result'] === 'success' && ! empty( $json['rates'] ) ) {
+                        foreach ( $symbols as $sym ) {
+                            if ( isset( $json['rates'][ $sym ] ) ) {
+                                $rates[ $sym ] = floatval( $json['rates'][ $sym ] );
+                            }
+                        }
+                        $updated_at = isset( $json['time_last_update_utc'] ) ? sanitize_text_field( $json['time_last_update_utc'] ) : '';
                     }
                 }
             } else {
@@ -1513,62 +1594,213 @@ function u_correio68_render_currency_monitor( $attributes ) {
                     'base'    => $base,
                     'symbols' => implode(',', $symbols),
                 ), 'https://api.exchangerate.host/latest' );
-                $res = wp_remote_get( $api_url, array( 'timeout' => 8 ) );
+                $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
                 if ( ! is_wp_error( $res ) ) {
                     $body = wp_remote_retrieve_body( $res );
                     $json = json_decode( $body, true );
                     if ( ! empty( $json['rates'] ) ) {
                         $rates = $json['rates'];
                         $updated_at = isset( $json['date'] ) ? sanitize_text_field( $json['date'] ) : '';
-                        set_transient( $cache_key, array('rates'=>$rates,'updated'=>$updated_at), 10 * MINUTE_IN_SECONDS );
                     }
                 }
             }
+
+            if ( ! empty( $rates ) ) {
+                set_transient( $cache_key, array( 'rates' => $rates, 'updated' => $updated_at ), 10 * MINUTE_IN_SECONDS );
+                $lastgood_store[ $cache_key ] = array( 'rates' => $rates, 'updated' => $updated_at );
+                update_option( 'u68_fx_lastgood', $lastgood_store, false );
+            }
+
+            // Fallback to last known good data if live call failed
+            if ( empty( $rates ) && ! empty( $lastgood ) ) {
+                $rates      = isset( $lastgood['rates'] ) ? $lastgood['rates'] : array();
+                $updated_at = isset( $lastgood['updated'] ) ? $lastgood['updated'] : '';
+            }
         } else {
-            $rates = isset($cached['rates']) ? $cached['rates'] : array();
-            $updated_at = isset($cached['updated']) ? $cached['updated'] : '';
+            $rates      = isset( $cached['rates'] ) ? $cached['rates'] : array();
+            $updated_at = isset( $cached['updated'] ) ? $cached['updated'] : '';
         }
     }
 
-    // Compute buy/sell using spread percentage around mid-market
-    $spread = max(0.0, $spread_pct) / 100.0;
-
     ob_start();
     ?>
-    <div class="currency-monitor card spaces p-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>Mercado de Câmbio</strong>
+    <div class="currency-monitor cm-minimal" style="padding: 0;">
+        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 12px; padding: 0 8px;">
+            <h5 style="margin: 0; font-weight: 700; letter-spacing: 0.2px; font-size: 1.1rem;">Quanto vale <?php echo esc_html( number_format( $base_amount, 0, ',', '.' ) ); ?> reais?</h5>
             <?php if ( $show_updated && $updated_at ) : ?>
-                <small class="text-muted">Atualizado: <?php echo esc_html( $updated_at ); ?></small>
+                <small class="text-muted" style="opacity: 0.7; font-size: 0.75rem;">Atualizado: <?php echo esc_html( $updated_at ); ?></small>
             <?php endif; ?>
         </div>
-        <div class="small text-muted mb-2">Base: BRL • Spread: <?php echo esc_html( number_format( $spread_pct, 1, ',', '.' ) ); ?>%</div>
-        <div class="cm-rows">
-            <?php if ( $show_brl ) : ?>
-                <div class="cm-row">
-                    <div class="cm-name">Real Brasileiro (BRL)</div>
-                    <div class="cm-values">
-                        <span class="cm-buy">Compra: 1.0000</span>
-                        <span class="cm-sell">Venda: 1.0000</span>
-                    </div>
-                </div>
-            <?php endif; ?>
+        <?php if ( empty( $rates ) && ! empty( $symbols ) ) : ?>
+            <div class="alert alert-warning" style="background:#fff3cd;border:1px solid #ffeeba;color:#856404;padding:8px;border-radius:6px;margin:0 8px 12px 8px;font-size:0.85rem;">
+                Taxas indisponíveis. Verifique conexão/API.
+            </div>
+        <?php endif; ?>
 
-            <?php foreach ( $symbols as $code ) : 
-                $mid = isset( $rates[$code] ) ? floatval( $rates[$code] ) : null;
-                if ( ! $mid ) continue;
-                $buy  = $mid * (1.0 - $spread);
-                $sell = $mid * (1.0 + $spread);
+        <div class="cm-slick" style="position:relative; margin:0 8px;">
+            <?php 
+            // Ordem para exibir (todas as moedas latino-americanas)
+            $display_order = array('USD', 'EUR', 'MXN', 'COP', 'PEN', 'ARS', 'CLP', 'UYU', 'PYG', 'BOB');
+            
+            foreach ( $display_order as $code ) :
+                // Verificar se deve exibir
+                if ( 
+                    ( $code === 'USD' && ! $show_usd ) ||
+                    ( $code === 'EUR' && ! $show_eur ) ||
+                    ( $code === 'PEN' && ! $show_pen ) ||
+                    ( $code === 'ARS' && ! $show_ars ) ||
+                    ( $code === 'BOB' && ! $show_bob ) ||
+                    ( $code === 'CLP' && ! $show_clp ) ||
+                    ( $code === 'COP' && ! $show_cop ) ||
+                    ( $code === 'UYU' && ! $show_uyu ) ||
+                    ( $code === 'PYG' && ! $show_pyg ) ||
+                    ( $code === 'MXN' && ! $show_mxn )
+                ) {
+                    continue;
+                }
+                
+                $rate = isset( $rates[$code] ) ? floatval( $rates[$code] ) : null;
+                if ( ! $rate ) continue;
+                
+                // Compute amount from BRL to target currency
+                if ( $provider === 'currencyfreaks' ) {
+                    $brl_rate = isset( $rates['BRL'] ) ? floatval( $rates['BRL'] ) : null; // BRL per 1 USD
+                    if ( $brl_rate && $brl_rate > 0 ) {
+                        // 1 BRL = (rate / brl_rate) target currency
+                        $amount = $base_amount * ( $rate / $brl_rate );
+                    } else {
+                        $amount = $base_amount * $rate; // fallback
+                    }
+                } else {
+                    $amount = $base_amount * $rate;
+                }
+                if ( $spread_pct > 0 ) {
+                    $amount = $amount * ( 1 + ( $spread_pct / 100 ) );
+                }
+                $info = isset( $currency_info[$code] ) ? $currency_info[$code] : array( 'name' => $code, 'flag' => '💱', 'decimals' => 2, 'symbol' => '' );
+                $decimals = isset( $info['decimals'] ) ? $info['decimals'] : 2;
+                $symbol = isset( $info['symbol'] ) ? $info['symbol'] : '';
+                
+                // Determine color based on currency
+                $color_map = array(
+                    'USD' => '#0066cc',  // Azul
+                    'EUR' => '#0066cc',  // Azul
+                    'PEN' => '#d4a500',  // Ouro
+                    'ARS' => '#4169e1',  // Royal Blue
+                    'BOB' => '#a52a2a',  // Brown
+                );
+                $color = isset( $color_map[$code] ) ? $color_map[$code] : '#6c757d';
             ?>
-                <div class="cm-row">
-                    <div class="cm-name"><?php echo esc_html( ( isset($names[$code]) ? $names[$code] : $code ) . ' (' . $code . ')' ); ?></div>
-                    <div class="cm-values">
-                        <span class="cm-buy">Compra: <?php echo esc_html( number_format( $buy, 4, ',', '.' ) ); ?></span>
-                        <span class="cm-sell">Venda: <?php echo esc_html( number_format( $sell, 4, ',', '.' ) ); ?></span>
+                <div class="cm-item" style="flex-shrink: 0; text-align: center; padding: 10px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">
+                    <?php if ( $show_flags ) : ?>
+                        <div style="font-size: 1.75rem; line-height: 1; margin-bottom: 3px;"><?php echo isset( $info['flag'] ) ? $info['flag'] : '💱'; ?></div>
+                    <?php endif; ?>
+                    <?php if ( $show_names ) : ?>
+                        <div style="font-weight: 700; font-size: 0.9rem; color: #111; margin-bottom: 1px;"><?php echo esc_html( $code ); ?></div>
+                        <div style="color: #888; font-size: 0.75rem; margin-bottom: 8px; line-height: 1.2;"><?php echo esc_html( $info['name'] ); ?></div>
+                    <?php endif; ?>
+                    <div class="badge" style="display:inline-block; background: <?php echo esc_attr( $color ); ?>; color: #fff; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 1rem; white-space: nowrap;">
+                        <?php echo esc_html( $symbol . ' ' . number_format( $amount, $decimals, ',', '.' ) ); ?>
                     </div>
                 </div>
             <?php endforeach; ?>
+            
+            <?php if ( $show_brl ) : ?>
+                <div class="cm-item" style="flex-shrink: 0; text-align: center; padding: 10px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">
+                    <div style="font-size: 1.75rem; line-height: 1; margin-bottom: 3px;">🇧🇷</div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: #111; margin-bottom: 1px;">BRL</div>
+                    <div style="color: #888; font-size: 0.75rem; margin-bottom: 8px; line-height: 1.2;">Real Brasileiro</div>
+                    <div class="badge" style="display:inline-block; background: #27ae60; color: #fff; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 1rem; white-space: nowrap;">R$ 100,00</div>
+                </div>
+            <?php endif; ?>
         </div>
+        <style>
+        .cm-slick .slick-prev, .cm-slick .slick-next {
+            z-index: 10;
+            width: 28px;
+            height: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .cm-slick .slick-prev::before, .cm-slick .slick-next::before {
+            font-size: 18px;
+            color: #333;
+        }
+        .cm-slick .slick-prev { left: -35px; }
+        .cm-slick .slick-next { right: -35px; }
+        @media (max-width: 768px) {
+            .cm-slick .slick-prev { left: 5px; }
+            .cm-slick .slick-next { right: 5px; }
+        }
+        </style>
+        <script>
+        (function($){
+            if ( typeof $ === 'undefined' || typeof $.fn === 'undefined' ) return;
+            var slidesToShowDefault = <?php echo intval( $slides_to_show ); ?>;
+            var autoplayEnabled = <?php echo $autoplay ? 'true' : 'false'; ?>;
+            var autoplaySpeedVal = <?php echo intval( $autoplay_speed ); ?>;
+            
+            function initSlick() {
+                var $el = $('.cm-slick');
+                if (!$el.length || $el.hasClass('slick-initialized')) return;
+                
+                try {
+                    $el.slick({
+                        slidesToShow: slidesToShowDefault,
+                        slidesToScroll: 1,
+                        arrows: false,
+                        dots: true,
+                        infinite: true,
+                        speed: 300,
+                        autoplay: autoplayEnabled,
+                        autoplaySpeed: autoplaySpeedVal,
+                        pauseOnHover: true,
+                        pauseOnFocus: true,
+                        responsive: [
+                            { breakpoint: 1200, settings: { slidesToShow: Math.max(1, slidesToShowDefault - 1) } },
+                            { breakpoint: 992,  settings: { slidesToShow: Math.max(1, Math.floor(slidesToShowDefault / 2)) } },
+                            { breakpoint: 600,  settings: { slidesToShow: 1 } }
+                        ]
+                    });
+                } catch (e) {
+                    console.warn('Slick init failed:', e.message);
+                }
+            }
+            
+            // Try immediate init
+            if (typeof $.fn.slick === 'function') {
+                initSlick();
+            }
+            
+            // Fallback: wait for DOM ready + slick load
+            $(document).ready(function(){
+                if (typeof $.fn.slick === 'function') {
+                    initSlick();
+                }
+            });
+            
+            // Another fallback for late slick loading
+            if (window.jQuery !== $) {
+                window.jQuery(document).ready(function(){
+                    if (typeof window.jQuery.fn.slick === 'function') {
+                        window.jQuery('.cm-slick').not('.slick-initialized').slick({
+                            slidesToShow: 4,
+                            slidesToScroll: 1,
+                            arrows: true,
+                            dots: false,
+                            infinite: true,
+                            speed: 300,
+                            responsive: [
+                                { breakpoint: 1200, settings: { slidesToShow: 3 } },
+                                { breakpoint: 992,  settings: { slidesToShow: 2 } },
+                                { breakpoint: 600,  settings: { slidesToShow: 1, arrows: false } }
+                            ]
+                        });
+                    }
+                });
+            }
+        })(window.jQuery || window.$);
+        </script>
     </div>
     <?php
     return ob_get_clean();

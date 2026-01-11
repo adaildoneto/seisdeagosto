@@ -1,0 +1,46 @@
+/* Colunistas Grid Layout */
+.wp-block-seideagosto-colunistas-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin-bottom: 24px;
+}
+
+.wp-block-seideagosto-colunista-item {
+    grid-column: span 1 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Editor-specific adjustments */
+.editor-styles-wrapper .wp-block-seideagosto-colunistas-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+.editor-styles-wrapper .wp-block-seideagosto-colunista-item {
+    grid-column: span 1 !important;
+    width: 100% !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .wp-block-seideagosto-colunistas-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .wp-block-seideagosto-colunistas-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .wp-block-seideagosto-colunistas-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

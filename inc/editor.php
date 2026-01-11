@@ -14,6 +14,7 @@ add_action( 'admin_init', 'st2_wpdocs_theme_add_editor_styles' );
 if ( ! function_exists ( 'st2_wpdocs_theme_add_editor_styles' ) ) {
   function st2_wpdocs_theme_add_editor_styles() {
     add_editor_style( 'css/custom-editor-style.min.css' );
+    add_editor_style( 'css/blocks-layout.css' );
   }
 }
 
