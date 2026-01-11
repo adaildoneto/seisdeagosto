@@ -604,32 +604,40 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     wp_deregister_style( 'u_seisbarra8-slicktheme' );
     wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
 
-    wp_deregister_style( 'u_seisbarra8-style-2' );
-    wp_enqueue_style( 'u_seisbarra8-style-2', get_bloginfo('stylesheet_url'), false, null, 'all');
-    
     // Check if local fonts exist, otherwise fallback to Google Fonts CDN
-    $u68_theme_dir = get_stylesheet_directory();
-    $u68_theme_uri = get_stylesheet_directory_uri();
-    $open_sans_exists = file_exists( $u68_theme_dir . '/assets/fonts/open-sans/OpenSans-Variable.ttf' );
-    $lato_exists = file_exists( $u68_theme_dir . '/assets/fonts/lato/Lato-Regular.ttf' );
+    $stylesheet_dir = get_stylesheet_directory();
+    $stylesheet_uri = get_stylesheet_directory_uri();
+    $font_dir = $stylesheet_dir . '/assets/fonts';
     
-    if ( $open_sans_exists && $lato_exists ) {
+    $open_sans_file = $font_dir . '/open-sans/OpenSans-Variable.ttf';
+    $lato_file = $font_dir . '/lato/Lato-Regular.ttf';
+    
+    if ( file_exists( $open_sans_file ) && file_exists( $lato_file ) ) {
         // Use local self-hosted fonts with absolute URLs
-        $u68_font_faces = "
-@font-face { font-family: 'Open Sans'; src: url('{$u68_theme_uri}/assets/fonts/open-sans/OpenSans-Variable.ttf') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Open Sans'; src: url('{$u68_theme_uri}/assets/fonts/open-sans/OpenSans-Italic-Variable.ttf') format('truetype'); font-weight: 300 700; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-LightItalic.ttf') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('{$u68_theme_uri}/assets/fonts/lato/Lato-BoldItalic.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
-";
-        wp_add_inline_style( 'u_seisbarra8-style-2', $u68_font_faces );
+        wp_register_style( 'u_seisbarra8-fonts', false, array(), filemtime( $lato_file ) );
+        wp_enqueue_style( 'u_seisbarra8-fonts' );
+        
+        // Cache buster using file modification time
+        $font_mtime = '?v=' . filemtime( $lato_file );
+        $font_uri = $stylesheet_uri . '/assets/fonts';
+        
+        $u68_font_faces = "@font-face { font-family: 'Open Sans'; src: url('" . esc_url( $font_uri . '/open-sans/OpenSans-Variable.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sans'; src: url('" . esc_url( $font_uri . '/open-sans/OpenSans-Italic-Variable.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Light.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-LightItalic.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Regular.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Italic.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Bold.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-BoldItalic.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }";
+        
+        wp_add_inline_style( 'u_seisbarra8-fonts', $u68_font_faces );
     } else {
         // Fallback to Google Fonts CDN
         wp_enqueue_style( 'u_seisbarra8-google-fonts', 'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap', false, null, 'all');
     }
+
+    wp_deregister_style( 'u_seisbarra8-style-2' );
+    wp_enqueue_style( 'u_seisbarra8-style-2', get_bloginfo('stylesheet_url'), false, null, 'all');
 
     /* Pinegrow generated Enqueue Styles End */
 
