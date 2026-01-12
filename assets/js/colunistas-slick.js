@@ -39,5 +39,16 @@
       clearTimeout(window.__colunistasResizeTimer);
       window.__colunistasResizeTimer = setTimeout(initColunistasSlick, 150);
     });
+
+    // Touch activation for hover effect on mobile
+    $(document).on('touchstart', '.colunista-card', function(){
+      var $c = $(this);
+      $c.addClass('touch-active');
+      var t = $c.data('touchTimer');
+      if (t) { clearTimeout(t); }
+      $c.data('touchTimer', setTimeout(function(){
+        $c.removeClass('touch-active');
+      }, 1000));
+    });
   });
 })(jQuery);

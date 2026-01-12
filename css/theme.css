@@ -459,6 +459,53 @@ ol li::before {
   font-size: 12px;
   line-height: 13px; }
 
+/* Colunistas: minimalist transparent cards with circular highlight */
+.colunista-card {
+  background: transparent !important;
+  border: 0;
+  transition: transform .2s ease;
+}
+
+.colunista-card .picture::before,
+.colunista-card .picture::after {
+  background: transparent !important;
+}
+
+.colunista-card .picture img {
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+.colunista-card:hover .picture img,
+.colunista-card.touch-active .picture img {
+  transform: scale(0.96);
+  box-shadow: 0 0 0 6px rgba(10, 69, 121, 0.25);
+}
+
+.colunista-card .team-content {
+  background: transparent !important;
+}
+
+.colunista-card .name {
+  position: relative;
+  display: inline-block;
+}
+
+.colunista-card .name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background: var(--u68-primary-color, #0a4579);
+  transition: width .25s ease;
+}
+
+.colunista-card:hover .name::after,
+.colunista-card.touch-active .name::after {
+  width: 100%;
+}
+
 .navbar-brand {
   -webkit-transform: translateX(-50%);
       -ms-transform: translateX(-50%);
