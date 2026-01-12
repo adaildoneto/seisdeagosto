@@ -316,6 +316,20 @@ function u_correio68_register_custom_blocks() {
             'period' => array( 'type' => 'string', 'default' => 'year' ),
         ),
     ) );
+    register_block_type( 'correio68/weather', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_weather',
+        'attributes'      => array(
+            'cityName'      => array( 'type' => 'string', 'default' => '' ),
+            'latitude'      => array( 'type' => 'string', 'default' => '' ),
+            'longitude'     => array( 'type' => 'string', 'default' => '' ),
+            'units'         => array( 'type' => 'string', 'default' => 'c' ),
+            'showWind'      => array( 'type' => 'boolean', 'default' => true ),
+            'showRain'      => array( 'type' => 'boolean', 'default' => true ),
+            'forecastDays'  => array( 'type' => 'number', 'default' => 5 ),
+            'showForecast'  => array( 'type' => 'boolean', 'default' => true ),
+        ),
+    ) );
     register_block_type( 'correio68/currency-monitor', array(
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_currency_monitor',
@@ -1091,7 +1105,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                 ?>
                                 <div class="card-img-overlay gradiente space d-flex flex-column justify-content-end" style="background: none !important;">
                                     <div class="tituloD">
-                                        <h3 class="mt-2 mb-3" style="<?php echo esc_attr( $titleStyle ); ?> line-height: 1.35; font-size: 1.35rem; font-weight: 700;"><a href="<?php the_permalink(); ?>" class="text-white"><?php the_title(); ?></a></h3>
+                                        <h3 class="TituloGrande text-shadow text-white"><a href="<?php the_permalink(); ?>" class="text-white"><?php the_title(); ?></a></h3>
                                     </div>
                                 </div>
                             </div>
@@ -1468,10 +1482,12 @@ function u_correio68_render_weather( $attributes ) {
  * Render Callback: Currency Monitor (exchangerate.host)
  */
 function u_correio68_render_currency_monitor( $attributes ) {
-    // Enqueue Slick on frontend only if not already enqueued
-    if ( ! is_admin() && function_exists( 'wp_enqueue_style' ) ) {
-        wp_enqueue_style( 'slick-css', get_template_directory_uri() . '/slick/slick.css', array(), '1.8.1' );
-        wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/slick/slick.min.js', array( 'jquery' ), '1.8.1', true );
+    // Enqueue Slick CSS/JS - use handle já registrado em functions.php
+    if ( ! is_admin() ) {
+        // Força o carregamento do Slick que já está registrado
+        wp_enqueue_style( 'u_seisbarra8-slick' );
+        wp_enqueue_style( 'u_seisbarra8-slicktheme' );
+        wp_enqueue_script( 'u_seisbarra8-slick' );
     }
 
     $provider    = isset( $attributes['provider'] ) ? sanitize_text_field( $attributes['provider'] ) : 'exchangerate';
@@ -1535,21 +1551,35 @@ function u_correio68_render_currency_monitor( $attributes ) {
         $timeout        = 4; // keep requests snappy
 
         if ( false === $cached ) {
-            if ( $provider === 'frankfurter' ) {
-                $api_url = add_query_arg( array(
-                    'from' => $base,
-                    'to'   => implode(',', $symbols),
-                ), 'https://api.frankfurter.app/latest' );
-                $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
-                if ( ! is_wp_error( $res ) ) {
-                    $body = wp_remote_retrieve_body( $res );
-                    $json = json_decode( $body, true );
-                    if ( ! empty( $json['rates'] ) ) {
-                        $rates = $json['rates'];
-                        $updated_at = isset( $json['date'] ) ? sanitize_text_field( $json['date'] ) : '';
+            // Try primary provider
+            $providers_to_try = array( $provider );
+            
+            // Add fallback providers if primary fails
+            if ( $provider !== 'erapi' ) {
+                $providers_to_try[] = 'erapi'; // Fast and free fallback
+            }
+            if ( $provider !== 'exchangerate' ) {
+                $providers_to_try[] = 'exchangerate'; // Second fallback
+            }
+            
+            foreach ( $providers_to_try as $current_provider ) {
+                if ( ! empty( $rates ) ) break; // Got data, stop trying
+                
+                if ( $current_provider === 'frankfurter' ) {
+                    $api_url = add_query_arg( array(
+                        'from' => $base,
+                        'to'   => implode(',', $symbols),
+                    ), 'https://api.frankfurter.app/latest' );
+                    $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
+                    if ( ! is_wp_error( $res ) ) {
+                        $body = wp_remote_retrieve_body( $res );
+                        $json = json_decode( $body, true );
+                        if ( ! empty( $json['rates'] ) ) {
+                            $rates = $json['rates'];
+                            $updated_at = isset( $json['date'] ) ? sanitize_text_field( $json['date'] ) : '';
+                        }
                     }
-                }
-            } elseif ( $provider === 'currencyfreaks' ) {
+                } elseif ( $current_provider === 'currencyfreaks' ) {
                 // currencyfreaks.com - API key from settings/constant/env
                 $api_key = function_exists('u68_get_currencyfreaks_api_key') ? u68_get_currencyfreaks_api_key() : '';
                 if ( ! empty( $api_key ) ) {
@@ -1573,7 +1603,7 @@ function u_correio68_render_currency_monitor( $attributes ) {
                         }
                     }
                 }
-            } elseif ( $provider === 'erapi' ) {
+            } elseif ( $current_provider === 'erapi' ) {
                 // open.er-api.com (rápida e gratuita)
                 $api_url = 'https://open.er-api.com/v6/latest/' . rawurlencode( $base );
                 $res = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
@@ -1604,6 +1634,7 @@ function u_correio68_render_currency_monitor( $attributes ) {
                     }
                 }
             }
+            } // end provider loop
 
             if ( ! empty( $rates ) ) {
                 set_transient( $cache_key, array( 'rates' => $rates, 'updated' => $updated_at ), 10 * MINUTE_IN_SECONDS );
@@ -1631,12 +1662,17 @@ function u_correio68_render_currency_monitor( $attributes ) {
                 <small class="text-muted" style="opacity: 0.7; font-size: 0.75rem;">Atualizado: <?php echo esc_html( $updated_at ); ?></small>
             <?php endif; ?>
         </div>
-        <?php if ( empty( $rates ) && ! empty( $symbols ) ) : ?>
+        <?php if ( empty( $symbols ) ) : ?>
+            <div class="alert alert-info" style="background:#d1ecf1;border:1px solid #bee5eb;color:#0c5460;padding:8px;border-radius:6px;margin:0 8px 12px 8px;font-size:0.85rem;">
+                Nenhuma moeda selecionada. Configure o bloco para escolher as moedas a exibir.
+            </div>
+        <?php elseif ( empty( $rates ) ) : ?>
             <div class="alert alert-warning" style="background:#fff3cd;border:1px solid #ffeeba;color:#856404;padding:8px;border-radius:6px;margin:0 8px 12px 8px;font-size:0.85rem;">
-                Taxas indisponíveis. Verifique conexão/API.
+                Taxas indisponíveis no momento. Tentando reconectar...
             </div>
         <?php endif; ?>
 
+        <?php if ( ! empty( $symbols ) && ! empty( $rates ) ) : ?>
         <div class="cm-slick" style="position:relative; margin:0 8px;">
             <?php 
             // Ordem para exibir (todas as moedas latino-americanas)
@@ -1714,6 +1750,8 @@ function u_correio68_render_currency_monitor( $attributes ) {
                 </div>
             <?php endif; ?>
         </div>
+        <?php endif; // End if symbols and rates are available ?>
+        
         <style>
         .cm-slick .slick-prev, .cm-slick .slick-next {
             z-index: 10;
@@ -1733,74 +1771,76 @@ function u_correio68_render_currency_monitor( $attributes ) {
             .cm-slick .slick-next { right: 5px; }
         }
         </style>
+        <?php if ( ! empty( $symbols ) && ! empty( $rates ) ) : ?>
         <script>
-        (function($){
-            if ( typeof $ === 'undefined' || typeof $.fn === 'undefined' ) return;
+        jQuery(document).ready(function($){
             var slidesToShowDefault = <?php echo intval( $slides_to_show ); ?>;
             var autoplayEnabled = <?php echo $autoplay ? 'true' : 'false'; ?>;
             var autoplaySpeedVal = <?php echo intval( $autoplay_speed ); ?>;
             
-            function initSlick() {
+            function initCurrencySlick() {
                 var $el = $('.cm-slick');
-                if (!$el.length || $el.hasClass('slick-initialized')) return;
                 
-                try {
-                    $el.slick({
-                        slidesToShow: slidesToShowDefault,
-                        slidesToScroll: 1,
-                        arrows: false,
-                        dots: true,
-                        infinite: true,
-                        speed: 300,
-                        autoplay: autoplayEnabled,
-                        autoplaySpeed: autoplaySpeedVal,
-                        pauseOnHover: true,
-                        pauseOnFocus: true,
-                        responsive: [
-                            { breakpoint: 1200, settings: { slidesToShow: Math.max(1, slidesToShowDefault - 1) } },
-                            { breakpoint: 992,  settings: { slidesToShow: Math.max(1, Math.floor(slidesToShowDefault / 2)) } },
-                            { breakpoint: 600,  settings: { slidesToShow: 1 } }
-                        ]
-                    });
-                } catch (e) {
-                    console.warn('Slick init failed:', e.message);
+                if (!$el.length) {
+                    console.log('Currency monitor: .cm-slick element not found');
+                    return;
                 }
-            }
-            
-            // Try immediate init
-            if (typeof $.fn.slick === 'function') {
-                initSlick();
-            }
-            
-            // Fallback: wait for DOM ready + slick load
-            $(document).ready(function(){
-                if (typeof $.fn.slick === 'function') {
-                    initSlick();
+                
+                // Check if there are items to show
+                var itemCount = $el.find('.cm-item').length;
+                if (itemCount === 0) {
+                    console.log('Currency monitor: No items to display');
+                    return;
                 }
-            });
-            
-            // Another fallback for late slick loading
-            if (window.jQuery !== $) {
-                window.jQuery(document).ready(function(){
-                    if (typeof window.jQuery.fn.slick === 'function') {
-                        window.jQuery('.cm-slick').not('.slick-initialized').slick({
-                            slidesToShow: 4,
-                            slidesToScroll: 1,
-                            arrows: true,
-                            dots: false,
-                            infinite: true,
-                            speed: 300,
-                            responsive: [
-                                { breakpoint: 1200, settings: { slidesToShow: 3 } },
-                                { breakpoint: 992,  settings: { slidesToShow: 2 } },
-                                { breakpoint: 600,  settings: { slidesToShow: 1, arrows: false } }
-                            ]
-                        });
-                    }
+                
+                if (typeof $.fn.slick === 'undefined') {
+                    console.log('Currency monitor: Slick not loaded yet');
+                    return;
+                }
+                
+                // Destroy if already initialized
+                if ($el.hasClass('slick-initialized')) {
+                    $el.slick('unslick');
+                }
+                
+                console.log('Currency monitor: Initializing slick with ' + slidesToShowDefault + ' slides and ' + itemCount + ' items');
+                
+                // Initialize slick
+                $el.slick({
+                    slidesToShow: slidesToShowDefault,
+                    slidesToScroll: 1,
+                    arrows: false,
+                    dots: true,
+                    infinite: true,
+                    speed: 300,
+                    autoplay: autoplayEnabled,
+                    autoplaySpeed: autoplaySpeedVal,
+                    pauseOnHover: true,
+                    pauseOnFocus: true,
+                    responsive: [
+                        { breakpoint: 1200, settings: { slidesToShow: Math.max(1, slidesToShowDefault - 1) } },
+                        { breakpoint: 992,  settings: { slidesToShow: Math.max(1, Math.floor(slidesToShowDefault / 2)) } },
+                        { breakpoint: 600,  settings: { slidesToShow: 1 } }
+                    ]
                 });
             }
-        })(window.jQuery || window.$);
+            
+            // Try multiple times to ensure slick is loaded
+            var attempts = 0;
+            var maxAttempts = 5;
+            var interval = setInterval(function(){
+                attempts++;
+                if (typeof $.fn.slick !== 'undefined') {
+                    clearInterval(interval);
+                    initCurrencySlick();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    console.error('Currency monitor: Slick library failed to load after ' + maxAttempts + ' attempts');
+                }
+            }, 200);
+        });
         </script>
+        <?php endif; ?>
     </div>
     <?php
     return ob_get_clean();

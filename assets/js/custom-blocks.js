@@ -740,7 +740,7 @@
         title: 'Monitor de Câmbio',
         icon: 'money',
         category: 'widgets',
-        supports: { inserter: false },
+        supports: { inserter: true },
         attributes: {
             provider: { type: 'string', default: 'currencyfreaks' },
             base: { type: 'string', default: 'BRL' },

@@ -671,17 +671,18 @@ require_once "inc/customizer.php";
     
     add_filter( '1', '__return_false' );
     
-    // Fallback shims for Advanced Custom Fields to avoid fatals when plugin is missing
-    if ( ! function_exists( 'get_field' ) ) {
+    // Fallback shims for Advanced Custom Fields only if plugin is not active
+    add_action( 'plugins_loaded', function() {
+        if ( function_exists( 'get_field' ) ) {
+            return; // ACF available, no shim needed
+        }
         function get_field( $selector, $post_id = false, $format_value = true ) {
             return '';
         }
-    }
-    if ( ! function_exists( 'the_field' ) ) {
         function the_field( $selector, $post_id = false ) {
             echo get_field( $selector, $post_id );
         }
-    }
+    } );
 
     // Register custom Block Pattern category for this theme
     add_action( 'init', function() {
@@ -888,3 +889,30 @@ function u68_rest_error_logger( $response, $server, $request ) {
 }
 add_filter( 'rest_post_dispatch', 'u68_rest_error_logger', 10, 3 );
 
+// DEBUG TEMPORÁRIO - Remover após teste
+add_action('wp_footer', function() {
+    if (current_user_can('manage_options') && is_front_page()) {
+        echo "\n<!-- Currency Monitor Debug -->\n";
+        echo "<script>console.log('[Currency Debug] Verificando bloco de câmbio...');</script>\n";
+        
+        // Verifica se o bloco está registrado
+        $registry = WP_Block_Type_Registry::get_instance();
+        $registered = $registry->is_registered('seideagosto/currency-monitor') ? 'SIM' : 'NÃO';
+        echo "<script>console.log('[Currency Debug] Bloco registrado: " . $registered . "');</script>\n";
+        
+        // Testa API diretamente
+        $api_url = 'https://open.er-api.com/v6/latest/BRL';
+        $res = wp_remote_get($api_url, array('timeout' => 5));
+        if (!is_wp_error($res)) {
+            $body = wp_remote_retrieve_body($res);
+            $json = json_decode($body, true);
+            if (isset($json['rates']['USD'])) {
+                echo "<script>console.log('[Currency Debug] API funcionando - USD: " . $json['rates']['USD'] . "');</script>\n";
+            } else {
+                echo "<script>console.error('[Currency Debug] API retornou dados incompletos');</script>\n";
+            }
+        } else {
+            echo "<script>console.error('[Currency Debug] Erro ao acessar API: " . esc_js($res->get_error_message()) . "');</script>\n";
+        }
+    }
+}, 999);
