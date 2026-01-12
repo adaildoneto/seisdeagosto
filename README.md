@@ -1,62 +1,244 @@
-# seideagosto
+# 🌳 Seis de Agosto
 
-Tema WordPress personalizado criado por Adaildo Neto (adaildo.neto@gmail.com).
+<div align="center">
 
-## Visão Geral
-- Blocos Gutenberg dinâmicos focados em notícias e destaques.
-- Construtor de páginas de Arquivo/Busca com conteúdo em blocos (seleção via Customizer).
-- Estilos baseados em variáveis de tema e painel de tipografia unificada.
-- Deduplicação de posts: blocos evitam repetir matérias já exibidas na mesma página (PG_Helper).
+**Tema WordPress personalizado para portais de notícias**
 
-## Blocos Gutenberg
-- **Destaques Home (1 Grande + 2 Pequenos)**: hero com um post grande e dois menores; aceita filtro por categoria.
-- **Grid de Notícias**: grade de cards com imagem e título; opções de categoria, quantidade, offset, colunas e tipografia. Suporta **paginação opcional** e respeita deduplicação entre blocos.
-- **Destaque Categoria (1 Grande + 3 Lista)**: primeiro post com imagem + lista textual; com tipografia configurável.
-- **Destaque Misto (2 Grandes + Lista + 1 Coluna)**: dois destaques principais e lista de itens; respeita a categoria selecionada.
-- **Grid de Colunistas / Item de Colunista**: grupo de colunistas; cada item mostra nome, título e o último post da categoria definida.
-- **Top Mais Lidas (Top N)**: lista ordenada por views (meta) com fallback por comentários.
-- **Clima (Open‑Meteo)**: exibe clima atual por cidade ou coordenadas; cache curta para performance.
-- **Monitor de Câmbio**: taxas BRL vs USD/BOB/PEN com spread; mostra compra e venda; setas ocultas e apenas dots.
-- **Blocos metadata (theme/blocks)**: destaque-grande, destaque-pequeno, lista-noticias.
+[![WordPress](https://img.shields.io/badge/WordPress-5.0+-blue.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-7.4+-purple.svg)](https://php.net/)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.0-purple.svg)](https://getbootstrap.com/)
 
-## Customizer (inc/customizer.php)
-- **Cores**: primária, badge, fundo de destaques, fundo colunistas, header, footer.
-- **Tipografia**: tamanhos e peso dos títulos (`.TituloGrande`, `.TituloGrande2`, `.title-post`).
-- **Layout**: altura imagem destacada, espaçamento entre cards, hr/separator minimalista.
-- **Toolbar de leitura (single)**: botões A-/A/A+ seguem variáveis de cor do tema.
-- **Modelos de Arquivo**: escolha páginas (Page) para renderizar o conteúdo de Categorias, Tags e Busca com blocos.
-- **Live Preview**: atualiza estilos em tempo real (js/customizer-preview.js).
+</div>
 
-## Arquivos/Busca com blocos
-- Crie uma Página com os blocos desejados (ex: Grid de Notícias com categoria “Todas”).
-- No Customizer, selecione essa Página para “Categorias”, “Tags” e/ou “Busca”.
-- As páginas de arquivo/busca vão renderizar o conteúdo dessa Página, e o Grid de Notícias seguirá o contexto automaticamente.
-- Se o Grid tiver paginação habilitada, os links usam a paginação do arquivo/busca.
+---
 
-## Áreas de Widgets
-1. **navbarlateral** (`navbarlateral`)
-2. **Banner abaixo do post** (`banner_post`)
-3. **bannervertical** (`banneraleac-vertical`)
-4. **temperatura** (`temperatura`)
-5. **Banner Colunistas** (`banner_colunistas`)
-6. **banner ALEAC** (`bannneraleac`)
-7. **Grupo Whatsapp** (`whatsappcorreio68`)
-8. **Colunistas 68** (`colunistas`)
-9. **Na Rota do Boi** (`narotadoboi`)
-10. **Right Sidebar** (`right-sidebar`)
-11. **banner Footer** (`bannerfooter`)
-12. **Banners do Cabral** (`cabralize`)
-13. **Left Sidebar** (`left-sidebar`)
+## 📖 Sobre o Nome
 
-## Tamanhos de Imagem
-- `destaque`: 300x180 (crop)
-- `destatquegrande`: 730x410 (crop)
+**Seis de Agosto** é uma homenagem à **Revolução Acreana**, movimento histórico que culminou em 6 de agosto de 1902, quando o Acre conquistou sua autonomia. Este tema foi desenvolvido com orgulho por um desenvolvedor acreano, celebrando a história e a cultura do Acre.
 
-## Notas de Desenvolvimento
-- Text Domain usado no tema: `u_correio68`.
-- Baseado em Bootstrap e arquivos do Starter Theme (ST2/UnderStrap).
-- Namespaces dos blocos: `seideagosto/*` (principal) com compatibilidade de renderização para `correio68/*`.
+> 🌟 *"A memória de um povo se perpetua em cada linha de código."*
 
-## Autor
-- Nome: Adaildo Neto
-- Email: adaildo.neto@gmail.com
+---
+
+## 🎯 Visão Geral
+
+Tema WordPress moderno e robusto, especialmente desenvolvido para portais de notícias e sites jornalísticos:
+
+- 🧩 **Blocos Gutenberg dinâmicos** focados em notícias e destaques
+- 🔧 **Construtor de páginas** de Arquivo/Busca com conteúdo em blocos (seleção via Customizer)
+- 🎨 **Estilos baseados em variáveis** de tema e painel de tipografia unificada
+- 🔄 **Deduplicação inteligente** de posts: blocos evitam repetir matérias já exibidas na mesma página (PG_Helper)
+- 📱 **Design responsivo** com Bootstrap 5
+- ⚡ **Performance otimizada** com cache e lazy loading
+
+---
+
+## 🧩 Blocos Gutenberg
+
+### 📰 Blocos de Conteúdo
+
+- **🎯 Destaques Home** (1 Grande + 2 Pequenos)
+  - Hero section com um post grande e dois menores
+  - Aceita filtro por categoria
+  - Imagens otimizadas com gradiente overlay
+
+- **📊 Grid de Notícias**
+  - Grade responsiva de cards com imagem e título
+  - Opções: categoria, quantidade, offset, colunas (2-6) e tipografia
+  - Suporta **paginação opcional** e respeita deduplicação entre blocos
+  - Adapta-se automaticamente em páginas de arquivo/busca
+
+- **🏷️ Destaque Categoria** (1 Grande + 3 Lista)
+  - Primeiro post com imagem destacada + lista textual
+  - Tipografia configurável
+  - Ideal para seções de categoria específica
+
+- **🎨 Destaque Misto** (2 Grandes + Lista + 1 Coluna)
+  - Layout híbrido: dois destaques principais e lista de itens
+  - Respeita categoria selecionada
+  - Perfeito para páginas iniciais
+
+### 👥 Blocos de Colunistas
+
+- **✍️ Grid de Colunistas / Item de Colunista**
+  - Layout em grade de 4 colunas
+  - Cada item exibe: nome, título e último post da categoria definida
+  - Suporte a imagem de perfil e biografia
+
+### 📈 Blocos de Engajamento
+
+- **🔥 Top Mais Lidas** (Top N)
+  - Lista ordenada por views (custom meta)
+  - Fallback automático por número de comentários
+  - Período configurável (hoje, semana, mês, ano)
+
+### 🌦️ Blocos Utilitários
+
+- **☁️ Clima** (Open-Meteo API)
+  - Exibe clima atual por cidade ou coordenadas
+  - Animações de chuva e vento aprimoradas
+  - Cache de curta duração para performance
+  - Previsão em tempo real
+
+- **💱 Monitor de Câmbio**
+  - Taxas BRL vs USD/BOB/PEN com spread
+  - Mostra compra e venda
+  - Carousel com dots (setas ocultas)
+  - Atualização automática via cron
+  - Fallback entre múltiplos provedores de API
+
+### 📦 Blocos Metadata (theme/blocks)
+
+- **destaque-grande** - Post em destaque tamanho grande
+- **destaque-pequeno** - Post em destaque compacto
+- **lista-noticias** - Lista simples de notícias
+
+---
+
+## 🎨 Customizer (inc/customizer.php)
+
+### Opções de Personalização
+
+- **🎨 Cores**
+  - Cor primária do tema
+  - Cor dos badges
+  - Fundo de destaques
+  - Fundo colunistas
+  - Cores de header e footer
+
+- **📝 Tipografia**
+  - Tamanhos e peso dos títulos
+  - Classes: `.TituloGrande`, `.TituloGrande2`, `.title-post`
+  - Controle fino de font-size e font-weight
+
+- **📐 Layout**
+  - Altura da imagem destacada
+  - Espaçamento entre cards
+  - **HR/Separator minimalista** (linha fina 1px)
+  
+- **📖 Toolbar de Leitura** (single post)
+  - Botões A-/A/A+ para ajuste de fonte
+  - Seguem variáveis de cor do tema
+  - Acessibilidade aprimorada
+
+- **📂 Modelos de Arquivo**
+  - Escolha páginas (Page) para renderizar conteúdo de:
+    - Categorias
+    - Tags
+    - Busca
+  - Permite usar blocos Gutenberg em páginas de arquivo
+
+- **👁️ Live Preview**
+  - Atualiza estilos em tempo real
+  - Powered by `js/customizer-preview.js`
+
+---
+
+## 🔍 Arquivos/Busca com Blocos
+
+### Como Configurar
+
+1. **Criar Página** com os blocos desejados
+   - Exemplo: Grid de Notícias com categoria "Todas"
+   
+2. **No Customizer**, selecione essa Página para:
+   - 📁 Categorias
+   - 🏷️ Tags
+   - 🔎 Busca
+
+3. **Resultado**: As páginas de arquivo/busca renderizam o conteúdo dessa Página
+   - O Grid de Notícias segue o contexto automaticamente
+   - Se paginação habilitada, os links usam a paginação do arquivo/busca
+
+---
+
+## 📱 Áreas de Widgets
+
+O tema oferece **13 áreas de widgets** estrategicamente posicionadas:
+
+| # | Nome | ID |
+|---|------|-----|
+| 1 | 📋 Navbar Lateral | `navbarlateral` |
+| 2 | 📰 Banner abaixo do post | `banner_post` |
+| 3 | 📊 Banner Vertical | `banneraleac-vertical` |
+| 4 | 🌡️ Temperatura | `temperatura` |
+| 5 | ✍️ Banner Colunistas | `banner_colunistas` |
+| 6 | 🏛️ Banner ALEAC | `bannneraleac` |
+| 7 | 💬 Grupo WhatsApp | `whatsappcorreio68` |
+| 8 | 👥 Colunistas 68 | `colunistas` |
+| 9 | 🐂 Na Rota do Boi | `narotadoboi` |
+| 10 | ➡️ Right Sidebar | `right-sidebar` |
+| 11 | 📢 Banner Footer | `bannerfooter` |
+| 12 | 🎯 Banners do Cabral | `cabralize` |
+| 13 | ⬅️ Left Sidebar | `left-sidebar` |
+
+---
+
+## 🖼️ Tamanhos de Imagem
+
+```php
+'destaque' => 300x180 (crop)
+'destatquegrande' => 730x410 (crop)
+```
+
+Otimizados para performance e qualidade visual em diferentes dispositivos.
+
+---
+
+## 💻 Notas de Desenvolvimento
+
+### Tecnologias e Padrões
+
+- **Text Domain**: `u_correio68`
+- **Base**: Bootstrap e Starter Theme (ST2/UnderStrap)
+- **Namespaces dos blocos**: 
+  - `seideagosto/*` (principal)
+  - `correio68/*` (compatibilidade de renderização)
+
+### Recursos Avançados
+
+- ✅ Deduplicação automática de posts via `PG_Helper`
+- ✅ Sistema de cache inteligente
+- ✅ Lazy loading de imagens
+- ✅ API REST customizada para clima e câmbio
+- ✅ Cron jobs para atualização de dados externos
+- ✅ Suporte a meta fields (ACF)
+- ✅ Customizer com live preview
+- ✅ Internacionalização (i18n) ready
+
+### Performance
+
+- 🚀 Transients para cache de API
+- 🚀 Minificação de assets
+- 🚀 Lazy loading nativo
+- 🚀 Otimização de queries com `post__not_in`
+
+---
+
+## 👨‍💻 Autor
+
+<div align="center">
+
+**Adaildo Neto**
+
+Desenvolvedor Acreano 🌳
+
+📧 [adaildo.neto@gmail.com](mailto:adaildo.neto@gmail.com)
+
+*Desenvolvido com ❤️ no Acre, Brasil*
+
+</div>
+
+---
+
+## 📜 Licença
+
+Este tema é proprietário e foi desenvolvido especificamente para uso em projetos jornalísticos.
+
+---
+
+<div align="center">
+
+**🌳 Seis de Agosto** - *Honrando a Revolução Acreana desde 1902*
+
+</div>
