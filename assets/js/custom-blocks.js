@@ -119,7 +119,8 @@
         icon: 'layout',
         category: 'layout',
         attributes: {
-            categoryId: { type: 'string', default: '0' }
+            categoryId: { type: 'string', default: '0' },
+            layoutType: { type: 'string', default: 'default' }
         },
         edit: function(props) {
             var attributes = props.attributes;
@@ -134,6 +135,15 @@
                     el(
                         PanelBody,
                         { title: 'Configurações' },
+                        el(SelectControl, {
+                            label: 'Layout',
+                            value: attributes.layoutType || 'default',
+                            options: [
+                                { label: '1 Grande + 2 Pequenos', value: 'default' },
+                                { label: 'Somente 1 Grande', value: 'single' }
+                            ],
+                            onChange: function(val) { setAttributes({ layoutType: String(val || 'default') }); }
+                        }),
                         el(SelectControl, {
                             label: 'Categoria',
                             value: attributes.categoryId,

@@ -496,6 +496,8 @@ ol li::before {
   border-radius: 14px;
   height: 380px;
   transition: transform .28s ease, box-shadow .32s ease, background .35s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .colunista-card .team-content {
@@ -506,13 +508,17 @@ ol li::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  order: 3;
 }
 
 .colunista-card .picture {
   position: relative;
   display: inline-block;
   margin-bottom: 8px;
-  margin-top: 20px;
+  margin-top: -6px;
+  order: 2;
+  align-self: center;
+  z-index: 1;
 }
 
 .colunista-card .picture::before,
@@ -541,21 +547,21 @@ ol li::before {
   box-shadow: 0 10px 35px rgba(10, 69, 121, 0.08);
 }
 
-.colunista-card:hover .picture::before,
+.colunista-card-link:hover .picture::before,
 .colunista-card.touch-active .picture::before {
   opacity: 1;
   transform: scale(1);
   filter: blur(16px);
 }
 
-.colunista-card:hover .picture img,
+.colunista-card-link:hover .picture img,
 .colunista-card.touch-active .picture img {
   transform: translateY(-4px) scale(0.97);
   box-shadow: 0 12px 40px rgba(10, 69, 121, 0.22);
   filter: saturate(1.05);
 }
 
-.colunista-card:hover,
+.colunista-card-link:hover .colunista-card,
 .colunista-card.touch-active {
   transform: translateY(-6px) scale(1.01);
   box-shadow: 0 18px 45px rgba(10, 69, 121, 0.15);
@@ -589,12 +595,12 @@ ol li::before {
   transition: width .3s ease, opacity .3s ease;
 }
 
-.colunista-card:hover .name,
+.colunista-card-link:hover .name,
 .colunista-card.touch-active .name {
   color: var(--u68-primary-color, #0a4579);
 }
 
-.colunista-card:hover .name::after,
+.colunista-card-link:hover .name::after,
 .colunista-card.touch-active .name::after {
   width: 100%;
   opacity: 1;
@@ -611,6 +617,70 @@ ol li::before {
   display: block;
   margin-top: 2px;
   color: rgba(10, 69, 121, 0.7);
+}
+
+/* Colunista card link wrapper */
+.colunista-card-link {
+  text-decoration: none !important;
+  color: inherit;
+  display: block;
+}
+
+.colunista-card-link:hover {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+.colunista-card-link:hover * {
+  text-decoration: none !important;
+}
+
+/* Bubble speech style for article in colunista card */
+.colunista-bubble {
+  order: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.colunista-bubble p {
+  position: relative;
+  background: #f5f5f5;
+  border: 0px solid #555;
+  border-radius: 18px;
+  padding: 12px 16px;
+  margin: 10px auto 10px;
+  max-width: 90%;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* Triangle/tail pointing down to photo */
+.colunista-bubble p::before {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #f5f5f5;
+}
+
+.colunista-card-link:hover .colunista-bubble p,
+.colunista-card.touch-active .colunista-bubble p {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(10, 69, 121, 0.12);
+  transform: translateY(-2px);
+}
+
+.colunista-card-link:hover .colunista-bubble p::before,
+.colunista-card.touch-active .colunista-bubble p::before {
+  border-top-color: #fff;
 }
 
 .navbar-brand {

@@ -443,6 +443,79 @@ function st2_failed_login()
 
 add_filter( 'widget_text', 'do_shortcode' );
 
+//* Force MetaSlider scripts to load when shortcode is used in blocks
+function u_seisbarra8_force_metaslider_scripts() {
+    if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
+        metaslider_register_public_styles();
+        metaslider_register_public_scripts();
+    }
+}
+add_action( 'wp_enqueue_scripts', 'u_seisbarra8_force_metaslider_scripts', 99 );
+
+//* Ensure MetaSlider shortcodes are processed in block content
+function u_seisbarra8_process_metaslider_in_blocks( $block_content, $block ) {
+    if ( ! empty( $block_content ) && has_shortcode( $block_content, 'metaslider' ) ) {
+        // Force enqueue MetaSlider assets
+        if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
+            metaslider_register_public_styles();
+            metaslider_register_public_scripts();
+        }
+        return do_shortcode( $block_content );
+    }
+    return $block_content;
+}
+add_filter( 'render_block', 'u_seisbarra8_process_metaslider_in_blocks', 10, 2 );
+
+//* Initialize MetaSlider JavaScript after page load
+function u_seisbarra8_init_metaslider_js() {
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // Force MetaSlider initialization
+        if (typeof metaslider_init !== 'undefined') {
+            setTimeout(function() {
+                $('.metaslider').each(function() {
+                    var $slider = $(this);
+                    if (!$slider.hasClass('flexslider-initialized')) {
+                        if (typeof $slider.flexslider === 'function') {
+                            $slider.addClass('flexslider-initialized');
+                            var flexOptions = $slider.data('flexslider-options') || {};
+                            $slider.flexslider(flexOptions);
+                        }
+                    }
+                });
+                
+                // For Nivo Slider
+                $('.nivoSlider').each(function() {
+                    var $slider = $(this);
+                    if (!$slider.hasClass('nivo-initialized')) {
+                        if (typeof $slider.nivoSlider === 'function') {
+                            $slider.addClass('nivo-initialized');
+                            var nivoOptions = $slider.data('nivo-options') || {};
+                            $slider.nivoSlider(nivoOptions);
+                        }
+                    }
+                });
+                
+                // For Coin Slider
+                $('.coin-slider').each(function() {
+                    var $slider = $(this);
+                    if (!$slider.hasClass('coin-initialized')) {
+                        if (typeof $slider.coinslider === 'function') {
+                            $slider.addClass('coin-initialized');
+                            var coinOptions = $slider.data('coin-options') || {};
+                            $slider.coinslider(coinOptions);
+                        }
+                    }
+                });
+            }, 300);
+        }
+    });
+    </script>
+    <?php
+}
+add_action( 'wp_footer', 'u_seisbarra8_init_metaslider_js', 999 );
+
 
 //* Quick Trick but does the job > Add Bootstrap4 Form Styling To WooCommerce Checkout Fields
 //* https://millionclues.com/wordpress-tips/bootstrap4-form-styling-woocommerce-fields/

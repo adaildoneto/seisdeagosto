@@ -126,6 +126,10 @@ function u_correio68_register_custom_blocks() {
                 'type' => 'string',
                 'default' => '0',
             ),
+            'layoutType' => array(
+                'type' => 'string',
+                'default' => 'default',
+            ),
         ),
     ) );
 
@@ -503,10 +507,12 @@ add_action( 'u_correio68_fx_daily_event', 'u_correio68_fx_cron_refresh' );
  */
 function u_correio68_render_destaques_home( $attributes ) {
     $category_id = isset( $attributes['categoryId'] ) ? intval( $attributes['categoryId'] ) : 0;
+    $layout_type = isset( $attributes['layoutType'] ) ? $attributes['layoutType'] : 'default';
+    $posts_count = ( $layout_type === 'single' ) ? 1 : 3;
     
     $args_all = array(
         'post_type'      => 'post',
-        'posts_per_page' => 3,
+        'posts_per_page' => $posts_count,
         'order'          => 'DESC',
         'orderby'        => 'date',
         'ignore_sticky_posts' => true,
@@ -523,10 +529,14 @@ function u_correio68_render_destaques_home( $attributes ) {
         $posts = $query_all->posts;
         $post_big = isset($posts[0]) ? $posts[0] : null;
         $posts_small = array_slice($posts, 1, 2);
+        
+        // Layout class based on type
+        $wrapper_class = ( $layout_type === 'single' ) ? 'destaques-home-wrapper-single' : 'destaques-home-wrapper';
+        $col_class = ( $layout_type === 'single' ) ? 'col-12' : 'col-md-8';
         ?>
-        <div class="row destaques-home-wrapper d-none d-md-flex">
+        <div class="row <?php echo esc_attr($wrapper_class); ?> d-none d-md-flex">
                     <!-- Big Post -->
-                    <div class="col-md-8">
+                    <div class="<?php echo esc_attr($col_class); ?>">
                         <?php if ( $post_big ) : 
                             $post = $post_big; 
                             setup_postdata( $post ); 
@@ -563,6 +573,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                     </div>
 
                     <!-- Small Posts -->
+                    <?php if ( $layout_type !== 'single' ) : ?>
                     <div class="col-md-4">
                         <div>
                             <?php foreach ( $posts_small as $post ) : 
@@ -599,6 +610,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                             <?php endforeach; wp_reset_postdata(); ?>
                         </div>
                 </div>
+                <?php endif; ?>
         </div>
 
         <!-- Mobile Slider Version -->
@@ -1010,10 +1022,42 @@ function u_correio68_render_colunista_item( $attributes ) {
     $imageUrl = isset($attributes['imageUrl']) ? $attributes['imageUrl'] : '';
     $categoryId = isset($attributes['categoryId']) ? intval($attributes['categoryId']) : 0;
 
+    $postUrl = '';
+    $postTitle = '';
+    
+    if ( $categoryId ) {
+        $args = [
+            'posts_per_page' => 1,
+            'cat'            => $categoryId,
+            'order'          => 'DESC',
+            'post__not_in'   => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
+        ];
+        $query = new WP_Query($args);
+
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
+                $postUrl = get_permalink();
+                $postTitle = get_the_title();
+            }
+            wp_reset_postdata();
+        }
+    }
+
     ob_start();
     ?>
     <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-3">
+        <?php if ( $postUrl ) : ?>
+            <a href="<?php echo esc_url( $postUrl ); ?>" class="colunista-card-link">
+        <?php endif; ?>
         <div class="our-team colunista-card">
+            <?php if ( $postTitle ) : ?>
+                <div class="colunista-bubble">
+                    <p><?php echo esc_html( $postTitle ); ?></p>
+                </div>
+            <?php endif; ?>
+            
             <div class="picture">
                 <?php if ( $imageUrl ) : ?>
                     <img class="img-fluid" src="<?php echo esc_url( $imageUrl ); ?>" alt="<?php echo esc_attr( $columnTitle ); ?>">
@@ -1025,31 +1069,10 @@ function u_correio68_render_colunista_item( $attributes ) {
                 <h5 class="name"><?php echo esc_html( $columnTitle ); ?></h5>
                 <span class="small"><?php echo esc_html( 'por ' . $name ); ?></span>
             </div>
-
-            <?php
-            if ( $categoryId ) {
-                $args = [
-                    'posts_per_page' => 1,
-                    'cat'            => $categoryId,
-                    'order'          => 'DESC',
-                    'post__not_in'   => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
-                ];
-                $query = new WP_Query($args);
-
-                if ($query->have_posts()) :
-                    while ($query->have_posts()) : $query->the_post();
-                        if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
-                        ?>
-                        <a href="<?php the_permalink(); ?>">
-                            <p><?php the_title(); ?></p>
-                        </a>
-                        <?php
-                    endwhile;
-                    wp_reset_postdata();
-                endif;
-            }
-            ?>
         </div>
+        <?php if ( $postUrl ) : ?>
+            </a>
+        <?php endif; ?>
     </div>
     <?php
     return ob_get_clean();
