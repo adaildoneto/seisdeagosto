@@ -6,22 +6,23 @@ Tema WordPress personalizado criado por Adaildo Neto (adaildo.neto@gmail.com).
 - Blocos Gutenberg dinâmicos focados em notícias e destaques.
 - Construtor de páginas de Arquivo/Busca com conteúdo em blocos (seleção via Customizer).
 - Estilos baseados em variáveis de tema e painel de tipografia unificada.
+- Deduplicação de posts: blocos evitam repetir matérias já exibidas na mesma página (PG_Helper).
 
 ## Blocos Gutenberg
 - **Destaques Home (1 Grande + 2 Pequenos)**: hero com um post grande e dois menores; aceita filtro por categoria.
-- **Grid de Notícias**: grade de cards com imagem e título; opções de categoria, quantidade, offset, colunas e tipografia. Suporta **paginação opcional**.
+- **Grid de Notícias**: grade de cards com imagem e título; opções de categoria, quantidade, offset, colunas e tipografia. Suporta **paginação opcional** e respeita deduplicação entre blocos.
 - **Destaque Categoria (1 Grande + 3 Lista)**: primeiro post com imagem + lista textual; com tipografia configurável.
 - **Destaque Misto (2 Grandes + Lista + 1 Coluna)**: dois destaques principais e lista de itens; respeita a categoria selecionada.
 - **Grid de Colunistas / Item de Colunista**: grupo de colunistas; cada item mostra nome, título e o último post da categoria definida.
 - **Top Mais Lidas (Top N)**: lista ordenada por views (meta) com fallback por comentários.
 - **Clima (Open‑Meteo)**: exibe clima atual por cidade ou coordenadas; cache curta para performance.
-- **Monitor de Câmbio**: taxas BRL vs USD/BOB/PEN com spread; mostra compra e venda.
+- **Monitor de Câmbio**: taxas BRL vs USD/BOB/PEN com spread; mostra compra e venda; setas ocultas e apenas dots.
 - **Blocos metadata (theme/blocks)**: destaque-grande, destaque-pequeno, lista-noticias.
 
 ## Customizer (inc/customizer.php)
 - **Cores**: primária, badge, fundo de destaques, fundo colunistas, header, footer.
 - **Tipografia**: tamanhos e peso dos títulos (`.TituloGrande`, `.TituloGrande2`, `.title-post`).
-- **Layout**: altura imagem destacada, espaçamento entre cards.
+- **Layout**: altura imagem destacada, espaçamento entre cards, hr/separator minimalista.
 - **Toolbar de leitura (single)**: botões A-/A/A+ seguem variáveis de cor do tema.
 - **Modelos de Arquivo**: escolha páginas (Page) para renderizar o conteúdo de Categorias, Tags e Busca com blocos.
 - **Live Preview**: atualiza estilos em tempo real (js/customizer-preview.js).
@@ -54,6 +55,7 @@ Tema WordPress personalizado criado por Adaildo Neto (adaildo.neto@gmail.com).
 ## Notas de Desenvolvimento
 - Text Domain usado no tema: `u_correio68`.
 - Baseado em Bootstrap e arquivos do Starter Theme (ST2/UnderStrap).
+- Namespaces dos blocos: `seideagosto/*` (principal) com compatibilidade de renderização para `correio68/*`.
 
 ## Autor
 - Nome: Adaildo Neto
