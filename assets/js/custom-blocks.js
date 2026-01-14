@@ -486,7 +486,10 @@
         icon: 'layout',
         category: 'layout',
         attributes: Object.assign({
-            categoryId: { type: 'string', default: '0' }
+            categoryId: { type: 'string', default: '0' },
+            showList: { type: 'boolean', default: true },
+            showListThumbs: { type: 'boolean', default: true },
+            showBadges: { type: 'boolean', default: true }
         }, getTypographyAttributes('#FFFFFF')),
         edit: function(props) {
             var attributes = props.attributes;
@@ -508,7 +511,24 @@
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
                         })
                     ),
-                    TypographyPanel(props, '#FFFFFF')
+                    TypographyPanel(props, '#FFFFFF'),
+                    el(PanelBody, { title: 'Lista e Aparência', initialOpen: false },
+                        el(wp.components.ToggleControl, {
+                            label: 'Mostrar lista de matérias',
+                            checked: attributes.showList,
+                            onChange: function(val){ setAttributes({ showList: !!val }); }
+                        }),
+                        el(wp.components.ToggleControl, {
+                            label: 'Mostrar fotos na lista',
+                            checked: attributes.showListThumbs,
+                            onChange: function(val){ setAttributes({ showListThumbs: !!val }); }
+                        }),
+                        el(wp.components.ToggleControl, {
+                            label: 'Mostrar badges (categorias)',
+                            checked: attributes.showBadges,
+                            onChange: function(val){ setAttributes({ showBadges: !!val }); }
+                        })
+                    )
                 ),
                 el('div', {
                     style: {
@@ -1094,5 +1114,215 @@
     } catch (e) {
         // Filter not available, skip
     }
+
+    // Image Slider Block
+    registerBlockType('seideagosto/image-slider', {
+        title: 'Galeria em Slider (Slick)',
+        icon: 'images-alt2',
+        category: 'media',
+        attributes: {
+            images: { type: 'array', default: [] },
+            speed: { type: 'number', default: 3000 },
+            autoplaySpeed: { type: 'number', default: 5000 },
+            vertical: { type: 'boolean', default: false },
+            rtl: { type: 'boolean', default: false },
+            fade: { type: 'boolean', default: false },
+            autoplay: { type: 'boolean', default: true },
+            pauseOnHover: { type: 'boolean', default: true },
+            slidesToShow: { type: 'number', default: 1 },
+            slidesToScroll: { type: 'number', default: 1 }
+        },
+        edit: function(props) {
+            var attributes = props.attributes;
+            var setAttributes = props.setAttributes;
+            var images = attributes.images || [];
+            
+            return el(
+                'div',
+                {},
+                el(
+                    InspectorControls,
+                    {},
+                    el(PanelBody, { title: 'Configurações do Slider', initialOpen: true },
+                        el(RangeControl, {
+                            label: 'Velocidade de Transição (ms)',
+                            value: attributes.speed,
+                            onChange: function(val) { setAttributes({ speed: val }); },
+                            min: 300,
+                            max: 5000,
+                            step: 100
+                        }),
+                        el(RangeControl, {
+                            label: 'Velocidade do Autoplay (ms)',
+                            value: attributes.autoplaySpeed,
+                            onChange: function(val) { setAttributes({ autoplaySpeed: val }); },
+                            min: 1000,
+                            max: 10000,
+                            step: 500
+                        }),
+                        el(ToggleControl, {
+                            label: 'Autoplay',
+                            checked: attributes.autoplay,
+                            onChange: function(val) { setAttributes({ autoplay: val }); }
+                        }),
+                        el(ToggleControl, {
+                            label: 'Pausar ao passar o mouse',
+                            checked: attributes.pauseOnHover,
+                            onChange: function(val) { setAttributes({ pauseOnHover: val }); }
+                        }),
+                        el(RangeControl, {
+                            label: 'Slides visíveis',
+                            value: attributes.slidesToShow,
+                            onChange: function(val) { setAttributes({ slidesToShow: val }); },
+                            min: 1,
+                            max: 5
+                        }),
+                        el(RangeControl, {
+                            label: 'Slides a rolar',
+                            value: attributes.slidesToScroll,
+                            onChange: function(val) { setAttributes({ slidesToScroll: val }); },
+                            min: 1,
+                            max: 5
+                        })
+                    ),
+                    el(PanelBody, { title: 'Efeitos de Animação', initialOpen: false },
+                        el(ToggleControl, {
+                            label: 'Direção Vertical',
+                            checked: attributes.vertical,
+                            onChange: function(val) { setAttributes({ vertical: val }); }
+                        }),
+                        el(ToggleControl, {
+                            label: 'Direita para Esquerda (RTL)',
+                            checked: attributes.rtl,
+                            onChange: function(val) { setAttributes({ rtl: val }); }
+                        }),
+                        el(ToggleControl, {
+                            label: 'Efeito Fade',
+                            checked: attributes.fade,
+                            onChange: function(val) { 
+                                if (val) {
+                                    setAttributes({ 
+                                        fade: val,
+                                        slidesToShow: 1,
+                                        slidesToScroll: 1
+                                    }); 
+                                } else {
+                                    setAttributes({ fade: val }); 
+                                }
+                            },
+                            help: 'Ativa fade, força 1 slide visível'
+                        })
+                    ),
+                    el(PanelBody, { title: 'Imagens', initialOpen: true },
+                        el(
+                            MediaUpload,
+                            {
+                                onSelect: function(media) {
+                                    var newImages = media.map(function(img) {
+                                        return {
+                                            id: img.id,
+                                            url: img.url,
+                                            alt: img.alt || '',
+                                            link: ''
+                                        };
+                                    });
+                                    setAttributes({ images: newImages });
+                                },
+                                allowedTypes: ['image'],
+                                multiple: true,
+                                gallery: true,
+                                value: images.map(function(img) { return img.id; }),
+                                render: function(obj) {
+                                    return el(
+                                        Button,
+                                        { 
+                                            onClick: obj.open,
+                                            variant: 'primary',
+                                            style: { marginBottom: '10px', width: '100%' }
+                                        },
+                                        images.length > 0 ? '➕ Editar Imagens (' + images.length + ')' : '➕ Adicionar Imagens'
+                                    );
+                                }
+                            }
+                        ),
+                        images.length > 0 && el(
+                            'div',
+                            { style: { display: 'grid', gridTemplateColumns: '1fr', gap: '10px', marginTop: '10px' } },
+                            images.map(function(image, index) {
+                                return el(
+                                    'div',
+                                    { key: index, style: { position: 'relative', border: '1px solid #ddd', padding: '8px', borderRadius: '4px', background: '#fff' } },
+                                    el('img', { 
+                                        src: image.url, 
+                                        alt: image.alt,
+                                        style: { width: '100%', height: 'auto', display: 'block', marginBottom: '8px', borderRadius: '2px' }
+                                    }),
+                                    el(TextControl, {
+                                        label: 'Link (opcional)',
+                                        value: image.link || '',
+                                        onChange: function(val) {
+                                            var newImages = images.slice();
+                                            newImages[index].link = val;
+                                            setAttributes({ images: newImages });
+                                        },
+                                        placeholder: 'https://...'
+                                    }),
+                                    el(Button, {
+                                        onClick: function() {
+                                            var newImages = images.filter(function(img, i) { return i !== index; });
+                                            setAttributes({ images: newImages });
+                                        },
+                                        variant: 'secondary',
+                                        isDestructive: true,
+                                        style: { marginTop: '5px', width: '100%', fontSize: '11px' }
+                                    }, '🗑️ Remover')
+                                );
+                            })
+                        ),
+                        images.length === 0 && el('div', { 
+                            style: { 
+                                fontSize: '12px', 
+                                color: '#999', 
+                                marginTop: '8px',
+                                fontStyle: 'italic',
+                                textAlign: 'center',
+                                padding: '8px'
+                            } 
+                        }, 'Nenhuma imagem adicionada')
+                    )
+                ),
+                el(
+                    'div',
+                    { 
+                        className: 'image-slider-editor', 
+                        style: { 
+                            border: '2px dashed #6c757d',
+                            borderRadius: '4px',
+                            padding: '12px',
+                            background: '#f8f9fa',
+                            color: '#444',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                        } 
+                    },
+                    el('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '🎞️ Galeria em Slider (Slick)'),
+                    images.length > 0 ? el('div', { style: { fontSize: '12px', color: '#555' } }, 
+                        images.length + ' imagem' + (images.length !== 1 ? 'ns' : '') + ' · ' +
+                        'Autoplay: ' + (attributes.autoplay ? 'Sim' : 'Não') + ' · ' +
+                        'Velocidade: ' + attributes.autoplaySpeed + 'ms'
+                    ) : el('div', { 
+                        style: { 
+                            fontSize: '11px', 
+                            color: '#999', 
+                            marginTop: '8px',
+                            fontStyle: 'italic'
+                        } 
+                    }, '(Configure as imagens no painel lateral →)')
+                )
+            );
+        },
+        save: function() {
+            return null;
+        }
+    });
 
 })(window.wp);

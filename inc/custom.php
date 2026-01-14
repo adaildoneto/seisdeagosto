@@ -466,51 +466,200 @@ function u_seisbarra8_process_metaslider_in_blocks( $block_content, $block ) {
 }
 add_filter( 'render_block', 'u_seisbarra8_process_metaslider_in_blocks', 10, 2 );
 
+//* Ensure MetaSlider shortcodes are processed in classic content and assets enqueued
+function u_seisbarra8_process_metaslider_in_content( $content ) {
+	if ( ! empty( $content ) && function_exists('has_shortcode') && has_shortcode( $content, 'metaslider' ) ) {
+		// Register assets if plugin provides helpers
+		if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
+			metaslider_register_public_styles();
+			metaslider_register_public_scripts();
+		}
+		// Attempt to enqueue common MetaSlider handles if registered
+		$possible_script_handles = array( 'metaslider-public', 'metaslider-flex', 'metaslider-nivo', 'metaslider-responsiveslides', 'metaslider-coin' );
+		foreach ( $possible_script_handles as $h ) {
+			if ( wp_script_is( $h, 'registered' ) ) {
+				wp_enqueue_script( $h );
+			}
+		}
+		$possible_style_handles = array( 'metaslider-public', 'metaslider-pro-public', 'metaslider-flex', 'metaslider-nivo', 'metaslider-responsiveslides' );
+		foreach ( $possible_style_handles as $h ) {
+			if ( wp_style_is( $h, 'registered' ) ) {
+				wp_enqueue_style( $h );
+			}
+		}
+		// Render the shortcode now
+		return do_shortcode( $content );
+	}
+	return $content;
+}
+add_filter( 'the_content', 'u_seisbarra8_process_metaslider_in_content', 9 );
+
 //* Initialize MetaSlider JavaScript after page load
 function u_seisbarra8_init_metaslider_js() {
     ?>
     <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        // Force MetaSlider initialization
-        if (typeof metaslider_init !== 'undefined') {
-            setTimeout(function() {
-                $('.metaslider').each(function() {
-                    var $slider = $(this);
-                    if (!$slider.hasClass('flexslider-initialized')) {
-                        if (typeof $slider.flexslider === 'function') {
-                            $slider.addClass('flexslider-initialized');
-                            var flexOptions = $slider.data('flexslider-options') || {};
-                            $slider.flexslider(flexOptions);
-                        }
-                    }
-                });
+    (function() {
+        var u_seisbarra8_init_called = false;
+        
+        function initMetaSliders() {
+            // Prevent duplicate execution
+            if (u_seisbarra8_init_called) {
+                return;
+            }
+            u_seisbarra8_init_called = true;
+            
+            if (typeof jQuery === 'undefined') return;
+            var $ = jQuery;
+            var sliders = $('.metaslider');
+            var sliderCount = sliders.length;
+            
+            if (sliderCount === 0) {
+                console.log('[MetaSlider] No sliders found');
+                return;
+            }
+            
+            console.log('[MetaSlider] Found ' + sliderCount + ' slider(s), initializing sequentially...');
+            
+            // Initialize each slider with staggered delay to prevent conflicts
+            sliders.each(function(index) {
+                var $slider = $(this);
                 
-                // For Nivo Slider
-                $('.nivoSlider').each(function() {
-                    var $slider = $(this);
-                    if (!$slider.hasClass('nivo-initialized')) {
-                        if (typeof $slider.nivoSlider === 'function') {
-                            $slider.addClass('nivo-initialized');
+                // Skip if already marked as processed
+                if ($slider.data('u-seisbarra8-slider-init')) {
+                    return;
+                }
+                
+                var sliderId = $slider.attr('id');
+                
+                // Generate unique ID if missing
+                if (!sliderId || sliderId.trim() === '') {
+                    sliderId = 'metaslider-' + Math.random().toString(36).substr(2, 9);
+                    $slider.attr('id', sliderId);
+                } else {
+                    // Check if ID is already used elsewhere
+                    var idCount = $('[id="' + sliderId + '"]').length;
+                    if (idCount > 1) {
+                        sliderId = sliderId + '-' + index;
+                        $slider.attr('id', sliderId);
+                    }
+                }
+                
+                // Mark as being processed
+                $slider.data('u-seisbarra8-slider-init', true);
+                
+                // Stagger initialization with proper delay
+                var delay = index * 400;
+                
+                setTimeout(function() {
+                    try {
+                        if (typeof $slider.flexslider === 'function') {
+                            var flexOptions = $slider.data('flexslider-options') || {};
+                            
+                            // Add callback to fix accessibility issues with cloned slides
+                            var originalStart = flexOptions.start || function() {};
+                            flexOptions.start = function(slider) {
+                                originalStart(slider);
+                                // Remove tabindex from cloned slide links to prevent focus issues
+                                $slider.find('.clone a, .clone button, .clone input').attr('tabindex', '-1');
+                            };
+                            
+                            var originalAfter = flexOptions.after || function() {};
+                            flexOptions.after = function(slider) {
+                                originalAfter(slider);
+                                // Ensure cloned slides remain unfocusable
+                                $slider.find('.clone a, .clone button, .clone input').attr('tabindex', '-1');
+                            };
+                            
+                            $slider.addClass('flexslider-initialized');
+                            $slider.flexslider(flexOptions);
+                            
+                            // Initial cleanup of cloned elements
+                            setTimeout(function() {
+                                $slider.find('.clone a, .clone button, .clone input').attr('tabindex', '-1');
+                            }, 100);
+                            
+                            console.log('[MetaSlider] ✓ FlexSlider initialized for ' + sliderId);
+                        } else if (typeof metaslider_init !== 'undefined') {
+                            $slider.addClass('flexslider-initialized');
+                            metaslider_init($slider[0]);
+                            
+                            // Fix accessibility for cloned slides after init
+                            setTimeout(function() {
+                                $slider.find('.clone a, .clone button, .clone input').attr('tabindex', '-1');
+                            }, 100);
+                            
+                            console.log('[MetaSlider] ✓ Plugin init fallback for ' + sliderId);
+                        } else {
+                            console.warn('[MetaSlider] No init method available for ' + sliderId);
+                        }
+                    } catch(e) {
+                        console.error('[MetaSlider] Error initializing ' + sliderId + ':', e.message);
+                    }
+                }, delay);
+            });
+            
+            // Nivo Slider
+            $('.nivoSlider').each(function(index) {
+                var $slider = $(this);
+                if ($slider.data('u-seisbarra8-slider-init')) {
+                    return;
+                }
+                if (!$slider.hasClass('nivo-initialized') && typeof $slider.nivoSlider === 'function') {
+                    $slider.data('u-seisbarra8-slider-init', true);
+                    var delay = sliderCount * 300 + index * 300;
+                    setTimeout(function() {
+                        $slider.addClass('nivo-initialized');
+                        try {
                             var nivoOptions = $slider.data('nivo-options') || {};
                             $slider.nivoSlider(nivoOptions);
+                            console.log('[NivoSlider] ✓ Initialized');
+                        } catch(e) {
+                            console.error('[NivoSlider] Error:', e.message);
                         }
-                    }
-                });
-                
-                // For Coin Slider
-                $('.coin-slider').each(function() {
-                    var $slider = $(this);
-                    if (!$slider.hasClass('coin-initialized')) {
-                        if (typeof $slider.coinslider === 'function') {
-                            $slider.addClass('coin-initialized');
+                    }, delay);
+                }
+            });
+            
+            // Coin Slider
+            $('.coin-slider').each(function(index) {
+                var $slider = $(this);
+                if ($slider.data('u-seisbarra8-slider-init')) {
+                    return;
+                }
+                if (!$slider.hasClass('coin-initialized') && typeof $slider.coinslider === 'function') {
+                    $slider.data('u-seisbarra8-slider-init', true);
+                    var delay = (sliderCount + $('.nivoSlider').length) * 300 + index * 300;
+                    setTimeout(function() {
+                        $slider.addClass('coin-initialized');
+                        try {
                             var coinOptions = $slider.data('coin-options') || {};
                             $slider.coinslider(coinOptions);
+                            console.log('[CoinSlider] ✓ Initialized');
+                        } catch(e) {
+                            console.error('[CoinSlider] Error:', e.message);
                         }
-                    }
-                });
-            }, 300);
+                    }, delay);
+                }
+            });
         }
-    });
+        
+        // Try on DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(initMetaSliders, 100);
+            });
+        } else {
+            // DOM already loaded
+            setTimeout(initMetaSliders, 100);
+        }
+        
+        // Also hook jQuery ready but with guard flag
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).ready(function() {
+                setTimeout(initMetaSliders, 100);
+            });
+        }
+    })();
     </script>
     <?php
 }

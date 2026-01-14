@@ -208,6 +208,52 @@ endif; // u_seisbarra8_setup
 
 add_action( 'after_setup_theme', 'u_seisbarra8_setup' );
 
+/**
+ * Ensure jQuery (and jQuery Migrate when available) load early for plugin compatibility (e.g., MetaSlider).
+ * Loads with very low priority so other enqueues can safely depend on it.
+ */
+function u_seisbarra8_ensure_jquery_first() {
+    // Enqueue core jQuery (do not replace with bundled files)
+    wp_enqueue_script( 'jquery' );
+    // Ensure jQuery loads in header group to satisfy plugins expecting early availability
+    if ( wp_script_is( 'jquery', 'registered' ) ) {
+        wp_script_add_data( 'jquery', 'group', 1 );
+    }
+    // Provide $ alias for legacy scripts that expect global $
+    wp_add_inline_script( 'jquery', 'window.$ = window.$ || window.jQuery;', 'after' );
+    // Enqueue jQuery Migrate if registered by WP (helps older plugins)
+    if ( wp_script_is( 'jquery-migrate', 'registered' ) ) {
+        wp_enqueue_script( 'jquery-migrate' );
+        wp_script_add_data( 'jquery-migrate', 'group', 1 );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'u_seisbarra8_ensure_jquery_first', 0 );
+
+/**
+ * MetaSlider/JS validation helper: when logged-in admin opens ?debug=ms,
+ * logs script queue and common MetaSlider markers in the browser console.
+ */
+function u_seisbarra8_debug_metaslider_footer() {
+    if ( empty( $_GET['debug'] ) || $_GET['debug'] !== 'ms' ) return;
+    $wp_scripts = wp_scripts();
+    $queue      = is_array( $wp_scripts->queue ) ? $wp_scripts->queue : array();
+    $handles    = array_values( $queue );
+    $interesting = array();
+    foreach ( $handles as $h ) {
+        if ( preg_match( '/jquery|migrate|meta|slider|flex|nivo|slick/i', $h ) ) {
+            $interesting[] = $h;
+        }
+    }
+    $inline = "(function(){try{console.group('u_seisbarra8: MetaSlider Debug');";
+    $inline .= "console.log('jQuery present:', !!window.jQuery, 'migrate:', !!(window.jQuery && window.jQuery.migrateWarnings));";
+    $inline .= "console.log('Script queue (subset):', " . wp_json_encode( $interesting ) . ");";
+    $inline .= "document.addEventListener('DOMContentLoaded', function(){var els={metaslider:document.querySelectorAll('.metaslider'),flex:document.querySelectorAll('.flexslider'),slides:document.querySelectorAll('.metaslider .slides, .flexslider .slides')};console.log('DOM markers:',{metaslider:els.metaslider.length,flex:els.flex.length,slides:els.slides.length});if(window.jQuery){console.log('jQuery.fn.flexslider exists:', !!jQuery.fn.flexslider);}});";
+    $inline .= "console.groupEnd();}catch(e){console.error('MetaSlider Debug error:', e);}})();";
+    // Attach after jQuery to reduce risk of syntax/ordering issues
+    wp_add_inline_script( 'jquery', $inline, 'after' );
+}
+add_action( 'wp_enqueue_scripts', 'u_seisbarra8_debug_metaslider_footer', 11 );
+
 
 if ( ! function_exists( 'u_seisbarra8_init' ) ) :
 
@@ -890,29 +936,24 @@ function u68_rest_error_logger( $response, $server, $request ) {
 add_filter( 'rest_post_dispatch', 'u68_rest_error_logger', 10, 3 );
 
 // DEBUG TEMPORÁRIO - Remover após teste
-add_action('wp_footer', function() {
-    if (current_user_can('manage_options') && is_front_page()) {
-        echo "\n<!-- Currency Monitor Debug -->\n";
-        echo "<script>console.log('[Currency Debug] Verificando bloco de câmbio...');</script>\n";
-        
-        // Verifica se o bloco está registrado
-        $registry = WP_Block_Type_Registry::get_instance();
-        $registered = $registry->is_registered('seideagosto/currency-monitor') ? 'SIM' : 'NÃO';
-        echo "<script>console.log('[Currency Debug] Bloco registrado: " . $registered . "');</script>\n";
-        
-        // Testa API diretamente
-        $api_url = 'https://open.er-api.com/v6/latest/BRL';
-        $res = wp_remote_get($api_url, array('timeout' => 5));
-        if (!is_wp_error($res)) {
-            $body = wp_remote_retrieve_body($res);
-            $json = json_decode($body, true);
-            if (isset($json['rates']['USD'])) {
-                echo "<script>console.log('[Currency Debug] API funcionando - USD: " . $json['rates']['USD'] . "');</script>\n";
-            } else {
-                echo "<script>console.error('[Currency Debug] API retornou dados incompletos');</script>\n";
-            }
+add_action('wp_enqueue_scripts', function() {
+    if ( empty( $_GET['debug'] ) || $_GET['debug'] !== 'ms' ) return;
+    $registry = WP_Block_Type_Registry::get_instance();
+    $registered = $registry->is_registered('seideagosto/currency-monitor') ? 'SIM' : 'NAO';
+    $api_msg = '';
+    $api_url = 'https://open.er-api.com/v6/latest/BRL';
+    $res = wp_remote_get($api_url, array('timeout' => 5));
+    if (!is_wp_error($res)) {
+        $body = wp_remote_retrieve_body($res);
+        $json = json_decode($body, true);
+        if (isset($json['rates']['USD'])) {
+            $api_msg = 'API funcionando - USD: ' . esc_js( $json['rates']['USD'] );
         } else {
-            echo "<script>console.error('[Currency Debug] Erro ao acessar API: " . esc_js($res->get_error_message()) . "');</script>\n";
+            $api_msg = 'API retornou dados incompletos';
         }
+    } else {
+        $api_msg = 'Erro ao acessar API: ' . esc_js( $res->get_error_message() );
     }
-}, 999);
+    $inline = "console.log('[Currency Debug] Verificando bloco de cambio...');console.log('[Currency Debug] Bloco registrado: " . esc_js( $registered ) . "');console.log('[Currency Debug] " . $api_msg . "');";
+    wp_add_inline_script('jquery', $inline, 'after');
+}, 12);

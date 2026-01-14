@@ -34,6 +34,16 @@ hr,
   flex: 0 0 75%;
   max-width: 75%;
 }
+.destaque-misto-wrapper .list-content a {
+  text-decoration: none;
+}
+.destaque-misto-wrapper .list-content a:hover {
+  text-decoration: none;
+}
+.destaque-misto-wrapper .list-item:not(:has(.list-thumb)) .list-content {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
 img.wp-post-image,
 article img,
 figure,
@@ -178,6 +188,10 @@ ol li::before {
   color: inherit;
 }
 
+.destaque-misto-wrapper .TituloGrande a:hover {
+  text-decoration: none;
+}
+
 .destaquebg {
   background: var(--u68-highlight-bg, #efefef);
   margin: 0px; }
@@ -229,19 +243,12 @@ ol li::before {
   border-bottom: 12px var(--u68-badge-color, #ec940d) solid; }
 
 .destaque-misto-wrapper .gradiente {
-  background: -webkit-linear-gradient(0deg, 
-    rgba(0, 0, 0, 0.95) 0%, 
-    rgba(0, 0, 0, 0.8) 15%, 
-    rgba(0, 0, 0, 0.5) 40%, 
-    rgba(0, 0, 0, 0.2) 70%, 
-    rgba(0, 0, 0, 0) 100%);
-  background: linear-gradient(0deg, 
-    rgba(0, 0, 0, 0.95) 0%, 
-    rgba(0, 0, 0, 0.8) 15%, 
-    rgba(0, 0, 0, 0.5) 40%, 
-    rgba(0, 0, 0, 0.2) 70%, 
-    rgba(0, 0, 0, 0) 100%);
-  border-bottom: none; }
+  background: -webkit-linear-gradient(0deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0));
+  background: -webkit-gradient(linear, left bottom, left top, from(rgba(0, 0, 0, 0.9)), color-stop(30%, rgba(0, 0, 0, 0.6)), to(rgba(0, 0, 0, 0)));
+  background: -webkit-linear-gradient(bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0));
+  background: -o-linear-gradient(bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0));
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0));
+  border-bottom: 12px var(--u68-badge-color, #ec940d) solid; }
 
 /* Modern Header Enhancements */
 .site-header {
@@ -1362,6 +1369,37 @@ body {
 .destaque-misto-wrapper .card {
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
+}
+
+/* Destaque Misto: card link inteiro clic\u00e1vel */
+.destaque-misto-wrapper .dm-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+.destaque-misto-wrapper .dm-card-link:hover .list-item {
+  opacity: 0.9;
+}
+.destaque-misto-wrapper .dm-card-link:hover h5 {
+  color: var(--u68-primary-color, #0a4579) !important;
+}
+
+/* Destaque Misto: badge posicionada no topo esquerdo */
+.destaque-misto-wrapper .dm-badge-overlay {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 10;
+}
+
+/* Destaque Misto: garantir que gradiente apareça sobre a imagem */
+.destaque-misto-wrapper .card-img-overlay {
+  z-index: 5;
+}
+.destaque-misto-wrapper .imagem-destaque-misto {
+  z-index: 1;
+  position: relative;
 }
 
 /* Apply Customizer highlight color only to image cards */

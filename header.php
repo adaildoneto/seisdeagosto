@@ -184,16 +184,4 @@
                             </nav>
                         </div>
                     </header>
-                    <?php if ( is_active_sidebar( 'banner_colunistas' ) ) : ?>
-                        <div class="main-container-wrapper">
-                            <div class="container">
-                                <div class="row">
-                                    <?php if ( is_active_sidebar( 'banner_colunistas' ) ) : ?>
-                                        <div>
-                                            <?php dynamic_sidebar( 'banner_colunistas' ); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                    

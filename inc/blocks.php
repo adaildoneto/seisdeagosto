@@ -189,6 +189,9 @@ function u_correio68_register_custom_blocks() {
         'attributes' => array_merge(
             array(
                 'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+                'showList' => array( 'type' => 'boolean', 'default' => true ),
+                'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
+                'showBadges' => array( 'type' => 'boolean', 'default' => true ),
             ),
             $typography_light
         ),
@@ -310,6 +313,9 @@ function u_correio68_register_custom_blocks() {
             'bigCount' => array( 'type' => 'number', 'default' => 1 ),
             'mediumCount' => array( 'type' => 'number', 'default' => 2 ),
             'smallCount' => array( 'type' => 'number', 'default' => 3 ),
+            'showList' => array( 'type' => 'boolean', 'default' => true ),
+            'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
+            'showBadges' => array( 'type' => 'boolean', 'default' => true ),
         ) + u_correio68_typography_attribute_schema(),
     ) );
     register_block_type( 'correio68/top-most-read', array(
@@ -367,6 +373,22 @@ function u_correio68_register_custom_blocks() {
         'attributes'      => array(
             'sidebarId' => array( 'type' => 'string', 'default' => 'right-sidebar' ),
             'title' => array( 'type' => 'string', 'default' => '' ),
+        ),
+    ) );
+    register_block_type( 'seideagosto/image-slider', array(
+        'editor_script'   => 'seideagosto-blocks',
+        'render_callback' => 'u_correio68_render_image_slider',
+        'attributes'      => array(
+            'images' => array( 'type' => 'array', 'default' => array() ),
+            'speed' => array( 'type' => 'number', 'default' => 3000 ),
+            'autoplaySpeed' => array( 'type' => 'number', 'default' => 5000 ),
+            'vertical' => array( 'type' => 'boolean', 'default' => false ),
+            'rtl' => array( 'type' => 'boolean', 'default' => false ),
+            'fade' => array( 'type' => 'boolean', 'default' => false ),
+            'autoplay' => array( 'type' => 'boolean', 'default' => true ),
+            'pauseOnHover' => array( 'type' => 'boolean', 'default' => true ),
+            'slidesToShow' => array( 'type' => 'number', 'default' => 1 ),
+            'slidesToScroll' => array( 'type' => 'number', 'default' => 1 ),
         ),
     ) );
 
@@ -792,20 +814,8 @@ function u_correio68_render_news_grid( $attributes ) {
                 ?>
                     <div class="<?php echo esc_attr($col_class); ?> mb-4" id="post-<?php the_ID(); ?>">
                         <article class="news-item" style="transition: opacity 0.2s ease;">
-                            <?php 
-                            $cor = function_exists('get_field') ? get_field( 'cor' ) : '';
-                            $icones = function_exists('get_field') ? get_field( 'icones' ) : '';
-                            $chamada = function_exists('get_field') ? get_field( 'chamada' ) : '';
-                            if ( !empty($chamada) ) : ?>
-                                <div class="mb-2">
-                                    <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
-                                        <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
-                                        <span><?php echo esc_html($chamada); ?></span>
-                                    </span>
-                                </div>
-                            <?php endif; ?>
                             
-                            <a href="<?php echo esc_url( get_permalink() ); ?>" class="d-block news-image-wrapper overflow-hidden mb-3" style="height: 180px; border-radius: 4px; border: 1px solid #e9ecef;">
+                            <a href="<?php echo esc_url( get_permalink() ); ?>" class="d-block news-image-wrapper overflow-hidden mb-3 position-relative" style="height: 180px; border-radius: 4px; border: 1px solid #e9ecef;">
                                 <?php 
                                 if ( has_post_thumbnail() ) :
                                     if ( class_exists( 'PG_Image' ) ) {
@@ -822,6 +832,17 @@ function u_correio68_render_news_grid( $attributes ) {
                                 else:
                                     echo '<div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light"><i class="fa fa-image fa-2x text-muted"></i></div>';
                                 endif;
+                                ?>
+                                <?php 
+                                $cor = function_exists('get_field') ? get_field( 'cor' ) : '';
+                                $icones = function_exists('get_field') ? get_field( 'icones' ) : '';
+                                $chamada = function_exists('get_field') ? get_field( 'chamada' ) : '';
+                                if ( !empty($chamada) ) : ?>
+                                    <span class="badge badge-light text-white badge-pill news-grid-badge" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem; position: absolute; left: 12px; top: 12px; z-index: 10;"> 
+                                        <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                        <span><?php echo esc_html($chamada); ?></span>
+                                    </span>
+                                <?php endif; ?>
                                 ?>
                             </a>
                             
@@ -926,8 +947,8 @@ function u_correio68_render_category_highlight( $attributes ) {
 
             <!-- Big Posts -->
             <?php foreach ( $big_posts as $post ) : setup_postdata( $post ); if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost(); ?>
-                <div class="primeiro mb-3" id="post-<?php echo $post->ID; ?>" style="transition: opacity 0.2s ease;">
-                    <div class="news-image-wrapper overflow-hidden mb-2" style="height: 200px; border-radius: 4px; border: 1px solid #e9ecef;">
+                <div class="primeiro mb-3 position-relative" id="post-<?php echo $post->ID; ?>" style="transition: opacity 0.2s ease;">
+                    <div class="news-image-wrapper overflow-hidden mb-2 position-relative" style="height: 200px; border-radius: 4px; border: 1px solid #e9ecef;">
                         <?php 
                         if ( class_exists( 'PG_Image' ) ) {
                             echo PG_Image::getPostImage( $post->ID, 'destaque', array(
@@ -941,6 +962,16 @@ function u_correio68_render_category_highlight( $attributes ) {
                             ) );
                         }
                         ?>
+                        <?php 
+                        $cor = function_exists('get_field') ? get_field( 'cor', $post->ID ) : '';
+                        $icones = function_exists('get_field') ? get_field( 'icones', $post->ID ) : '';
+                        $chamada = function_exists('get_field') ? get_field( 'chamada', $post->ID ) : '';
+                        if ( !empty( $chamada ) ) : ?>
+                            <span class="badge badge-light text-white badge-pill category-highlight-badge" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem; position: absolute; left: 12px; top: 12px; z-index: 10;"> 
+                                <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                <span><?php echo esc_html($chamada); ?></span>
+                            </span>
+                        <?php endif; ?>
                     </div>
                     <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="text-decoration-none">
                         <h5 class="mb-3" style="<?php echo esc_attr( $titleStyle ); ?> line-height: 1.35; font-size: 1.25rem; color: #333; font-weight: 700; "><?php echo get_the_title( $post->ID ); ?></h5>
@@ -1087,6 +1118,9 @@ function u_correio68_render_destaque_misto( $attributes ) {
 
     $typography = u_correio68_resolve_typography( $attributes, '#FFFFFF' );
     $titleStyle = $typography['style'];
+    $showList = isset( $attributes['showList'] ) ? filter_var( $attributes['showList'], FILTER_VALIDATE_BOOLEAN ) : true;
+    $showListThumbs = isset( $attributes['showListThumbs'] ) ? filter_var( $attributes['showListThumbs'], FILTER_VALIDATE_BOOLEAN ) : true;
+    $showBadges = isset( $attributes['showBadges'] ) ? filter_var( $attributes['showBadges'], FILTER_VALIDATE_BOOLEAN ) : true;
     
     // Total posts: 2 (Large) + 6 (List) = 8.
     $args = array(
@@ -1126,7 +1160,18 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                     echo get_the_post_thumbnail(get_the_ID(), 'destatquegrande', array('class' => 'imagem-destaque-misto w-100 h-100', 'style' => 'object-fit: cover;'));
                                 }
                                 ?>
-                                <div class="card-img-overlay gradiente space d-flex flex-column justify-content-end" style="background: none !important;">
+                                <div class="card-img-overlay gradiente space d-flex flex-column justify-content-end">
+                                    <?php if ( $showBadges ) :
+                                        $cor = function_exists('get_field') ? get_field( 'cor' ) : '';
+                                        $icones = function_exists('get_field') ? get_field( 'icones' ) : '';
+                                        $chamada = function_exists('get_field') ? get_field( 'chamada' ) : '';
+                                        if ( !empty($chamada) ) : ?>
+                                            <span class="badge badge-light text-white badge-pill dm-badge-overlay" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
+                                                <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                                <span><?php echo esc_html($chamada); ?></span>
+                                            </span>
+                                        <?php endif;
+                                    endif; ?>
                                     <div class="tituloD">
                                         <h3 class="TituloGrande text-shadow text-white"><a href="<?php the_permalink(); ?>" class="text-white"><?php the_title(); ?></a></h3>
                                     </div>
@@ -1140,6 +1185,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
             </div>
 
             <!-- Row 2: List (Full Width) -->
+            <?php if ( $showList ): ?>
             <div class="row">
                 <!-- List (Full Width) -->
                 <div class="col-12">
@@ -1152,8 +1198,10 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                 setup_postdata($post);
                                 ?>
                                 <div class="col-md-4 col-sm-6 mb-2">
-                                    <div class="media list-item">
-                                        <div class="list-thumb">
+                                    <a href="<?php echo esc_url( get_permalink() ); ?>" class="dm-card-link">
+                                        <div class="media list-item">
+                                            <?php if ( $showListThumbs ): ?>
+                                            <div class="list-thumb">
                                               <?php 
                                               if ( class_exists('PG_Image') ) {
                                                   echo PG_Image::getPostImage(get_the_ID(), 'thumbnail', array('class' => 'img-fluid rounded w-100 h-100', 'style' => 'object-fit: cover;'), null, null);
@@ -1162,11 +1210,26 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                               }
                                               ?>
                                         </div>
+                                        <?php endif; ?>
                                         <div class="media-body list-content">
+                                            <?php if ( $showBadges ) :
+                                                $cor = function_exists('get_field') ? get_field( 'cor' ) : '';
+                                                $icones = function_exists('get_field') ? get_field( 'icones' ) : '';
+                                                $chamada = function_exists('get_field') ? get_field( 'chamada' ) : '';
+                                                if ( !empty($chamada) ) : ?>
+                                                    <div class="mb-1">
+                                                        <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.65rem; padding: 0.2rem 0.4rem;"> 
+                                                            <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.7rem;"></ion-icon> 
+                                                            <span><?php echo esc_html($chamada); ?></span>
+                                                        </span>
+                                                    </div>
+                                                <?php endif;
+                                            endif; ?>
                                             <h5 class="mt-0" style="<?php echo esc_attr( $titleStyle ); ?>"><a href="<?php the_permalink(); ?>" class="text-dark"><?php the_title(); ?></a></h5>
                                             <small class="text-muted"><?php echo get_the_date(); ?></small>
                                         </div>
-                                    </div>
+                                        </div>
+                                    </a>
                                 </div>
                                 <?php
                              endif;
@@ -1175,6 +1238,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
         <?php
         wp_reset_postdata();
@@ -1868,3 +1932,111 @@ function u_correio68_render_currency_monitor( $attributes ) {
     <?php
     return ob_get_clean();
 }
+
+/**
+ * Render Image Slider Block (Slick.js)
+ */
+function u_correio68_render_image_slider( $attributes ) {
+    // Enqueue Slick dependencies
+    wp_enqueue_style( 'u_seisbarra8-slick' );
+    wp_enqueue_style( 'u_seisbarra8-slicktheme' );
+    wp_enqueue_script( 'u_seisbarra8-slick' );
+    
+    $images = isset( $attributes['images'] ) ? $attributes['images'] : array();
+    
+    if ( empty( $images ) ) {
+        return '<div class="alert alert-info">Adicione imagens ao slider</div>';
+    }
+    
+    // Configurações
+    $speed = isset( $attributes['speed'] ) ? absint( $attributes['speed'] ) : 3000;
+    $autoplaySpeed = isset( $attributes['autoplaySpeed'] ) ? absint( $attributes['autoplaySpeed'] ) : 5000;
+    $vertical = isset( $attributes['vertical'] ) ? filter_var( $attributes['vertical'], FILTER_VALIDATE_BOOLEAN ) : false;
+    $rtl = isset( $attributes['rtl'] ) ? filter_var( $attributes['rtl'], FILTER_VALIDATE_BOOLEAN ) : false;
+    $fade = isset( $attributes['fade'] ) ? filter_var( $attributes['fade'], FILTER_VALIDATE_BOOLEAN ) : false;
+    $autoplay = isset( $attributes['autoplay'] ) ? filter_var( $attributes['autoplay'], FILTER_VALIDATE_BOOLEAN ) : true;
+    $pauseOnHover = isset( $attributes['pauseOnHover'] ) ? filter_var( $attributes['pauseOnHover'], FILTER_VALIDATE_BOOLEAN ) : true;
+    $slidesToShow = isset( $attributes['slidesToShow'] ) ? absint( $attributes['slidesToShow'] ) : 1;
+    $slidesToScroll = isset( $attributes['slidesToScroll'] ) ? absint( $attributes['slidesToScroll'] ) : 1;
+    
+    $slider_id = 'image-slider-' . uniqid();
+    
+    ob_start();
+    ?>
+    <div class="image-slider-wrapper" style="margin: 20px 0;">
+        <div class="<?php echo esc_attr( $slider_id ); ?> image-slider-slick">
+            <?php foreach ( $images as $image ) : 
+                $image_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+                $image_url = isset( $image['url'] ) ? esc_url( $image['url'] ) : '';
+                $link_url = isset( $image['link'] ) ? esc_url( $image['link'] ) : '';
+                $alt_text = isset( $image['alt'] ) ? esc_attr( $image['alt'] ) : '';
+                
+                if ( empty( $image_url ) && $image_id > 0 ) {
+                    $image_url = wp_get_attachment_image_url( $image_id, 'full' );
+                    $alt_text = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+                }
+                
+                if ( empty( $image_url ) ) continue;
+            ?>
+                <div class="slide-item">
+                    <?php if ( ! empty( $link_url ) ) : ?>
+                        <a href="<?php echo $link_url; ?>" target="_blank" rel="noopener">
+                            <img src="<?php echo $image_url; ?>" alt="<?php echo $alt_text; ?>" class="img-fluid w-100" style="display: block; height: auto;">
+                        </a>
+                    <?php else : ?>
+                        <img src="<?php echo $image_url; ?>" alt="<?php echo $alt_text; ?>" class="img-fluid w-100" style="display: block; height: auto;">
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <script>
+    (function($){
+        $(function(){
+            var $slider = $('.<?php echo esc_js( $slider_id ); ?>');
+            if (!$slider.length || typeof $.fn.slick !== 'function') {
+                console.log('[ImageSlider] Element or Slick not available');
+                return;
+            }
+            
+            if ($slider.hasClass('slick-initialized')) {
+                console.log('[ImageSlider] Already initialized');
+                return;
+            }
+            
+            $slider.slick({
+                slidesToShow: <?php echo $slidesToShow; ?>,
+                slidesToScroll: <?php echo $slidesToScroll; ?>,
+                speed: <?php echo $speed; ?>,
+                autoplay: <?php echo $autoplay ? 'true' : 'false'; ?>,
+                autoplaySpeed: <?php echo $autoplaySpeed; ?>,
+                arrows: false,
+                dots: false,
+                infinite: true,
+                vertical: <?php echo $vertical ? 'true' : 'false'; ?>,
+                rtl: <?php echo $rtl ? 'true' : 'false'; ?>,
+                fade: <?php echo $fade ? 'true' : 'false'; ?>,
+                pauseOnHover: <?php echo $pauseOnHover ? 'true' : 'false'; ?>,
+                pauseOnFocus: true,
+                adaptiveHeight: false,
+                cssEase: 'ease-in-out',
+                responsive: [
+                    {
+                        breakpoint: 768,
+                        settings: {
+                            slidesToShow: 1,
+                            slidesToScroll: 1
+                        }
+                    }
+                ]
+            });
+            
+            console.log('[ImageSlider] ✓ Initialized: <?php echo esc_js( $slider_id ); ?>');
+        });
+    })(jQuery);
+    </script>
+    <?php
+    return ob_get_clean();
+}
+
