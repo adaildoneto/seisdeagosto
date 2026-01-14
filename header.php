@@ -9,10 +9,10 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="profile" href="http://gmpg.org/xfn/11">
-        <meta name="author" content="Correio68">
+        <meta name="author" content="6barra8">
         
        
-        <meta content="Pinegrow Web Editor" name="generator">
+    
         <?php wp_head(); ?>
        
 
@@ -54,40 +54,12 @@
                         <div itemscope itemtype="http://schema.org/WebSite" id="wrapper-navbar">
                             <a class="skip-link sr-only sr-only-focusable" href="#content"><?php _e( 'Skip to content', 'u_correio68' ); ?></a>
 
-                            <!-- Topbar: small info + socials -->
-                            <nav class="navbar navbar-dark bg-primary topbar primeiromenu py-1" aria-label="Topbar">
-                                <div class="container">
-                                    <div class="row w-100">
-                                        <div class="col-12">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                        <div class="topbar-left d-flex align-items-center">
-                                            <?php if ( is_active_sidebar( 'temperatura' ) ) : ?>
-                                                <?php dynamic_sidebar( 'temperatura' ); ?>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="topbar-right social-icons d-flex align-items-center">
-                                            <a href="#" aria-label="Facebook" class="text-white ml-2"><i class="fa fa-facebook"></i></a>
-                                            <a href="#" aria-label="Twitter" class="text-white ml-2"><i class="fa fa-twitter"></i></a>
-                                            <a href="#" aria-label="Instagram" class="text-white ml-2"><i class="fa fa-instagram"></i></a>
-                                            <a href="#" aria-label="WhatsApp" class="text-white ml-2"><i class="fa fa-whatsapp"></i></a>
-                                            <a href="#" aria-label="Telegram" class="text-white ml-2"><i class="fa fa-telegram"></i></a>
-                                            <a href="#" aria-label="YouTube" class="text-white ml-2"><i class="fa fa-youtube"></i></a>
-                                        </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </nav>
-
-                            <!-- Main navbar: brand + sidebar toggle + search -->
+                            <!-- Main navbar: brand + search -->
                             <nav id="headnev" class="bg-primary headnev navbar navbar-dark navbar-expand-lg topbar" aria-label="Main Navigation">
                                 <div class="container">
                                     <div class="row w-100">
                                         <div class="col-12">
                                             <div class="d-flex align-items-center w-100">
-                                        <button class="btn bg-primary text-white mr-3" id="sidebarCollapse" aria-label="Abrir menu lateral">
-                                            <i class="fa fa-align-justify"></i>
-                                        </button>
 
                                         <?php if ( ! has_custom_logo() ) : ?>
                                             <a rel="home" class="navbar-brand" href="<?php echo esc_url( home_url() ); ?>"><?php bloginfo( 'name' ); ?></a>
@@ -95,68 +67,30 @@
                                             <?php the_custom_logo(); ?>
                                         <?php endif; ?>
 
-                                                                                <div class="ml-auto d-flex align-items-center">
-                                                                                    <!-- Desktop search -->
-                                                                                    <div class="d-none d-lg-block">
-                                                                                        <?php get_search_form( true ); ?>
-                                                                                    </div>
-                                                                                    <!-- Mobile: search is shown below logo by default -->
+                                                                                <!-- Desktop search -->
+                                                                                <div class="ml-auto d-none d-lg-block">
+                                                                                    <?php get_search_form( true ); ?>
                                                                                 </div>
+                                                                                
+                                                                                <!-- Mobile search toggle button -->
+                                                                                <button class="btn btn-search-toggle d-lg-none ml-auto" id="searchToggleMobile" aria-label="Abrir busca">
+                                                                                    <i class="fa fa-search"></i>
+                                                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </nav>
-                                                        <!-- Mobile search wrapper -->
-                                                        <div id="mobileSearchWrapper" class="mobile-search d-block d-lg-none px-3">
-                                                                <div class="containerpy-1">
-                                                                        <?php get_search_form( true ); ?>
-                                                                </div>
-                                                        </div>
-                                                        <script>
-                                                        (function(){
-                                                            var btn = document.getElementById('sidebarCollapse');
-                                                            var sidebar = document.getElementById('sidebar');
-                                                            var headerNav = document.getElementById('headnev');
-                                                            if (btn && sidebar) {
-                                                                btn.setAttribute('aria-controls', 'sidebar');
-                                                                btn.setAttribute('aria-expanded', sidebar.classList.contains('active') ? 'false' : 'true');
-                                                                btn.addEventListener('click', function(){
-                                                                    var isActive = sidebar.classList.toggle('active');
-                                                                    // When active, sidebar is hidden (slides left). Not expanded.
-                                                                    btn.setAttribute('aria-expanded', (!isActive).toString());
-                                                                });
 
-                                                                // Sync sidebar background with header background color
-                                                                try {
-                                                                    if (headerNav) {
-                                                                        var headerBg = window.getComputedStyle(headerNav).backgroundColor;
-                                                                        if (headerBg) {
-                                                                            sidebar.style.backgroundColor = headerBg;
-                                                                        }
-                                                                    }
-                                                                } catch (e) {
-                                                                    // ignore
-                                                                }
+                            <!-- Mobile expandable search -->
+                            <div id="mobileSearchWrapper" class="mobile-search-expanded d-lg-none">
+                                <div class="container py-2">
+                                    <?php get_search_form( true ); ?>
+                                </div>
+                            </div>
 
-                                                                // Close sidebar when clicking outside
-                                                                document.addEventListener('click', function(ev){
-                                                                    if (!sidebar || sidebar.classList.contains('active')) return;
-                                                                    var target = ev.target;
-                                                                    var clickedInsideSidebar = sidebar.contains(target);
-                                                                    var clickedToggle = btn.contains(target);
-                                                                    if (!clickedInsideSidebar && !clickedToggle) {
-                                                                        sidebar.classList.add('active');
-                                                                        btn.setAttribute('aria-expanded', 'false');
-                                                                    }
-                                                                });
-                                                            }
-                                                            // Mobile search displays by default below logo; no toggle needed
-                                                        })();
-                                                        </script>
-
-                            <!-- Categories bar: horizontally scrollable on mobile -->
-                            <nav class="bg-primary navbar navbar-categorias" aria-label="Categorias">
+                            <!-- Categories bar: hidden on scroll -->
+                            <nav id="categoriesNav" class="bg-primary navbar navbar-categorias categories-nav-top" aria-label="Categorias">
                                 <div class="container">
                                     <div class="row w-100">
                                         <div class="col-12">
@@ -182,6 +116,83 @@
                                     </div>
                                 </div>
                             </nav>
+
+                            <script>
+                            (function() {
+                                // Scroll handler for categories and header with debounce
+                                var categoriesNav = document.getElementById('categoriesNav');
+                                var header = document.querySelector('.site-header');
+                                var contentWrapper = document.getElementById('content');
+                                var searchToggle = document.getElementById('searchToggleMobile');
+                                var mobileSearchWrapper = document.getElementById('mobileSearchWrapper');
+                                var scrollThreshold = 50;
+                                var ticking = false;
+                                var lastScrollTop = 0;
+                                
+                                function updateScrollState() {
+                                    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                                    
+                                    if (scrollTop > scrollThreshold) {
+                                        header.classList.add('scrolled', 'fixed-header');
+                                        categoriesNav.classList.add('hidden');
+                                        if (contentWrapper) {
+                                            contentWrapper.classList.add('header-fixed');
+                                        }
+                                        // Close mobile search when scrolling
+                                        if (mobileSearchWrapper && searchToggle) {
+                                            mobileSearchWrapper.classList.remove('active');
+                                            searchToggle.classList.remove('active');
+                                        }
+                                    } else if (scrollTop <= scrollThreshold) {
+                                        header.classList.remove('scrolled', 'fixed-header');
+                                        categoriesNav.classList.remove('hidden');
+                                        if (contentWrapper) {
+                                            contentWrapper.classList.remove('header-fixed');
+                                        }
+                                    }
+                                    ticking = false;
+                                }
+                                
+                                window.addEventListener('scroll', function() {
+                                    lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                                    if (!ticking) {
+                                        window.requestAnimationFrame(updateScrollState);
+                                        ticking = true;
+                                    }
+                                }, { passive: true });
+                                
+                                // Mobile search toggle
+                                if (searchToggle) {
+                                    searchToggle.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        mobileSearchWrapper.classList.toggle('active');
+                                        searchToggle.classList.toggle('active');
+                                    });
+                                    
+                                    // Close search when clicking outside
+                                    document.addEventListener('click', function(e) {
+                                        if (!searchToggle.contains(e.target) && !mobileSearchWrapper.contains(e.target)) {
+                                            mobileSearchWrapper.classList.remove('active');
+                                            searchToggle.classList.remove('active');
+                                        }
+                                    });
+                                    
+                                    // Close search when clicking on search input (auto-focus)
+                                    var searchInput = mobileSearchWrapper.querySelector('input[type="search"]');
+                                    if (searchInput) {
+                                        searchInput.addEventListener('blur', function() {
+                                            setTimeout(function() {
+                                                if (!document.activeElement.closest('.navbar-search')) {
+                                                    mobileSearchWrapper.classList.remove('active');
+                                                    searchToggle.classList.remove('active');
+                                                }
+                                            }, 200);
+                                        });
+                                    }
+                                }
+                            })();
+                            </script>
                         </div>
                     </header>
                     

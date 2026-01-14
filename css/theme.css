@@ -1,3 +1,19 @@
+/* Global box-sizing to prevent overflow */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
 /* Destaque Misto: larger big image on all screens */
 .imagem-destaque-misto {
   height: 360px !important;
@@ -69,7 +85,24 @@ figcaption {
   height: auto; }
 
 #page {
-  word-wrap: break-word; }
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Prevent long text from causing horizontal scroll */
+h1, h2, h3, h4, h5, h6,
+p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  h1, h2, h3, h4, h5, h6,
+  p {
+    word-break: break-word;
+    hyphens: auto;
+  }
+}
 
 .wp-block-image figcaption {
   margin-top: .5em;
@@ -112,6 +145,19 @@ figcaption {
   margin-left: 0;
   margin-right: 0; }
 
+/* Prevent Bootstrap rows from causing horizontal overflow */
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@media (max-width: 768px) {
+  .row > [class*="col-"] {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 /* Centered site content and fixed container width */
 .container {
   max-width: 1280px;
@@ -119,6 +165,13 @@ figcaption {
   margin-right: auto;
   padding-left: 15px;
   padding-right: 15px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 }
 
 /* Center core wrappers if used without .container */
@@ -214,25 +267,23 @@ ol li::before {
   height: var(--u68-featured-height, 425px);
   width: auto; }
 
-.topbar {
-  height: 80px;
-  background-color: var(--u68-primary-color, #0a4579);
-  -webkit-animation: mymove 1s;
-          animation: mymove 1s;
-  -webkit-animation-timing-function: ease-out;
-          animation-timing-function: ease-out; }
-
-#menu-topo {
-  bottom: 0px; }
+/* Destaque home mobile - larger images */
+@media (max-width: 768px) {
+  .imagem-destaque {
+    height: 450px !important;
+  }
+  
+  .destaques-home-wrapper .imagem-destaque,
+  .destaques-home-mobile-slider .imagem-destaque {
+    height: 450px !important;
+  }
+}
 
 .bg-primary {
   background-color: var(--u68-primary-color, #0a4579) !important; }
 
 .bg-orange {
   background-color: var(--u68-badge-color, #ec940d) !important; }
-
-.navbar-categorias {
-  background-color: var(--u68-primary-color, #0a4579); }
 
 .gradiente {
   background: -webkit-linear-gradient(0deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0));
@@ -253,55 +304,529 @@ ol li::before {
 /* Modern Header Enhancements */
 .site-header {
   backdrop-filter: saturate(160%) blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.primeiromenu {
+/* Inline navbar search with transitions */
+.navbar-search .form-control {
+  min-width: 220px;
+  transition: 
+    min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    font-size 0.4s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .navbar-search .form-control { 
+    min-width: 120px;
+    font-size: 0.9rem;
+  }
+}
+.navbar-search .form-control:focus {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3), inset 0 0 5px rgba(0, 0, 0, 0.1);
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.02);
+}
+
+.navbar-search .form-control:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.navbar-search .btn {
+  border: none;
+  transition: 
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  position: relative;
+}
+
+.navbar-search .btn:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-search .btn:active {
+  transform: scale(0.95) translateY(0);
+}
+
+/* Mobile search toggle button */
+.btn-search-toggle {
+  background: none !important;
+  border: none !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 1.2rem;
+  color: #fff !important;
+  transition: 
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 0.3s ease;
+  cursor: pointer;
+  display: block !important;
+}
+
+.btn-search-toggle:hover {
+  transform: scale(1.15);
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.btn-search-toggle.active {
+  color: var(--u68-badge-color, #ec940d) !important;
+}
+
+/* Ensure button shows on mobile */
+@media (max-width: 991px) {
+  .btn-search-toggle {
+    display: block !important;
+  }
+  
+  .d-lg-none {
+    display: block !important;
+  }
+}
+
+/* Hide button on desktop */
+@media (min-width: 992px) {
+  .btn-search-toggle {
+    display: none !important;
+  }
+}
+
+/* Mobile expandable search wrapper */
+.mobile-search-expanded {
+  display: none !important;
+  background-color: var(--u68-primary-color, #0a4579);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 0;
+  overflow: hidden;
+  transition: 
+    max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.4s ease;
+  position: static;
+  z-index: 1039;
+}
+
+.mobile-search-expanded.active {
+  display: block !important;
+  max-height: 100px;
+  padding: 0.75rem 0 !important;
+  animation: searchExpand 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes searchExpand {
+  from {
+    max-height: 0;
+    padding: 0 !important;
+    opacity: 0;
+  }
+  to {
+    max-height: 100px;
+    padding: 0.75rem 0 !important;
+    opacity: 1;
+  }
+}
+
+/* Ensure mobile search wrapper is shown only on mobile */
+@media (max-width: 991px) {
+  .mobile-search-expanded {
+    display: none !important;
+    z-index: 1039;
+    position: static;
+  }
+  
+  .mobile-search-expanded.active {
+    display: block !important;
+    z-index: 1039;
+  }
+}
+
+@media (min-width: 992px) {
+  .mobile-search-expanded {
+    display: none !important;
+  }
+}
+
+.mobile-search-expanded .navbar-search {
+  display: flex !important;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.mobile-search-expanded .navbar-search .form-control {
+  flex: 1;
+  min-width: 0 !important;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  height: auto;
+  border-radius: 4px;
+}
+
+.mobile-search-expanded .navbar-search .btn {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+#mobileSearchWrapper {
+  position: static;
+}
+
+#mobileSearchWrapper.active {
+  position: relative;
+}
+
+/* Header layout adjustments - logo and search on same line */
+#headnev {
+  padding: 0.5rem 0 !important;
+}
+
+#headnev .navbar-brand {
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Site header - sticky positioning with smooth transitions */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1040;
+  transition: 
+    position 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.4s ease;
   background-color: var(--u68-primary-color, #0a4579);
 }
 
-.social-icons a {
-  opacity: 0.85;
-  transition: opacity .2s ease, transform .2s ease;
-}
-.social-icons a:hover {
-  opacity: 1;
-  transform: translateY(-1px);
+/* When header is fixed - make it truly fixed with enhanced effects */
+.site-header.fixed-header {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  top: 0 !important;
+  z-index: 1040 !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  animation: headerSlideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Adjust for WordPress admin bar */
+
+
+body.admin-bar .site-header.fixed-header {
+  top: 32px !important;
+}
+
+@media (max-width: 782px) {
+  body.admin-bar .site-header {
+    top: 46px;
+  }
+  
+  body.admin-bar .site-header.fixed-header {
+    top: 46px !important;
+  }
+}
+
+/* Remove WordPress default admin bar margin */
+
+body.admin-bar {
+  margin-top: 0 !important;
+}
+
+/* Animation for header sliding down */
+@keyframes headerSlideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Content adjustment - always has base padding */
+#content {
+  padding-top: 0;
+  transition: padding-top 0.4s ease;
+}
+
+#content.header-fixed {
+  padding-top: 60px;
+}
+
+/* Categories navbar - show at top, hide on scroll with smooth animation */
 .navbar-categorias {
   background-color: var(--u68-primary-color, #0a4579);
   border-top: 1px solid rgba(255,255,255,.1);
+  max-height: 50px;
+  overflow: hidden;
+  transition: 
+    max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    border 0.5s ease;
+  opacity: 1;
+  transform: translateY(0);
+  animation: categoriesSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* Animation for categories sliding in */
+@keyframes categoriesSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.navbar-categorias.hidden {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  border: none;
+  transform: translateY(-20px) scaleY(0.8);
+}
+
 .navbar-categorias .navbar-nav .nav-link {
   color: #fff !important;
   padding: .5rem .75rem;
   white-space: nowrap;
+  font-size: 0.9rem;
+  transition: 
+    color 0.3s ease,
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    text-shadow 0.3s ease;
 }
+
 .navbar-categorias .navbar-nav .nav-link:hover {
   text-decoration: underline;
+  transform: translateY(-2px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.topbar {
-  height: 80px;
-  background-color: var(--u68-primary-color, #0a4579);
-  -webkit-animation: mymove 1s;
-          animation: mymove 1s;
-  -webkit-animation-timing-function: ease-out;
-          animation-timing-function: ease-out; }
+/* Header compression on scroll - scrolled state with smooth effects */
+.site-header.scrolled #headnev {
+  padding: 0.35rem 0 !important;
+  animation: headerCompress 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 
-/* Inline navbar search */
-.navbar-search .form-control {
-  min-width: 220px;
+@keyframes headerCompress {
+  from {
+    padding: 0.5rem 0;
+  }
+  to {
+    padding: 0.35rem 0;
+  }
 }
-@media (max-width: 576px) {
-  .navbar-search .form-control { min-width: 140px; }
+
+.site-header.scrolled #headnev .navbar-brand {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  transition: 
+    padding 0.4s ease,
+    font-size 0.4s ease,
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.95);
 }
-.navbar-search .form-control:focus {
-  box-shadow: none;
-  outline: none;
+
+.site-header.scrolled #headnev .navbar-search .form-control {
+  font-size: 0.85rem;
+  min-width: 180px;
 }
-.navbar-search .btn {
-  border: none;
+
+/* Mobile: categories navbar styling */
+@media (max-width: 768px) {
+  .navbar-categorias {
+    max-height: 40px;
+  }
+  
+  .navbar-categorias .navbar-nav .nav-link {
+    padding: .4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .site-header.scrolled #headnev .navbar-search .form-control {
+    min-width: 100px;
+  }
+  
+  #content.header-fixed {
+    padding-top: 50px;
+  }
+  
+  /* Improved mobile layout */
+  #headnev {
+    padding: 0.45rem 0 !important;
+  }
+  
+  #headnev .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    max-width: 100%;
+  }
+  
+  #headnev .d-flex {
+    gap: 0;
+    align-items: center;
+  }
+  
+  /* Logo on the left */
+  #headnev .navbar-brand {
+    position: relative !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0;
+    display: flex !important;
+    align-items: center;
+    order: -1;
+  }
+  
+  #headnev .navbar-brand img {
+    max-height: 40px;
+    width: auto;
+  }
+  
+  /* Search button on the right */
+  .btn-search-toggle {
+    margin-left: auto !important;
+    margin-right: 0;
+  }
+  
+  /* Hide old search elements */
+  #headnev .ml-auto {
+    display: none;
+  }
+  
+  #headnev .navbar-search {
+    display: none !important;
+  }
+  
+  /* Mobile search wrapper should always be available */
+  #mobileSearchWrapper {
+    display: none !important;
+  }
+  
+  #mobileSearchWrapper.active {
+    display: block !important;
+  }
+  
+  .site-header.scrolled #headnev {
+    padding: 0.3rem 0 !important;
+  }
+  
+  .site-header.scrolled #headnev .navbar-brand {
+    max-width: 65px;
+  }
+}
+
+/* Small mobile (380px - 480px) - improved proportions */
+@media (min-width: 381px) and (max-width: 480px) {
+  #headnev {
+    padding: 0.4rem 0 !important;
+  }
+  
+  #headnev .container {
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
+  }
+  
+  #headnev .navbar-brand {
+    max-width: 65px !important;
+  }
+  
+  #headnev .navbar-brand img {
+    max-height: 38px;
+  }
+  
+  .btn-search-toggle {
+    padding: 0.5rem 0.5rem !important;
+  }
+}
+
+/* Extra small mobile devices (320px) - ultra compact layout */
+@media (max-width: 380px) {
+  #headnev {
+    padding: 0.35rem 0 !important;
+  }
+  
+  #headnev .container {
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    max-width: 100%;
+  }
+  
+  #headnev .d-flex {
+    gap: 0;
+    align-items: center;
+  }
+  
+  #headnev .navbar-brand {
+    position: relative !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    -ms-transform: none !important;
+    left: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    max-width: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  #headnev .navbar-brand img {
+    max-height: 32px;
+    width: auto;
+  }
+  
+  .btn-search-toggle {
+    margin-left: auto !important;
+    padding: 0.35rem 0.5rem !important;
+  }
+  
+  .site-header.scrolled #headnev {
+    padding: 0.25rem 0 !important;
+  }
+  
+  .site-header.scrolled #headnev .navbar-brand {
+    max-width: 50px;
+  }
+}
+
+
+/* Mobile header - keep logo and search inline */
+@media (max-width: 768px) {
+  #headnev .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  #headnev .navbar-brand {
+    font-size: 1rem;
+    margin-right: 0.5rem;
+  }
+  
+  #headnev .ml-auto {
+    margin-left: auto !important;
+  }
+  
+  #headnev .navbar-search .form-control {
+    min-width: 100px;
+  }
 }
 
 .title-d2 {
@@ -690,21 +1215,31 @@ ol li::before {
   border-top-color: #fff;
 }
 
-.navbar-brand {
-  -webkit-transform: translateX(-50%);
-      -ms-transform: translateX(-50%);
-          transform: translateX(-50%);
-  left: 50%;
-  position: absolute; }
+
+
+@media (max-width: 768px) {
+  .navbar-brand {
+    position: relative;
+    transform: none;
+    -webkit-transform: none;
+    -ms-transform: none;
+    left: auto;
+    max-width: 150px;
+    margin: 0 auto;
+  }
+}
 
 #wrapper {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   width: 100%;
+  max-width: 100%;
+  -webkit-box-align: stretch;
   -webkit-box-align: stretch;
       -ms-flex-align: stretch;
-          align-items: stretch; }
+          align-items: stretch;
+}
 
 #sidebar {
   min-width: 250px;
@@ -861,89 +1396,9 @@ a.article:hover {
   color: white;
   padding: 0.1rem 0.5rem !important; }
 
-.navbar-categorias {
-  font-size: .8rem;
-  line-height: .8rem;
-  display: block !important;
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.navbar-categorias .container {
-  display: flex !important;
-  flex-wrap: nowrap;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Mobile navigation improvements */
-@media (max-width: 768px) {
-  .navbar-categorias .navbar-nav {
-    display: flex !important;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-  }
-  .navbar-categorias .nav-item {
-    scroll-snap-align: start;
-  }
-  .navbar-categorias .nav-link {
-    padding: 0.5rem 0.75rem !important;
-  }
-  #sidebarCollapse {
-    padding: .5rem .75rem;
-    font-size: 1.1rem;
-    line-height: 1;
-  }
-}
-
-.navbar-categorias .list-group-horizontal {
-  display: flex !important;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0;
-  margin: 0;
-}
-
-/* Mobile search wrapper styling (match desktop header visual) */
+/* Mobile search wrapper styling */
 .mobile-search {
-  background-color: var(--u68-primary-color, #0a4579);
-  border-bottom: 1px solid #0a3a66; /* slightly darker divider */
-}
-.mobile-search .navbar-search {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: center;           /* center contents */
-  max-width: 640px;                  /* keep a comfortable width */
-  margin: 0 auto;                    /* center the form block */
-  column-gap: .5rem;                 /* small gap between input/button */
-}
-.mobile-search .navbar-search .form-control {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.mobile-search .navbar-search .btn {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-.navbar-categorias .list-group-horizontal .nav-item {
-  display: inline-block;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.navbar-categorias .nav-link {
-  display: inline-block;
-  padding: 0.5rem 1rem !important;
-  white-space: nowrap;
+  display: none;
 }
 
 /* More news section on single posts */
@@ -982,8 +1437,8 @@ a:not(.btn):hover {
 /* Global: map Bootstrap text-primary to theme primary color */
 .text-primary { color: var(--u68-primary-color, #0a4579) !important; }
 
-/* Slick carousel adjustments for Colunistas Grid on mobile */
-@media (max-width: 767.98px) {
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
   .colunistas-grid.slick-initialized .col-6,
   .colunistas-grid.slick-initialized .col-sm-6,
   .colunistas-grid.slick-initialized .col-md-4,
@@ -991,27 +1446,17 @@ a:not(.btn):hover {
     max-width: 100%;
     flex: 0 0 100%;
   }
-}
-
-/* Mobile specific for navbar categorias */
-@media (max-width: 768px) {
-  .navbar-categorias {
-    display: block !important;
-    padding: 0.5rem 0;
+  
+  /* Ensure colunistas slider track can extend */
+  .colunistas-grid.slick-initialized .slick-track {
+    max-width: none !important;
+    width: auto !important;
   }
-
-  .navbar-categorias .container {
-    padding: 0 10px;
-  }
-
-  .navbar-categorias .list-group-horizontal {
-    justify-content: flex-start;
-    gap: 5px;
-  }
-
-  .navbar-categorias .nav-link {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.8rem !important;
+  
+  /* Destaque misto slider adjustments */
+  .destaque-misto-wrapper.slick-initialized .slick-track {
+    max-width: none !important;
+    width: auto !important;
   }
 }
 
@@ -1019,8 +1464,7 @@ a:not(.btn):hover {
   color: orange; }
 
 /* Mobile stability: prevent horizontal movement on small screens */
-html,
-body {
+html {
   max-width: 100%;
   width: 100%;
   overflow-x: hidden;
@@ -1028,35 +1472,37 @@ body {
   padding: 0;
 }
 
+body {
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
 @media (max-width: 768px) {
   html,
   body {
     overscroll-behavior-x: none;
-    touch-action: pan-y;
     max-width: 100vw;
-    width: 100vw;
+    overflow-x: hidden !important;
   }
 
-  /* Ensure common wrappers don't exceed viewport width */
-  .container,
-  .row,
-  .no-wrapper,
-  #content,
-  #page,
-  .hfeed {
-    max-width: 100% !important;
-    width: 100% !important;
-    overflow-x: hidden !important;
+  /* Container with proper padding */
+  .container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  
+  /* Rows without negative margins */
+  .row {
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
 
   /* Fix for sidebar overflow */
   #wrapper {
-    width: 100%;
-    max-width: 100vw;
     overflow-x: hidden;
   }
 
@@ -1066,10 +1512,8 @@ body {
   video,
   embed,
   object {
-    max-width: 100% !important;
-    height: auto !important;
-    display: block !important;
-    width: auto;
+    max-width: 100%;
+    height: auto;
   }
 
   /* Destaque Misto: taller big images on mobile */
@@ -1097,22 +1541,31 @@ body {
     width: 75%;
   }
 
-  .col, [class*="col-"] {
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
   /* Ensure navbar elements don't overflow */
-  .navbar, .navbar-nav {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
+  .navbar-brand img {
+    max-width: 150px;
+    height: auto;
   }
 
-  /* Fix slick carousel */
-  .slick-list, .slick-slide {
-    overflow-x: hidden;
+  /* Fix slick carousel - allow proper slider functionality */
+  .slick-list {
+    overflow: hidden;
+  }
+  
+  .slick-track {
+    display: flex !important;
+  }
+  
+  /* Ensure slider containers don't overflow */
+  .slick-slider {
+    overflow: hidden;
+  }
+  
+  /* Tables responsive */
+  table {
     max-width: 100%;
+    overflow-x: auto;
+    display: block;
   }
 }
 
@@ -1411,3 +1864,57 @@ body {
 .destaques-home-mobile-slider .position-relative {
   background-color: var(--u68-badge-color, #ec940d) !important;
 }
+
+/* Destaque Home: badge positioning - always top left */
+.destaques-home-wrapper .badge,
+.destaques-home-mobile-slider .badge,
+.destaques-home-wrapper .position-relative .badge,
+.destaques-home-mobile-slider .slick-slide .badge {
+  position: absolute !important;
+  left: 12px !important;
+  top: 12px !important;
+  z-index: 100 !important;
+}
+
+/* Ensure card containers support absolute positioning */
+.destaques-home-wrapper .position-relative,
+.destaques-home-mobile-slider .position-relative,
+.destaques-home-wrapper .card,
+.destaques-home-mobile-slider .slick-slide {
+  position: relative !important;
+}
+
+/* Destaque Home Mobile: Larger images */
+@media (max-width: 768px) {
+  .destaques-home-wrapper .imagem-destaque,
+  .destaques-home-mobile-slider .imagem-destaque,
+  .destaques-home-wrapper img.imagem-destaque,
+  .destaques-home-mobile-slider img.imagem-destaque {
+    height: 450px !important;
+    object-fit: cover !important;
+  }
+}
+
+/* ========================================
+   AUTOPLAY DO DESTAQUE HOME MOBILE
+   ========================================
+   
+   Para ativar o autoplay no slider mobile, adicione este código JavaScript
+   no arquivo que inicializa o slider (geralmente carousel_init.js ou similar):
+   
+   jQuery(document).ready(function($) {
+     if ($(window).width() <= 768) {
+       $('.destaques-home-mobile-slider').slick({
+         autoplay: true,
+         autoplaySpeed: 3000,
+         dots: true,
+         arrows: false,
+         infinite: true,
+         speed: 500,
+         slidesToShow: 1,
+         slidesToScroll: 1
+       });
+     }
+   });
+  
+    Ajuste os par\u00e2metros conforme necess\u00e1rio.
