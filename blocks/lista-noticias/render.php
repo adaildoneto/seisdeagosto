@@ -32,6 +32,17 @@ function u_correio68_render_lista_noticias($attributes) {
         $args['category_name'] = sanitize_text_field($attributes['category']);
     }
 
+    // Apply tag filter (CSV of slugs) and keyword search
+    if (!empty($attributes['tags']) && is_string($attributes['tags'])) {
+        $slugs = array_filter(array_map('sanitize_title', array_map('trim', explode(',', $attributes['tags']))));
+        if (!empty($slugs)) {
+            $args['tag_slug__in'] = $slugs;
+        }
+    }
+    if (!empty($attributes['keyword'])) {
+        $args['s'] = sanitize_text_field($attributes['keyword']);
+    }
+
     $query = new WP_Query($args);
     ob_start();
 

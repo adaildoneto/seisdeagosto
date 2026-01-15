@@ -334,7 +334,9 @@
             numberOfPosts: { type: 'number', default: 9 },
             offset: { type: 'number', default: 0 },
             columns: { type: 'number', default: 3 },
-            paginate: { type: 'boolean', default: false }
+            paginate: { type: 'boolean', default: false },
+            tags: { type: 'string', default: '' },
+            keyword: { type: 'string', default: '' }
         }, getTypographyAttributes()),
         edit: function(props) {
             var attributes = props.attributes;
@@ -380,6 +382,16 @@
                             label: 'Mostrar paginação',
                             checked: !!attributes.paginate,
                             onChange: function(val) { setAttributes({ paginate: !!val }); }
+                        }),
+                        el(TextControl, {
+                            label: 'Tags (slugs separados por vírgula)',
+                            value: attributes.tags || '',
+                            onChange: function(val) { setAttributes({ tags: String(val || '') }); }
+                        }),
+                        el(TextControl, {
+                            label: 'Palavra-chave (busca)',
+                            value: attributes.keyword || '',
+                            onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
                         })
                     ),
                     TypographyPanel(props)
@@ -411,12 +423,13 @@
         title: 'Destaque Categoria (1 Grande + 3 Lista)',
         icon: 'list-view',
         category: 'layout',
-        supports: { inserter: false },
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
             title: { type: 'string', default: '' },
             bigCount: { type: 'number', default: 1 },
-            listCount: { type: 'number', default: 3 }
+            listCount: { type: 'number', default: 3 },
+            tags: { type: 'string', default: '' },
+            keyword: { type: 'string', default: '' }
         }, getTypographyAttributes()),
         edit: function(props) {
             var attributes = props.attributes;
@@ -455,6 +468,16 @@
                             onChange: function(val) { setAttributes({ listCount: parseInt(val) }); },
                             min: 0,
                             max: 12
+                        }),
+                        el(TextControl, {
+                            label: 'Tags (slugs separados por vírgula)',
+                            value: attributes.tags || '',
+                            onChange: function(val) { setAttributes({ tags: String(val || '') }); }
+                        }),
+                        el(TextControl, {
+                            label: 'Palavra-chave (busca)',
+                            value: attributes.keyword || '',
+                            onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
                         })
                     ),
                     TypographyPanel(props)
@@ -489,7 +512,9 @@
             categoryId: { type: 'string', default: '0' },
             showList: { type: 'boolean', default: true },
             showListThumbs: { type: 'boolean', default: true },
-            showBadges: { type: 'boolean', default: true }
+            showBadges: { type: 'boolean', default: true },
+            tags: { type: 'string', default: '' },
+            keyword: { type: 'string', default: '' }
         }, getTypographyAttributes('#FFFFFF')),
         edit: function(props) {
             var attributes = props.attributes;
@@ -509,6 +534,16 @@
                             value: attributes.categoryId,
                             options: seideagostoBlocks.categories,
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
+                        }),
+                        el(TextControl, {
+                            label: 'Tags (slugs separados por vírgula)',
+                            value: attributes.tags || '',
+                            onChange: function(val) { setAttributes({ tags: String(val || '') }); }
+                        }),
+                        el(TextControl, {
+                            label: 'Palavra-chave (busca)',
+                            value: attributes.keyword || '',
+                            onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
                         })
                     ),
                     TypographyPanel(props, '#FFFFFF'),
@@ -556,7 +591,6 @@
         title: 'Top Mais Lidas',
         icon: 'chart-area',
         category: 'layout',
-        supports: { inserter: false },
         attributes: {
             title: { type: 'string', default: 'Mais lidas' },
             count: { type: 'number', default: 5 },
@@ -644,7 +678,6 @@
         title: 'Clima / Tempo',
         icon: 'cloud',
         category: 'widgets',
-        supports: { inserter: false },
         attributes: {
             cityName: { type: 'string', default: '' },
             latitude: { type: 'string', default: '' },
@@ -1026,6 +1059,8 @@
         if (typeof a.offset !== 'undefined') lines.push('Offset: ' + a.offset);
         if (typeof a.columns !== 'undefined') lines.push('Colunas: ' + a.columns);
         if (typeof a.category !== 'undefined' && a.category) lines.push('Categoria: ' + a.category);
+        if (typeof a.titulo !== 'undefined' && a.titulo) lines.push('Título: ' + a.titulo);
+        if (typeof a.icone !== 'undefined' && a.icone) lines.push('Ícone: ' + a.icone);
         return el('div', {
             style: {
                 border: '2px dashed #17a2b8',
@@ -1322,6 +1357,115 @@
         },
         save: function() {
             return null;
+        }
+    });
+
+    // CTA (antigo Título com Ícone)
+    wp.domReady(function() {
+        var ctaBlockName = 'u-correio68/titulo-com-icone';
+        // Evita erro "Block is already registered" se o PHP ou outro script já o registrou
+        if (wp.blocks.getBlockType(ctaBlockName)) {
+            wp.blocks.unregisterBlockType(ctaBlockName);
+        }
+
+        try {
+            registerBlockType(ctaBlockName, {
+                title: 'CTA',
+                icon: 'heading',
+                category: 'layout',
+                attributes: {
+                    titulo: { type: 'string', default: 'CTA' },
+                    icone: { type: 'string', default: 'fa-star' },
+                    corIcone: { type: 'string', default: '#fd7e14' },
+                    corLinha: { type: 'string', default: '#fd7e14' },
+                    tamanhoIcone: { type: 'number', default: 24 },
+                    tamanhoTitulo: { type: 'number', default: 28 },
+                    espessuraLinha: { type: 'number', default: 3 },
+                    alinhamento: { type: 'string', default: 'left' }
+                },
+                edit: function(props) {
+                    var attributes = props.attributes;
+                    var setAttributes = props.setAttributes;
+                    var blockProps = useBlockProps ? useBlockProps() : {};
+                    
+                    // Safe ServerSideRender resolution
+                    var SSR = wp.serverSideRender || (wp.components && wp.components.ServerSideRender);
+                    if (typeof SSR === 'object' && SSR.default) SSR = SSR.default;
+
+                    return el(
+                        wp.element.Fragment,
+                        null,
+                        el(
+                            InspectorControls,
+                            null,
+                            el(
+                                PanelBody,
+                                { title: 'Configurações' },
+                                el(TextControl, {
+                                    label: 'Título',
+                                    value: attributes.titulo,
+                                    onChange: function(val) { setAttributes({ titulo: val }); }
+                                }),
+                                el(TextControl, {
+                                    label: 'Ícone (Classe FontAwesome)',
+                                    value: attributes.icone,
+                                    onChange: function(val) { setAttributes({ icone: val }); },
+                                    help: 'Ex: fa-star, fa-home'
+                                }),
+                                el(SelectControl, {
+                                    label: 'Alinhamento',
+                                    value: attributes.alinhamento,
+                                    options: [
+                                        { label: 'Esquerda', value: 'left' },
+                                        { label: 'Centro', value: 'center' },
+                                        { label: 'Direita', value: 'right' }
+                                    ],
+                                    onChange: function(val) { setAttributes({ alinhamento: val }); }
+                                }),
+                                el(RangeControl, {
+                                    label: 'Tamanho do Ícone (px)',
+                                    value: attributes.tamanhoIcone,
+                                    onChange: function(val) { setAttributes({ tamanhoIcone: val }); },
+                                    min: 12, max: 60
+                                }),
+                                el(RangeControl, {
+                                    label: 'Tamanho do Título (px)',
+                                    value: attributes.tamanhoTitulo,
+                                    onChange: function(val) { setAttributes({ tamanhoTitulo: val }); },
+                                    min: 12, max: 60
+                                }),
+                                el(RangeControl, {
+                                    label: 'Espessura da Linha (px)',
+                                    value: attributes.espessuraLinha,
+                                    onChange: function(val) { setAttributes({ espessuraLinha: val }); },
+                                    min: 1, max: 10
+                                }),
+                                el(ColorPalette, {
+                                    label: 'Cor do Ícone',
+                                    value: attributes.corIcone,
+                                    onChange: function(val) { setAttributes({ corIcone: val }); }
+                                }),
+                                el(ColorPalette, {
+                                    label: 'Cor da Linha',
+                                    value: attributes.corLinha,
+                                    onChange: function(val) { setAttributes({ corLinha: val }); }
+                                })
+                            )
+                        ),
+                        el('div', blockProps, 
+                            SSR ? el(SSR, {
+                                block: 'u-correio68/titulo-com-icone',
+                                attributes: attributes
+                            }) : el('div', {}, 'ServerSideRender not available')
+                        )
+                    );
+                },
+                save: function() {
+                    return null;
+                }
+            });
+        } catch (e) {
+            console.error('SEISDEAGOSTO: Failed to register titulo-com-icone', e);
         }
     });
 

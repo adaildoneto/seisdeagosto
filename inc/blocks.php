@@ -64,14 +64,92 @@ function u_correio68_apply_category_filter( array $args, $categoryId ) {
     return $args;
 }
 
+/**
+ * Apply tag and keyword filters to a query args array based on block attributes.
+ * Supported attributes:
+ * - keyword: string (search term)
+ * - tags: string (CSV of tag slugs)
+ * - tagSlugs: array of tag slugs
+ * - tagIds: array of tag IDs
+ */
+function u_correio68_apply_tag_keyword_filters( array $args, $attributes ) {
+    // Keyword (search)
+    if ( isset( $attributes['keyword'] ) && is_string( $attributes['keyword'] ) && $attributes['keyword'] !== '' ) {
+        $args['s'] = sanitize_text_field( $attributes['keyword'] );
+    }
+
+    // Prefer explicit tag IDs
+    if ( isset( $attributes['tagIds'] ) && is_array( $attributes['tagIds'] ) ) {
+        $ids = array();
+        foreach ( $attributes['tagIds'] as $id ) {
+            $id = absint( $id );
+            if ( $id > 0 ) { $ids[] = $id; }
+        }
+        if ( ! empty( $ids ) ) {
+            $args['tag__in'] = array_values( array_unique( $ids ) );
+        }
+        return $args;
+    }
+
+    // Next, explicit tag slugs
+    if ( isset( $attributes['tagSlugs'] ) && is_array( $attributes['tagSlugs'] ) ) {
+        $slugs = array();
+        foreach ( $attributes['tagSlugs'] as $slug ) {
+            $slug = sanitize_title( $slug );
+            if ( $slug !== '' ) { $slugs[] = $slug; }
+        }
+        if ( ! empty( $slugs ) ) {
+            $args['tag_slug__in'] = array_values( array_unique( $slugs ) );
+        }
+        return $args;
+    }
+
+    // Finally, CSV of slugs via `tags`
+    if ( isset( $attributes['tags'] ) && is_string( $attributes['tags'] ) && $attributes['tags'] !== '' ) {
+        $parts = array_map( 'trim', explode( ',', $attributes['tags'] ) );
+        $slugs = array();
+        foreach ( $parts as $p ) {
+            $p = sanitize_title( $p );
+            if ( $p !== '' ) { $slugs[] = $p; }
+        }
+        if ( ! empty( $slugs ) ) {
+            $args['tag_slug__in'] = array_values( array_unique( $slugs ) );
+        }
+    }
+
+    return $args;
+}
+
 function u_correio68_register_custom_blocks() {
     // Register the block editor script
+    $blocks_script_src      = get_template_directory_uri() . '/assets/js/custom-blocks.js';
+    $blocks_script_deps     = array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-data', 'wp-server-side-render', 'wp-hooks', 'wp-dom-ready' );
+    $blocks_script_version  = filemtime( get_template_directory() . '/assets/js/custom-blocks.js' );
+
     wp_register_script(
         'seideagosto-blocks',
-        get_template_directory_uri() . '/assets/js/custom-blocks.js',
-        array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-data', 'wp-server-side-render', 'wp-hooks', 'wp-dom-ready' ),
-        filemtime( get_template_directory() . '/assets/js/custom-blocks.js' )
+        $blocks_script_src,
+        $blocks_script_deps,
+        $blocks_script_version
     );
+
+    // Legacy alias for existing block.json files referencing the old handle
+    wp_register_script(
+        'u-correio68-custom-blocks',
+        false,
+        array( 'seideagosto-blocks' ),
+        $blocks_script_version
+    );
+
+    // Ensure Font Awesome is available inside the editor for icon-based blocks
+    $fa_handle   = 'u_seisbarra8-fontawesome';
+    $fa_vendor   = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+    $fa_fallback = get_template_directory_uri() . '/css/local-fa-fallback.css';
+    if ( file_exists( $fa_vendor ) ) {
+        wp_register_style( $fa_handle, get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', array(), '4.7.0' );
+    } else {
+        wp_register_style( $fa_handle, $fa_fallback, array(), file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null );
+    }
 
     // Get categories for the dropdown
     $categories = get_categories( array( 'hide_empty' => false ) );
@@ -114,6 +192,14 @@ function u_correio68_register_custom_blocks() {
         )
     );
 
+    // Enqueue block editor assets
+    add_action( 'enqueue_block_editor_assets', function() use ( $fa_handle ) {
+        wp_enqueue_script( 'seideagosto-blocks' );
+        if ( wp_style_is( $fa_handle, 'registered' ) ) {
+            wp_enqueue_style( $fa_handle );
+        }
+    });
+
     $typography_default = u_correio68_typography_attribute_schema();
     $typography_light   = u_correio68_typography_attribute_schema( '#FFFFFF' );
 
@@ -130,6 +216,8 @@ function u_correio68_register_custom_blocks() {
                 'type' => 'string',
                 'default' => 'default',
             ),
+            'tags' => array( 'type' => 'string', 'default' => '' ),
+            'keyword' => array( 'type' => 'string', 'default' => '' ),
         ),
     ) );
 
@@ -162,6 +250,8 @@ function u_correio68_register_custom_blocks() {
                 'offset'        => array( 'type' => 'number', 'default' => 0 ),
                 'columns'       => array( 'type' => 'number', 'default' => 3 ),
                 'paginate'      => array( 'type' => 'boolean', 'default' => false ),
+                'tags'          => array( 'type' => 'string', 'default' => '' ),
+                'keyword'       => array( 'type' => 'string', 'default' => '' ),
             ),
             $typography_default
         ),
@@ -177,6 +267,8 @@ function u_correio68_register_custom_blocks() {
                 'title'      => array( 'type' => 'string', 'default' => '' ),
                 'bigCount'   => array( 'type' => 'number', 'default' => 1 ),
                 'listCount'  => array( 'type' => 'number', 'default' => 3 ),
+                'tags'       => array( 'type' => 'string', 'default' => '' ),
+                'keyword'    => array( 'type' => 'string', 'default' => '' ),
             ),
             $typography_default
         ),
@@ -192,6 +284,8 @@ function u_correio68_register_custom_blocks() {
                 'showList' => array( 'type' => 'boolean', 'default' => true ),
                 'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
                 'showBadges' => array( 'type' => 'boolean', 'default' => true ),
+                'tags'       => array( 'type' => 'string', 'default' => '' ),
+                'keyword'    => array( 'type' => 'string', 'default' => '' ),
             ),
             $typography_light
         ),
@@ -394,10 +488,17 @@ function u_correio68_register_custom_blocks() {
 
     // Register metadata-based blocks from theme/blocks directory
     $blocks_dir = get_template_directory() . '/blocks';
+    
+    // Include render callbacks for metadata blocks
+    if ( file_exists( $blocks_dir . '/titulo-com-icone/render.php' ) ) {
+        require_once( $blocks_dir . '/titulo-com-icone/render.php' );
+    }
+    
     $metadata_blocks = array(
         'destaque-grande',
         'destaque-pequeno',
         'lista-noticias',
+        'titulo-com-icone',
     );
     foreach ( $metadata_blocks as $slug ) {
         $path = $blocks_dir . '/' . $slug;
@@ -410,7 +511,14 @@ function u_correio68_register_custom_blocks() {
                         'render_callback' => $block_config['render_callback'],
                     ) );
                 } else {
-                    register_block_type( $path );
+                    // Special handling for titulo-com-icone block
+                    if ( $slug === 'titulo-com-icone' && function_exists( 'u_correio68_render_titulo_com_icone' ) ) {
+                        register_block_type( $path, array(
+                            'render_callback' => 'u_correio68_render_titulo_com_icone',
+                        ) );
+                    } else {
+                        register_block_type( $path );
+                    }
                 }
             }
         }
@@ -543,6 +651,8 @@ function u_correio68_render_destaques_home( $attributes ) {
     if ( $category_id ) {
         $args_all['cat'] = $category_id;
     }
+    // Apply tag and keyword filters if provided in attributes
+    $args_all = u_correio68_apply_tag_keyword_filters( $args_all, $attributes );
     
     $query_all = new WP_Query( $args_all );
     
@@ -803,6 +913,7 @@ function u_correio68_render_news_grid( $attributes ) {
             $args['post__not_in'] = $shownPosts;
         }
         $args = u_correio68_apply_category_filter( $args, $categoryId );
+        $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
         $query = new WP_Query( $args );
     }
     
@@ -931,6 +1042,7 @@ function u_correio68_render_category_highlight( $attributes ) {
     );
 
     $args = u_correio68_apply_category_filter( $args, $categoryId );
+    $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
 
     $query = new WP_Query( $args );
     
@@ -1134,6 +1246,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
     );
 
     $args = u_correio68_apply_category_filter( $args, $categoryId );
+    $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
 
     $query = new WP_Query( $args );
     
@@ -1425,10 +1538,11 @@ function u_correio68_render_weather( $attributes ) {
     $icon = 'clear';
     $fa   = 'fa-sun-o';
     // Open-Meteo weather codes mapping (simplified)
+    // PASSO 3 - WordPress Compatibility: Icons mapped to CSS classes (clear, cloudy, rain, storm, snow)
     if ( in_array( $code, array(0) ) ) { $desc = 'Céu limpo'; $icon = 'clear'; $fa = 'fa-sun-o'; }
     elseif ( in_array( $code, array(1,2) ) ) { $desc = 'Parcialmente nublado'; $icon = 'cloudy'; $fa = 'fa-cloud'; }
     elseif ( in_array( $code, array(3) ) ) { $desc = 'Nublado'; $icon = 'cloudy'; $fa = 'fa-cloud'; }
-    elseif ( in_array( $code, array(45,48) ) ) { $desc = 'Neblina'; $icon = 'mist'; $fa = 'fa-cloud'; }
+    elseif ( in_array( $code, array(45,48) ) ) { $desc = 'Neblina'; $icon = 'cloudy'; $fa = 'fa-cloud'; } // Mist mapped to cloudy
     elseif ( in_array( $code, array(51,53,55,56,57) ) ) { $desc = 'Garoa'; $icon = 'rain'; $fa = 'fa-tint'; }
     elseif ( in_array( $code, array(61,63,65,66,67) ) ) { $desc = 'Chuva'; $icon = 'rain'; $fa = 'fa-umbrella'; }
     elseif ( in_array( $code, array(71,73,75,77) ) ) { $desc = 'Neve'; $icon = 'snow'; $fa = 'fa-snowflake-o'; }
@@ -1447,119 +1561,176 @@ function u_correio68_render_weather( $attributes ) {
     $wind_unit = 'km/h';
 
     ob_start();
+    
+    // Enqueue Slick for forecast slider
+    if ( ! is_admin() ) {
+        wp_enqueue_style( 'u_seisbarra8-slick' );
+        wp_enqueue_style( 'u_seisbarra8-slicktheme' );
+        wp_enqueue_script( 'u_seisbarra8-slick' );
+    }
+    
+    // Get current day name and format date
+    $current_date = new DateTime( $data['time'] );
+    $day_name = date_i18n( 'l', $current_date->getTimestamp() );
+    $date_formatted = date_i18n( 'd M Y', $current_date->getTimestamp() );
+    
+    // Get humidity if available
+    $humidity = isset( $data['relative_humidity_2m'] ) ? intval( $data['relative_humidity_2m'] ) : null;
+    
+    // Get precipitation
+    $header_prpct = null; $header_prsum = null;
+    if ( ! empty( $data['daily'] ) && ! empty( $data['daily']['precipitation_probability_mean'] ) && isset( $data['daily']['precipitation_probability_mean'][0] ) ) {
+        $header_prpct = intval( $data['daily']['precipitation_probability_mean'][0] );
+    }
+    if ( ( $header_prpct === null ) && ! empty( $data['daily'] ) && ! empty( $data['daily']['precipitation_sum'] ) && isset( $data['daily']['precipitation_sum'][0] ) ) {
+        $header_prsum = floatval( $data['daily']['precipitation_sum'][0] );
+    }
     ?>
-    <div class="weather-block minimal card spaces p-3 weather-eyecandy">
-        <div class="current-wrap d-flex flex-column align-items-center text-center">
-            <div class="weather-icon icon-<?php echo esc_attr( $icon ); ?>" style="position:relative;width:56px;height:56px;margin-bottom:12px;">
-                <div class="icon-base" style="position:absolute;inset:0;"></div>
-                <?php if ( in_array( $icon, array('rain','storm'), true ) ) : ?>
-                    <div class="rain" style="position:absolute;inset:0;"></div>
+    <div class="weather-widget">
+        <!-- TOP SIDE: Gradient Blue -->
+        <div class="weather-side">
+            <div class="weather-gradient"></div>
+            
+            <div class="date-container">
+                <h2 class="date-dayname"><?php echo esc_html( $day_name ); ?></h2>
+                <span class="date-day"><?php echo esc_html( $date_formatted ); ?></span>
+            </div>
+            
+            <div class="weather-container">
+                <div class="current-top">
+                    <div class="weather-icon-large icon-<?php echo esc_attr( $icon ); ?>" style="position:relative;width:80px;height:80px;margin:0;">
+                        <div class="icon-base" style="position:absolute;inset:0;"></div>
+                        <?php if ( in_array( $icon, array('rain','storm'), true ) ) : ?>
+                            <div class="rain" style="position:absolute;inset:0;"></div>
+                        <?php endif; ?>
+                        <div class="fa-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                            <i class="fa <?php echo esc_attr( $fa ); ?> weather-fa-icon-large" aria-hidden="true"></i>
+                        </div>
+                    </div>
+
+                    <h1 class="weather-temp">
+                        <span class="temp-value"><?php echo esc_html( round( $temp ) ); ?></span><span class="temp-unit">°</span>
+                    </h1>
+                </div>
+                <h3 class="weather-desc"><?php echo esc_html( $desc ); ?></h3>
+                <?php if ( ! empty( $city ) ) : ?>
+                    <div class="weather-location">
+                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                        <span class="city-name"><?php echo esc_html( $city ); ?></span>
+                    </div>
                 <?php endif; ?>
-                <?php if ( $showWind ) : ?>
-                    <div class="wind" style="position:absolute;inset:0;"></div>
-                <?php endif; ?>
-                <div class="fa-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                    <i class="fa <?php echo esc_attr( $fa ); ?> weather-fa-icon icon-color-<?php echo esc_attr( $icon_color_class_main ); ?>" aria-hidden="true"></i>
+            </div>
+        </div>
+        
+        <!-- BOTTOM SIDE: Dark Info -->
+        <div class="info-side">
+            <div class="today-info-container">
+                <div class="today-info">
+                    <?php if ( $showRain ) : ?>
+                    <div class="info-item">
+                        <span class="info-title"><i class="fa fa-tint" aria-hidden="true"></i> Chuva</span>
+                        <span class="info-value">
+                            <?php 
+                            if ( is_int( $header_prpct ) ) {
+                                echo esc_html( $header_prpct ) . ' %';
+                            } elseif ( is_float( $header_prsum ) ) {
+                                echo esc_html( round( $header_prsum, 1 ) ) . ' mm';
+                            } else {
+                                echo '0 %';
+                            }
+                            ?>
+                        </span>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ( ! is_null( $humidity ) ) : ?>
+                    <div class="info-item">
+                        <span class="info-title">Umidade</span>
+                        <span class="info-value"><?php echo esc_html( $humidity ); ?> %</span>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ( $showWind && is_numeric( $windspeed ) ) : ?>
+                    <div class="info-item">
+                        <span class="info-title"><i class="fa fa-flag" aria-hidden="true"></i> Vento</span>
+                        <span class="info-value"><?php echo esc_html( round( $windspeed ) ); ?> <?php echo esc_html( $wind_unit ); ?></span>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
-            <div class="current-info">
-                <div class="current-temp mb-2">
-                    <span class="temp-value"><?php echo esc_html( round( $temp ) ); ?></span>
-                    <span class="temp-unit"><?php echo esc_html( $temp_unit ); ?></span>
-                </div>
-                <div class="current-meta-inline mb-2">
-                    <?php if ( ! empty( $city ) ) : ?>
-                        <div class="city"><i class="fa fa-map-marker icon-color-primary mr-1" aria-hidden="true"></i> <?php echo esc_html( $city ); ?></div>
-                    <?php endif; ?>
-                    <div class="condition"><i class="fa fa-info-circle icon-color-accent mr-1" aria-hidden="true"></i> <?php echo esc_html( $desc ); ?></div>
-                </div>
-                <div class="meta-bottom d-flex align-items-center justify-content-center" style="gap: 8px; flex-wrap: nowrap;">
-                    <?php if ( $showWind && is_numeric( $windspeed ) ) : ?>
-                        <span class="badge badge-pill" style="background-color: #007bff; color: white; padding: 6px 12px; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
-                            <i class="fa fa-flag" aria-hidden="true"></i>
-                            <span><?php echo esc_html( round( $windspeed ) ); ?> <?php echo esc_html( $wind_unit ); ?></span>
-                        </span>
-                    <?php endif; ?>
-                    <?php
-                    // Show today precipitation probability or sum if available
-                    $header_prpct = null; $header_prsum = null;
-                    if ( ! empty( $data['daily'] ) && ! empty( $data['daily']['precipitation_probability_mean'] ) && isset( $data['daily']['precipitation_probability_mean'][0] ) ) {
-                        $header_prpct = intval( $data['daily']['precipitation_probability_mean'][0] );
-                    }
-                    if ( ( $header_prpct === null ) && ! empty( $data['daily'] ) && ! empty( $data['daily']['precipitation_sum'] ) && isset( $data['daily']['precipitation_sum'][0] ) ) {
-                        $header_prsum = floatval( $data['daily']['precipitation_sum'][0] );
-                    }
-                    if ( $showRain ) {
-                        if ( is_int( $header_prpct ) ) {
-                            echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 6px 12px; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"><i class="fa fa-tint" aria-hidden="true"></i> <span>' . esc_html( $header_prpct ) . '%</span></span>';
-                        } elseif ( is_float( $header_prsum ) ) {
-                            echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 6px 12px; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"><i class="fa fa-tint" aria-hidden="true"></i> <span>' . esc_html( round( $header_prsum, 1 ) ) . ' mm</span></span>';
+            
+            <?php if ( $showForecast ) : ?>
+            <!-- Forecast Slider (Slick) -->
+            <div class="week-container">
+                <div class="weather-forecast-slider">
+                    <?php 
+                    $daily = isset( $data['daily'] ) ? $data['daily'] : array();
+                    if ( ! empty( $daily ) && ! empty( $daily['time'] ) ) :
+                        $total_days = min( $forecastDays + 1, count( $daily['time'] ) );
+                        for ( $i = 0; $i < $total_days; $i++ ) {
+                            $date = sanitize_text_field( $daily['time'][$i] );
+                            $wcode = isset( $daily['weathercode'][$i] ) ? intval( $daily['weathercode'][$i] ) : 0;
+                            $tmax  = isset( $daily['temperature_2m_max'][$i] ) ? floatval( $daily['temperature_2m_max'][$i] ) : null;
+                            $tmin  = isset( $daily['temperature_2m_min'][$i] ) ? floatval( $daily['temperature_2m_min'][$i] ) : null;
+                            
+                            if ( $units === 'f' && is_numeric( $tmax ) ) {
+                                $tmax = round( ( $tmax * 9/5 ) + 32, 1 );
+                            }
+                            if ( $units === 'f' && is_numeric( $tmin ) ) {
+                                $tmin = round( ( $tmin * 9/5 ) + 32, 1 );
+                            }
+                            
+                            // Map weather code to icon
+                            $forecast_icon = 'fa-sun-o';
+                            $forecast_icon_class = 'clear';
+                            if ( in_array( $wcode, array(1,2,3,45,48), true ) ) { $forecast_icon = 'fa-cloud'; $forecast_icon_class = 'cloudy'; }
+                            elseif ( in_array( $wcode, array(51,53,55,56,57,61,63,65,66,67,80,81,82), true ) ) { $forecast_icon = 'fa-umbrella'; $forecast_icon_class = 'rain'; }
+                            elseif ( in_array( $wcode, array(71,73,75,77), true ) ) { $forecast_icon = 'fa-snowflake-o'; $forecast_icon_class = 'snow'; }
+                            elseif ( in_array( $wcode, array(95,96,99), true ) ) { $forecast_icon = 'fa-bolt'; $forecast_icon_class = 'storm'; }
+                            
+                            $day_date = new DateTime( $date );
+                            $day_short = date_i18n( 'D', $day_date->getTimestamp() );
+                            $day_full = date_i18n( 'j \d\e M', $day_date->getTimestamp() );
+                            $is_today = ( $i === 0 ) ? ' active' : '';
+                            ?>
+                            <div class="forecast-slide">
+                                <div class="forecast-day-card<?php echo esc_attr( $is_today ); ?>">
+                                    <div class="day-icon icon-<?php echo esc_attr( $forecast_icon_class ); ?>" style="position:relative;width:48px;height:48px;margin:0 auto 12px;">
+                                        <i class="fa <?php echo esc_attr( $forecast_icon ); ?>" aria-hidden="true"></i>
+                                    </div>
+                                    <span class="day-name"><?php echo esc_html( $day_short ); ?></span>
+                                    <span class="day-date"><?php echo esc_html( $day_full ); ?></span>
+                                    <div class="temps">
+                                        <span class="temp-max"><?php echo is_numeric( $tmax ) ? esc_html( round( $tmax ) ) . '°' : '-'; ?></span>
+                                        <span class="temp-min"><?php echo is_numeric( $tmin ) ? esc_html( round( $tmin ) ) . '°' : '-'; ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php
                         }
-                    }
+                    endif;
                     ?>
                 </div>
             </div>
+            
+            <script>
+            jQuery(document).ready(function($) {
+                if ( $('.weather-forecast-slider').length ) {
+                    $('.weather-forecast-slider').slick({
+                        slidesToShow: 2,
+                        slidesToScroll: 1,
+                        autoplay: true,
+                        autoplaySpeed: 2000,
+                        dots: true,
+                        arrows: false,
+                        infinite: true,
+                        speed: 300
+                    });
+                }
+            });
+            </script>
+            <?php endif; ?>
         </div>
-
-        <?php
-        // Forecast (next days) - Skip today (index 0), start from tomorrow (index 1)
-        if ( $showForecast ) :
-            $daily = isset( $data['daily'] ) ? $data['daily'] : array();
-            if ( ! empty( $daily ) && ! empty( $daily['time'] ) ) :
-                // Start from index 1 to skip today, add 1 to get the requested number of future days
-                $total_days = min( $forecastDays + 1, count( $daily['time'] ) );
-                echo '<div class="weather-forecast mt-3">';
-                echo '<div class="weather-forecast-slider">';
-                for ( $i = 1; $i < $total_days; $i++ ) {
-                    $date = sanitize_text_field( $daily['time'][$i] );
-                    $wcode = isset( $daily['weathercode'][$i] ) ? intval( $daily['weathercode'][$i] ) : 0;
-                    $tmax  = isset( $daily['temperature_2m_max'][$i] ) ? floatval( $daily['temperature_2m_max'][$i] ) : null;
-                    $tmin  = isset( $daily['temperature_2m_min'][$i] ) ? floatval( $daily['temperature_2m_min'][$i] ) : null;
-                    $prsum = isset( $daily['precipitation_sum'][$i] ) ? floatval( $daily['precipitation_sum'][$i] ) : null;
-                    $prpct = isset( $daily['precipitation_probability_mean'][$i] ) ? intval( $daily['precipitation_probability_mean'][$i] ) : null;
-                    $wmax  = isset( $daily['windspeed_10m_max'][$i] ) ? floatval( $daily['windspeed_10m_max'][$i] ) : null;
-
-                    // Convert units if needed
-                    if ( $units === 'f' ) {
-                        if ( is_numeric( $tmax ) ) $tmax = round( ( $tmax * 9/5 ) + 32 );
-                        if ( is_numeric( $tmin ) ) $tmin = round( ( $tmin * 9/5 ) + 32 );
-                    } else {
-                        if ( is_numeric( $tmax ) ) $tmax = round( $tmax );
-                        if ( is_numeric( $tmin ) ) $tmin = round( $tmin );
-                    }
-
-                    // Simple daily icon mapping
-                    $d_fa = 'fa-sun-o';
-                    if ( in_array( $wcode, array(1,2,3), true ) ) $d_fa = 'fa-cloud';
-                    elseif ( in_array( $wcode, array(61,63,65,66,67,80,81,82), true ) ) $d_fa = 'fa-umbrella';
-                    elseif ( in_array( $wcode, array(71,73,75,77), true ) ) $d_fa = 'fa-snowflake-o';
-                    elseif ( in_array( $wcode, array(95,96,99), true ) ) $d_fa = 'fa-bolt';
-                    $d_color = ( in_array( $wcode, array(61,63,65,66,67,80,81,82,95,96,99), true ) ) ? 'accent' : 'primary';
-
-                    echo '<div class="forecast-day small p-3 border rounded">';
-                    echo '<div class="d-flex align-items-center mb-1">';
-                    echo '<i class="fa ' . esc_attr( $d_fa ) . ' mr-2 icon-color-' . esc_attr( $d_color ) . '" aria-hidden="true"></i>';
-                    echo '<span class="day-name">' . esc_html( date_i18n( 'l', strtotime( $date ) ) ) . '</span>';
-                    echo '<span class="day-date ml-2">' . esc_html( date_i18n( 'j/m', strtotime( $date ) ) ) . '</span>';
-                    echo '</div>';
-                    // Temps inline com badges
-                    echo '<div class="mb-1 metrics temps d-flex align-items-center" style="gap: 6px; flex-wrap: wrap;">';
-                    echo '<span class="badge badge-pill" style="background-color: #ffc107; color: #333; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-thermometer-full" aria-hidden="true"></i> Máx: ' . ( is_numeric( $tmax ) ? esc_html( $tmax ) . '°' : '-' ) . '</span>';
-                    echo '<span class="badge badge-pill" style="background-color: #ffc107; color: #333; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-thermometer-empty" aria-hidden="true"></i> Mín: ' . ( is_numeric( $tmin ) ? esc_html( $tmin ) . '°' : '-' ) . '</span>';
-                    echo '</div>';
-                    // Rain & Wind badges inline
-                    echo '<div class="mb-1 metrics d-flex align-items-center" style="gap: 6px; flex-wrap: wrap;">';
-                    if ( is_numeric( $prpct ) ) echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-tint" aria-hidden="true"></i> ' . esc_html( $prpct ) . '%</span>';
-                    elseif ( is_numeric( $prsum ) ) echo '<span class="badge badge-pill" style="background-color: #17a2b8; color: white; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-tint" aria-hidden="true"></i> ' . esc_html( round( $prsum, 1 ) ) . ' mm</span>';
-                    if ( is_numeric( $wmax ) ) echo '<span class="badge badge-pill" style="background-color: #007bff; color: white; padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-flag" aria-hidden="true"></i> ' . esc_html( round( $wmax ) ) . ' ' . esc_html( $wind_unit ) . '</span>';
-                    echo '</div>';
-                echo '</div>';
-            }
-            echo '</div>';
-            echo '</div>';
-            endif;
-        endif;
-        ?>
     </div>
     <?php
     return ob_get_clean();

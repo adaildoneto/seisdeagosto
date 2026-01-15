@@ -1,0 +1,56 @@
+{
+    "apiVersion": 2,
+    "name": "u-correio68/titulo-com-icone",
+    "title": "CTA",
+    "category": "layout",
+    "icon": "heading",
+    "description": "Bloco de título com ícone à esquerda e linha animada no hover.",
+    "attributes": {
+        "titulo": {
+            "type": "string",
+            "default": "CTA"
+        },
+        "icone": {
+            "type": "string",
+            "default": "fa-star"
+        },
+        "corIcone": {
+            "type": "string",
+            "default": "#fd7e14"
+        },
+        "corLinha": {
+            "type": "string",
+            "default": "#fd7e14"
+        },
+        "tamanhoIcone": {
+            "type": "number",
+            "default": 24
+        },
+        "tamanhoTitulo": {
+            "type": "number",
+            "default": 28
+        },
+        "espessuraLinha": {
+            "type": "number",
+            "default": 3
+        },
+        "alinhamento": {
+            "type": "string",
+            "default": "left"
+        }
+    },
+    "example": {
+        "attributes": {
+            "titulo": "Título com Ícone",
+            "icone": "fa-star",
+            "corIcone": "#fd7e14",
+            "corLinha": "#fd7e14"
+        }
+    },
+    "supports": {
+        "color": { "text": true, "background": true },
+        "spacing": { "margin": true, "padding": true },
+        "typography": { "fontSize": true, "fontWeight": true }
+    },
+    "renderCallback": "u_correio68_render_titulo_com_icone"
+}

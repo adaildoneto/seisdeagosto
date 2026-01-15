@@ -17,6 +17,14 @@
         "category": {
             "type": "string",
             "default": ""
+        },
+        "tags": {
+            "type": "string",
+            "default": ""
+        },
+        "keyword": {
+            "type": "string",
+            "default": ""
         }
     },
     "example": {

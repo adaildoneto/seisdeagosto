@@ -1,0 +1,39 @@
+/* Titulo com Icone Block - Editor Styles */
+
+.block-editor-block-list__block[data-type="u-correio68/titulo-com-icone"] {
+    margin: 16px 0;
+}
+
+.titulo-com-icone-wrapper {
+    position: relative;
+    padding: 12px 0;
+    transition: all 0.2s ease;
+}
+
+.titulo-com-icone-wrapper:hover {
+    opacity: 0.95;
+}
+
+.titulo-com-icone-icon i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.titulo-com-icone-line-wrapper {
+    display: inline-block;
+}
+
+.titulo-com-icone-titulo {
+    display: inline-block;
+    line-height: 1.2;
+    color: #333;
+}
+
+.titulo-com-icone-line {
+    border-radius: 2px;
+}
+
+.wp-block-u-correio68-titulo-com-icone {
+    width: 100%;
+}

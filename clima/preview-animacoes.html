@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview - Animações de Clima</title>
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Raleway+Dots);
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Raleway Dots', cursive;
+            padding: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .weather-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .weather-preview h3 {
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Wrapper para animação */
+        .wrapper {
+            width: 150px;
+            height: 150px;
+            position: relative;
+        }
+
+        /* SOL */
+        .sun {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 85px;
+            height: 85px;
+            background: #f9db62;
+            border-radius: 360px;
+            opacity: 1;
+            animation: sun 10s 0s linear infinite;
+        }
+
+        /* NUVEM */
+        .cloud {
+            position: absolute;
+            bottom: 12px;
+            left: 8px;
+            z-index: 2;
+            opacity: 0;
+            animation: cloud 10s 0s linear infinite;
+        }
+
+        .cloud .cloud1:not(.c_shadow) ul li {
+            animation: cloudi 10s 0.1s linear infinite;
+        }
+
+        .cloud .cloud1:not(.c_shadow):before {
+            animation: cloudi 10s 0s linear infinite;
+        }
+
+        .cloud_s {
+            position: absolute;
+            bottom: 70px;
+            left: 150px;
+            transform: scale(0.7, 0.7) matrix(-1, 0, 0, 1, 0, 0);
+            z-index: 1;
+            opacity: 0;
+            animation: cloud_s 10s 0s linear infinite;
+        }
+
+        .cloud_s .c_shadow {
+            transform: scale(1.02, 1.02);
+        }
+
+        .cloud_vs {
+            position: absolute;
+            bottom: 90px;
+            left: 30px;
+            transform: scale(0.5, 0.5);
+            z-index: 0;
+            opacity: 0;
+            animation: cloud_vs 10s 0s linear infinite;
+        }
+
+        .c_shadow {
+            z-index: 4 !important;
+            left: -5px;
+            bottom: -3px !important;
+        }
+
+        .c_shadow:before {
+            background: #667eea !important;
+        }
+
+        .c_shadow ul li {
+            width: 60px !important;
+            height: 60px !important;
+            background: #667eea !important;
+            float: left;
+            position: absolute;
+            bottom: -2px !important;
+            border-radius: 360px;
+        }
+
+        .c_shadow ul li:nth-child(2) {
+            width: 80px !important;
+            height: 80px !important;
+            background: #667eea !important;
+            float: left;
+            border-radius: 360px;
+            position: absolute;
+            bottom: 16px !important;
+            left: 25px !important;
+        }
+
+        .c_shadow ul li:nth-child(3) {
+            width: 70px !important;
+            height: 70px !important;
+            background: #667eea !important;
+            float: left;
+            border-radius: 360px;
+            position: absolute;
+            bottom: 6px !important;
+            left: 60px !important;
+        }
+
+        .c_shadow ul li:last-child {
+            width: 60px !important;
+            height: 60px !important;
+            background: #667eea !important;
+            float: left;
+            border-radius: 360px;
+            position: absolute;
+            bottom: 0px;
+            left: 90px;
+        }
+
+        .cloud1 {
+            position: absolute;
+            bottom: 0px;
+            z-index: 5;
+        }
+
+        .cloud1:before {
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            left: 28px;
+            width: 90px;
+            height: 20px;
+            background: #fff;
+        }
+
+        .cloud1 ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .cloud1 ul li {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            float: left;
+            border-radius: 360px;
+        }
+
+        .cloud1 ul li:nth-child(2) {
+            width: 70px;
+            height: 70px;
+            background: #fff;
+            float: left;
+            border-radius: 360px;
+            position: absolute;
+            bottom: 18px;
+            left: 25px;
+        }
+
+        .cloud1 ul li:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            float: left;
+            border-radius: 360px;
+            position: absolute;
+            bottom: 8px;
+            left: 60px;
+        }
+
+        .cloud1 ul li:last-child {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            float: left;
+            border-radius: 360px;
+            position: absolute;
+            bottom: 0px;
+            left: 90px;
+        }
+
+        /* CHUVA */
+        .rain {
+            position: absolute;
+            bottom: 0px;
+            left: 25px;
+        }
+
+        .rain ul {
+            list-style: none;
+            margin: 0;
+            padding: 0px;
+        }
+
+        .rain ul li {
+            float: left;
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            margin-left: 20px;
+            background: #6ab9e9;
+            height: 40px;
+            width: 10px;
+            border-radius: 360px;
+            transform: rotate(35deg);
+            opacity: 0;
+        }
+
+        .rain ul li:first-child {
+            animation: raini 10s 0s linear infinite;
+        }
+
+        .rain ul li:nth-child(2) {
+            animation: rainii 10s 0.2s linear infinite;
+        }
+
+        .rain ul li:last-child {
+            animation: rainiii 10s 0.4s linear infinite;
+        }
+
+        /* TROVÃO */
+        .thunder {
+            position: absolute;
+            bottom: 100px;
+            left: 65px;
+            width: 12px;
+            height: 12px;
+            background: #f9db62;
+            transform: skew(-25deg);
+            opacity: 0;
+            animation: thunder 10s 0s linear infinite;
+        }
+
+        .thunder:before {
+            content: '';
+            position: absolute;
+            top: 11px;
+            left: 0px;
+            width: 25px;
+            height: 8px;
+            background: #f9db62;
+        }
+
+        .thunder:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            top: 18px;
+            right: -14px;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 20px solid #f9db62;
+            transform: skew(5deg);
+        }
+
+        /* NEVE */
+        .sleet {
+            position: absolute;
+            bottom: 0px;
+            left: 25px;
+        }
+
+        .sleet ul {
+            list-style: none;
+            margin: 0;
+            padding: 0px;
+        }
+
+        .sleet ul li {
+            float: left;
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            margin-left: 20px;
+            background: #fff;
+            height: 40px;
+            width: 10px;
+            border-radius: 360px;
+            transform: rotate(35deg);
+            opacity: 0;
+        }
+
+        .sleet ul li:first-child {
+            animation: raini 10s 1.0s linear infinite;
+        }
+
+        .sleet ul li:nth-child(2) {
+            animation: rainii 10s 1.4s linear infinite;
+        }
+
+        .sleet ul li:last-child {
+            animation: rainiii 10s 1.6s linear infinite;
+        }
+
+        /* ANIMAÇÕES */
+        @keyframes sun {
+            0% {
+                opacity: 1;
+                bottom: 35px;
+                right: 35px;
+            }
+            4% {
+                bottom: 80px;
+                right: 80px;
+            }
+            4.5% {
+                bottom: 75px;
+                right: 75px;
+                opacity: 1;
+            }
+            40% {
+                opacity: 1;
+            }
+            41% {
+                bottom: 75px;
+                right: 75px;
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+                bottom: 0px;
+                right: 0px;
+            }
+        }
+
+        @keyframes cloud {
+            0% {
+                transform: scale(0.8);
+                left: 120px;
+                bottom: 35px;
+                opacity: 0;
+            }
+            2% {
+                opacity: 1;
+            }
+            3.5% {
+                bottom: 35px;
+                left: 10px;
+                opacity: 1;
+            }
+            16% {
+                transform: scale(0.8);
+            }
+            18% {
+                transform: scale(0.95);
+            }
+            19% {
+                transform: scale(0.9);
+            }
+            48% {
+                opacity: 1;
+                bottom: 35px;
+            }
+            50% {
+                bottom: 70px;
+            }
+            64% {}
+            96% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                bottom: 70px;
+                left: 10px;
+            }
+        }
+
+        @keyframes cloud_s {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+                bottom: 40px;
+                left: 18px;
+            }
+            23% {
+                opacity: 0;
+            }
+            24% {
+                opacity: 1;
+                bottom: 40px;
+                left: 30px;
+            }
+            28% {
+                opacity: 1;
+                bottom: 85px;
+                left: 60px;
+            }
+            32% {
+                transform: scale(0.6);
+            }
+            34% {
+                transform: scale(0.75);
+            }
+            35% {
+                transform: scale(0.7);
+            }
+            48% {
+                opacity: 1;
+            }
+            49% {
+                opacity: 0;
+            }
+            100% {
+                transform: scale(0.7);
+                opacity: 0;
+                bottom: 85px;
+                left: 60px;
+            }
+        }
+
+        @keyframes cloud_vs {
+            0% {
+                opacity: 0;
+                bottom: 85px;
+                left: 60px;
+            }
+            39% {
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+                bottom: 85px;
+                left: 60px;
+            }
+            42% {
+                bottom: 125px;
+                left: 10px;
+            }
+            43% {
+                bottom: 120px;
+                left: 15px;
+            }
+            48% {
+                opacity: 1;
+            }
+            49% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+                bottom: 120px;
+                left: 15px;
+            }
+        }
+
+        @keyframes cloudi {
+            0% {
+                background: #fff;
+            }
+            56% {
+                background: #fff;
+            }
+            57% {
+                background: #92a4b6;
+            }
+            100% {
+                background: #92a4b6;
+            }
+        }
+
+        @keyframes thunder {
+            0% {
+                opacity: 0;
+                bottom: 100px;
+                left: 65px;
+            }
+            62% {
+                opacity: 0;
+                bottom: 100px;
+                left: 65px;
+            }
+            64% {
+                opacity: 1;
+                bottom: 50px;
+                left: 60px;
+            }
+            65% {
+                opacity: 1;
+                bottom: 55px;
+                left: 61px;
+            }
+            72% {
+                opacity: 1;
+                bottom: 55px;
+                left: 61px;
+            }
+            73% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+                bottom: 55px;
+            }
+        }
+
+        @keyframes raini {
+            0% {
+                opacity: 0;
+                bottom: 100px;
+                left: 60px;
+            }
+            72% {
+                opacity: 0;
+                bottom: 100px;
+                left: 60px;
+            }
+            73% {
+                opacity: 1;
+                bottom: 15px;
+                left: 50px;
+            }
+            74% {
+                opacity: 1;
+                bottom: 25px;
+                left: 52px;
+            }
+            80% {
+                opacity: 1;
+                bottom: 25px;
+                left: 52px;
+            }
+            81% {
+                opacity: 0;
+                bottom: -15px;
+                left: 6px;
+            }
+            100% {
+                opacity: 0;
+                bottom: 20px;
+            }
+        }
+
+        @keyframes rainii {
+            0% {
+                opacity: 0;
+                bottom: 100px;
+                left: 30px;
+            }
+            72% {
+                opacity: 0;
+                bottom: 100px;
+                left: 30px;
+            }
+            73% {
+                opacity: 1;
+                bottom: 15px;
+                left: 20px;
+            }
+            74% {
+                opacity: 1;
+                bottom: 25px;
+                left: 22px;
+            }
+            80% {
+                opacity: 1;
+                bottom: 25px;
+                left: 22px;
+            }
+            81% {
+                opacity: 0;
+                bottom: -15px;
+                left: -6px;
+            }
+            100% {
+                opacity: 0;
+                bottom: 20px;
+            }
+        }
+
+        @keyframes rainiii {
+            0% {
+                opacity: 0;
+                bottom: 100px;
+                left: 0px;
+            }
+            72% {
+                opacity: 0;
+                bottom: 100px;
+                left: 0px;
+            }
+            73% {
+                opacity: 1;
+                bottom: 15px;
+                left: -10px;
+            }
+            74% {
+                opacity: 1;
+                bottom: 25px;
+                left: -8px;
+            }
+            80% {
+                opacity: 1;
+                bottom: 25px;
+                left: -8px;
+            }
+            81% {
+                opacity: 0;
+                bottom: -15px;
+                left: -28px;
+            }
+            100% {
+                opacity: 0;
+                bottom: 20px;
+            }
+        }
+
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            max-width: 800px;
+            color: #333;
+        }
+
+        .info h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .info h3 {
+            color: #764ba2;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .info p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .info ul {
+            margin-left: 20px;
+        }
+
+        .info li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div class="container">
+            <!-- SOL - CLARO -->
+            <div class="weather-preview">
+                <h3>☀️ Claro</h3>
+                <div class="wrapper">
+                    <div class="sun"></div>
+                </div>
+            </div>
+
+            <!-- NUVEM - NUBLADO -->
+            <div class="weather-preview">
+                <h3>☁️ Nublado</h3>
+                <div class="wrapper">
+                    <div class="cloud">
+                        <div class="cloud1">
+                            <ul>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="cloud1 c_shadow">
+                            <ul>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="cloud_s">
+                        <div class="cloud1">
+                            <ul>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="cloud1 c_shadow">
+                            <ul>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHUVA -->
+            <div class="weather-preview">
+                <h3>🌧️ Chuva</h3>
+                <div class="wrapper">
+                    <div class="rain">
+                        <ul>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TROVÃO - TEMPESTADE -->
+            <div class="weather-preview">
+                <h3>⚡ Tempestade</h3>
+                <div class="wrapper">
+                    <div class="thunder"></div>
+                </div>
+            </div>
+
+            <!-- NEVE -->
+            <div class="weather-preview">
+                <h3>❄️ Neve</h3>
+                <div class="wrapper">
+                    <div class="sleet">
+                        <ul>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h2>📋 Análise e Possibilidades de Integração</h2>
+            
+            <h3>✅ O que pode ser adaptado para o bloco de clima:</h3>
+            <ul>
+                <li><strong>Animações de Sol:</strong> Perfeito para substituir o ícone estático em dias claros</li>
+                <li><strong>Nuvens animadas:</strong> Movimento suave e realista para dias nublados</li>
+                <li><strong>Chuva cascata:</strong> Gotas caindo em padrão natural para dias chuvosos</li>
+                <li><strong>Trovão intermitente:</strong> Flash que acende e apaga para tempestades</li>
+                <li><strong>Neve caindo:</strong> Partículas suaves descendo para dias com neve</li>
+            </ul>
+
+            <h3>🔧 Adaptações necessárias:</h3>
+            <ul>
+                <li>Redimensionar animações de 150x150px para 48x48px (tamanho do ícone atual)</li>
+                <li>Ajustar cores para corresponder ao tema (azul principal #0a4579, laranja #ec940d)</li>
+                <li>Otimizar animações para melhor performance em telas pequenas</li>
+                <li>Manter compatibilidade com os dados dinâmicos do WordPress</li>
+                <li>Adicionar suporte para modo claro/escuro se necessário</li>
+            </ul>
+
+            <h3>💡 Recomendação:</h3>
+            <p>
+                Use uma abordagem híbrida: mantenha a estrutura CSS atual do tema que já está funcionando bem,
+                mas enriqueça os ícones com essas animações para casos específicos (principalmente sol, chuva e trovão).
+                As nuvens e neve podem ser versões simplificadas das animações aqui mostradas para não sobrecarregar o design.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

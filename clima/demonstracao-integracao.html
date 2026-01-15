@@ -1,0 +1,617 @@
+<!-- 
+========================================
+WEATHER BLOCK - INTEGRAÇÃO COMPLETA
+PASSO 1: Simplify | PASSO 2: Optimize | PASSO 3: WordPress Compatibility
+========================================
+-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Block - Integração WordPress</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .integration-info {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .integration-info h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+            font-size: 0.9rem;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: #2196F3;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            margin: 3px;
+            font-size: 0.85rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .weather-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .weather-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        /* PASSO 3 - CSS Animations (Optimized for 48x48px) */
+        .weather-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== SOL (Clear) ===== */
+        .weather-icon.icon-clear .icon-base {
+            background: #f9db62;
+            opacity: 0.15;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .weather-icon.icon-clear .sun {
+            width: 24px;
+            height: 24px;
+            background: #f9db62;
+            border-radius: 50%;
+            position: absolute;
+            animation: sunPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* ===== NUVEM (Cloudy) ===== */
+        .weather-icon.icon-cloudy .icon-base {
+            background: #95a5a6;
+            opacity: 0.12;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .weather-icon.icon-cloudy .cloud {
+            position: absolute;
+            width: 28px;
+            height: 14px;
+            background: #95a5a6;
+            border-radius: 6px;
+            animation: cloudFloat 3s ease-in-out infinite;
+        }
+
+        .weather-icon.icon-cloudy .cloud::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #95a5a6;
+            border-radius: 50%;
+            top: -6px;
+            left: 4px;
+        }
+
+        .weather-icon.icon-cloudy .cloud::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #95a5a6;
+            border-radius: 50%;
+            top: -5px;
+            right: 4px;
+        }
+
+        @keyframes cloudFloat {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(2px); }
+        }
+
+        /* ===== CHUVA (Rain) ===== */
+        .weather-icon.icon-rain .icon-base {
+            background: #6ab9e9;
+            opacity: 0.12;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .weather-icon.icon-rain .rain {
+            position: absolute;
+            width: 32px;
+            height: 20px;
+            animation: rainFall 0.8s linear infinite;
+        }
+
+        .weather-icon.icon-rain .rain::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 4px;
+            background: #6ab9e9;
+            border-radius: 1px;
+            box-shadow: 
+                4px -2px 0 #6ab9e9,
+                8px -4px 0 #6ab9e9,
+                12px -2px 0 #6ab9e9,
+                16px -4px 0 #6ab9e9,
+                0px 8px 0 #6ab9e9,
+                4px 6px 0 #6ab9e9,
+                8px 8px 0 #6ab9e9,
+                12px 6px 0 #6ab9e9;
+        }
+
+        @keyframes rainFall {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(16px); }
+        }
+
+        /* ===== TROVÃO (Storm) ===== */
+        .weather-icon.icon-storm .icon-base {
+            background: #8e44ad;
+            opacity: 0.15;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .weather-icon.icon-storm .thunder {
+            position: absolute;
+            width: 6px;
+            height: 10px;
+            background: #f9db62;
+            top: 8px;
+            left: 10px;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: thunderFlash 1.8s ease-in-out infinite;
+        }
+
+        @keyframes thunderFlash {
+            0%, 10%, 15%, 20%, 100% { opacity: 0; }
+            11%, 14%, 19% { opacity: 1; background: #f9db62; }
+            12%, 18% { opacity: 0.5; background: #8e44ad; }
+        }
+
+        /* ===== VENTO (Wind) ===== */
+        .weather-icon.icon-rain .wind,
+        .weather-icon.icon-cloudy .wind {
+            position: absolute;
+            width: 32px;
+            height: 14px;
+            animation: windFlow 1.8s ease-in-out infinite;
+        }
+
+        .weather-icon.icon-rain .wind::before,
+        .weather-icon.icon-cloudy .wind::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #95a5a6;
+            top: 2px;
+            border-radius: 1px;
+            box-shadow: 0 6px 0 #95a5a6, 0 12px 0 #95a5a6;
+        }
+
+        @keyframes windFlow {
+            0% { transform: translateX(0); }
+            50% { opacity: 0.85; }
+            100% { transform: translateX(64px); }
+        }
+
+        /* ===== NEVE (Snow) ===== */
+        .weather-icon.icon-snow .icon-base {
+            background: #bdc3c7;
+            opacity: 0.12;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .weather-icon.icon-snow .snow {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            animation: snowFall 1.8s ease-in infinite;
+        }
+
+        .weather-icon.icon-snow .snow::before {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            left: 4px;
+            top: -2px;
+            animation: snowFall 1.8s ease-in infinite 0.3s;
+        }
+
+        .weather-icon.icon-snow .snow::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            left: 8px;
+            top: -4px;
+            animation: snowFall 1.8s ease-in infinite 0.6s;
+        }
+
+        @keyframes snowFall {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(14px); opacity: 0; }
+        }
+
+        .weather-info {
+            margin-top: 15px;
+        }
+
+        .weather-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .temp {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .condition {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin: 5px 3px;
+        }
+
+        .badge.rain {
+            background: #17a2b8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .weather-icon {
+                width: 48px;
+                height: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌦️ Weather Block - Integração Completa</h1>
+
+        <div class="integration-info">
+            <h2>Status da Integração</h2>
+            <div style="margin-bottom: 20px;">
+                <span class="status-badge">✅ PASSO 1: Simplificado</span>
+                <span class="status-badge">✅ PASSO 2: Otimizado 48x48px</span>
+                <span class="status-badge">✅ PASSO 3: Compatibilidade WordPress</span>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <strong>Arquivos Modificados:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><code>css/theme.css</code> - Linhas 1640-1910 (Animações CSS otimizadas)</li>
+                    <li><code>inc/blocks.php</code> - Linha 1431 (Mapeamento mist → cloudy)</li>
+                    <li><code>clima/INTEGRACAO-WORDPRESS.md</code> - Documentação completa</li>
+                </ul>
+            </div>
+
+            <div>
+                <strong>Códigos Meteorológicos Suportados:</strong>
+                <div class="code-block">
+// Open-Meteo API Integration
+- 0      → ☀️ Céu Limpo
+- 1-3    → ☁️ Nublado/Parcialmente Nublado
+- 45-48  → ☁️ Neblina (mapeado para cloudy)
+- 51-67  → 🌧️ Chuva/Garoa
+- 71-77  → ❄️ Neve
+- 80-82  → 🌧️ Aguaceiros
+- 95-99  → ⛈️ Trovoadas
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- SOL -->
+            <div class="weather-card">
+                <h3>☀️ Céu Limpo</h3>
+                <div class="weather-icon icon-clear">
+                    <div class="icon-base"></div>
+                    <div class="sun"></div>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">25°C</div>
+                    <div class="condition">Céu limpo</div>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #999;">
+                        <span class="step-badge">PASSO 1: scale 1.1→1.08</span>
+                        <span class="step-badge">PASSO 2: 28px→24px</span>
+                        <span class="step-badge">PASSO 3: #f9db62</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NUVEM -->
+            <div class="weather-card">
+                <h3>☁️ Nublado</h3>
+                <div class="weather-icon icon-cloudy">
+                    <div class="icon-base"></div>
+                    <div class="cloud"></div>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">18°C</div>
+                    <div class="condition">Nublado</div>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #999;">
+                        <span class="step-badge">PASSO 1: -2px float</span>
+                        <span class="step-badge">PASSO 2: 36px→28px</span>
+                        <span class="step-badge">PASSO 3: #95a5a6</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHUVA -->
+            <div class="weather-card">
+                <h3>🌧️ Chuva</h3>
+                <div class="weather-icon icon-rain">
+                    <div class="icon-base"></div>
+                    <div class="rain"></div>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">15°C</div>
+                    <div class="condition">Chuva moderada</div>
+                    <span class="badge rain">60% precipitação</span>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #999;">
+                        <span class="step-badge">PASSO 1: 16→8 drops</span>
+                        <span class="step-badge">PASSO 2: 36px→32px</span>
+                        <span class="step-badge">PASSO 3: #6ab9e9</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TROVÃO -->
+            <div class="weather-card">
+                <h3>⛈️ Trovoada</h3>
+                <div class="weather-icon icon-storm">
+                    <div class="icon-base"></div>
+                    <div class="thunder"></div>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">14°C</div>
+                    <div class="condition">Trovoada severa</div>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #999;">
+                        <span class="step-badge">PASSO 1: skew -12deg</span>
+                        <span class="step-badge">PASSO 2: 8px→6px</span>
+                        <span class="step-badge">PASSO 3: #8e44ad</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEVE -->
+            <div class="weather-card">
+                <h3>❄️ Neve</h3>
+                <div class="weather-icon icon-snow">
+                    <div class="icon-base"></div>
+                    <div class="snow"></div>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">-5°C</div>
+                    <div class="condition">Neve</div>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #999;">
+                        <span class="step-badge">PASSO 1: 4→3px</span>
+                        <span class="step-badge">PASSO 2: Fall suave</span>
+                        <span class="step-badge">PASSO 3: #bdc3c7</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VENTO -->
+            <div class="weather-card">
+                <h3>💨 Ventoso</h3>
+                <div class="weather-icon icon-cloudy">
+                    <div class="icon-base"></div>
+                    <div class="wind"></div>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">20°C</div>
+                    <div class="condition">Ventoso</div>
+                    <span class="badge">32 km/h</span>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #999;">
+                        <span class="step-badge">PASSO 1: 80→64px</span>
+                        <span class="step-badge">PASSO 2: Flow otimizado</span>
+                        <span class="step-badge">PASSO 3: #95a5a6</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="integration-info" style="margin-top: 40px;">
+            <h2>Estrutura HTML WordPress</h2>
+            <p style="color: #666; margin-bottom: 15px;">
+                O bloco renderiza a seguinte estrutura HTML com as classes CSS corretas:
+            </p>
+            <div class="code-block">
+&lt;div class="weather-block minimal card spaces p-3 weather-eyecandy"&gt;
+    &lt;div class="current-wrap d-flex flex-column align-items-center"&gt;
+        
+        &lt;!-- Ícone com Animação --&gt;
+        &lt;div class="weather-icon icon-[clear|cloudy|rain|storm|snow]" 
+             style="position:relative;width:56px;height:56px;"&gt;
+            
+            &lt;div class="icon-base" style="position:absolute;inset:0;"&gt;&lt;/div&gt;
+            &lt;div class="rain" style="position:absolute;inset:0;"&gt;&lt;/div&gt;
+            &lt;div class="wind" style="position:absolute;inset:0;"&gt;&lt;/div&gt;
+            
+            &lt;div class="fa-overlay" style="position:absolute;inset:0;display:flex;..."&gt;
+                &lt;i class="fa fa-sun-o weather-fa-icon"&gt;&lt;/i&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="current-temp"&gt;25&lt;span class="temp-unit"&gt;°C&lt;/span&gt;&lt;/div&gt;
+        &lt;div class="condition"&gt;Céu limpo&lt;/div&gt;
+        &lt;div class="city"&gt;Rio Branco&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+            </div>
+
+            <h2 style="margin-top: 30px;">Cores e Opacidades</h2>
+            <div class="code-block">
+/* PASSO 3 - WordPress Compatibility Color Mapping */
+
+.weather-block .icon-clear .icon-base 
+    { background: #f9db62; opacity: .15; }  /* Sol - Amarelo */
+
+.weather-block .icon-cloudy .icon-base 
+    { background: #95a5a6; opacity: .12; }  /* Nuvem - Cinza */
+
+.weather-block .icon-rain .icon-base 
+    { background: #6ab9e9; opacity: .12; }  /* Chuva - Azul */
+
+.weather-block .icon-storm .icon-base 
+    { background: #8e44ad; opacity: .15; }  /* Trovão - Roxo */
+
+.weather-block .icon-snow .icon-base 
+    { background: #bdc3c7; opacity: .12; }  /* Neve - Cinza Claro */
+            </div>
+
+            <h2 style="margin-top: 30px;">Performance</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                <div style="padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                    <strong>✅ CSS Animations</strong>
+                    <p style="color: #666; margin-top: 10px;">GPU-aceleradas, 60fps suave</p>
+                </div>
+                <div style="padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                    <strong>✅ Sem JavaScript</strong>
+                    <p style="color: #666; margin-top: 10px;">Animações puras CSS</p>
+                </div>
+                <div style="padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                    <strong>✅ Otimizado Mobile</strong>
+                    <p style="color: #666; margin-top: 10px;">48x48px em dispositivos pequenos</p>
+                </div>
+                <div style="padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                    <strong>✅ Compatível</strong>
+                    <p style="color: #666; margin-top: 10px;">Chrome, Firefox, Safari, Edge</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="integration-info" style="margin-top: 40px;">
+            <h2>🚀 Próximos Passos</h2>
+            <ul style="color: #666; margin-left: 20px; line-height: 1.8;">
+                <li>Abra o WordPress e adicione o bloco "Previsão do Tempo"</li>
+                <li>Configure a cidade e coordenadas</li>
+                <li>Ative "Show Wind" e "Show Rain"</li>
+                <li>Visualize as animações em ação!</li>
+                <li>Teste em diferentes resoluções (desktop, tablet, mobile)</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; color: white; margin-top: 40px; font-size: 0.9rem;">
+            <p>Weather Block Integration - SeisdeAgosto Theme</p>
+            <p>Integração Concluída: 14 de Janeiro de 2026</p>
+        </div>
+    </div>
+</body>
+</html>
