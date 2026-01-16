@@ -59,7 +59,7 @@ function u_correio68_render_lista_noticias($attributes) {
                     if ( !empty($chamada) ) : ?>
                         <div class="mb-2">
                             <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
-                                <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                <i class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></i> 
                                 <span><?php echo esc_html($chamada); ?></span>
                             </span>
                         </div>

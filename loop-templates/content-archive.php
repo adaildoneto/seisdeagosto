@@ -10,7 +10,7 @@
                     <?php while ( have_posts() ) : the_post(); ?>
                         <?php PG_Helper::rememberShownPost(); ?>
                         <div <?php post_class( 'col-md-4 spaces' ); ?> id="post-<?php the_ID(); ?>">
-                            <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo get_field( 'cor' ); ?> !important;"> <ion-icon class="<?php echo get_field( 'icones' ); ?>"></ion-icon> <span><?php echo get_field( 'chamada' ); ?></span></span>
+                            <?php u_correio68_the_badge(); ?>
                             <div class="card"> 
                                 <?php echo PG_Image::getPostImage( null, 'destaque', array(
                                         'class' => 'card-img-top img-d img-fluid'

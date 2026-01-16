@@ -53,7 +53,7 @@ function u_correio68_render_destaque_pequeno($attributes) {
                         $chamada = function_exists('get_field') ? get_field('chamada') : '';
                         if ( !empty($chamada) ) : ?>
                             <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
-                                <ion-icon class="<?php echo esc_attr($icones); ?>"></ion-icon> 
+                                <i class="<?php echo esc_attr($icones); ?>"></i> 
                                 <span><?php echo esc_html($chamada); ?></span>
                             </span>
                         <?php endif; ?>

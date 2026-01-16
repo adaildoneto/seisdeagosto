@@ -99,7 +99,7 @@ class UbberCorreio68_Destaques_Widget extends WP_Widget {
                                             $chamada = get_field( 'chamada' );
                                             if ( $chamada ) : ?>
                                                 <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
-                                                    <ion-icon class="<?php echo esc_attr($icones); ?>"></ion-icon> 
+                                                    <i class="<?php echo esc_attr($icones); ?>"></i> 
                                                     <span><?php echo esc_html($chamada); ?></span>
                                                 </span>
                                                 <br>
@@ -137,7 +137,7 @@ class UbberCorreio68_Destaques_Widget extends WP_Widget {
                                                 $chamada = get_field( 'chamada' );
                                                 if ( $chamada ) : ?>
                                                     <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
-                                                        <ion-icon class="<?php echo esc_attr($icones); ?>"></ion-icon> 
+                                                        <i class="<?php echo esc_attr($icones); ?>"></i> 
                                                         <span><?php echo esc_html($chamada); ?></span>
                                                     </span>
                                                 <?php endif; ?>

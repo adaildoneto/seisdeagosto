@@ -2,7 +2,7 @@
     "apiVersion": 2,
     "name": "u-correio68/destaque-grande",
     "title": "Destaque Grande",
-    "category": "widgets",
+    "category": "seisdeagosto",
     "icon": "star-filled",
     "description": "Bloco de destaque grande para a home.",
     "attributes": {

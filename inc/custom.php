@@ -310,6 +310,9 @@ add_filter('wp', 'st2_jetpackme_remove_rp', 20);
 if (!function_exists('st2_comment_reply')) {
 	function st2_comment_reply()
 	{
+		if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+			return;
+		}
 		if (is_singular() && comments_open() && get_option('thread_comments')) {
 			wp_enqueue_script('comment-reply');
 		}
@@ -445,6 +448,9 @@ add_filter( 'widget_text', 'do_shortcode' );
 
 //* Force MetaSlider scripts to load when shortcode is used in blocks
 function u_seisbarra8_force_metaslider_scripts() {
+	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+		return;
+	}
     if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
         metaslider_register_public_styles();
         metaslider_register_public_scripts();
@@ -454,6 +460,9 @@ add_action( 'wp_enqueue_scripts', 'u_seisbarra8_force_metaslider_scripts', 99 );
 
 //* Ensure MetaSlider shortcodes are processed in block content
 function u_seisbarra8_process_metaslider_in_blocks( $block_content, $block ) {
+	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+		return $block_content;
+	}
     if ( ! empty( $block_content ) && has_shortcode( $block_content, 'metaslider' ) ) {
         // Force enqueue MetaSlider assets
         if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
@@ -468,6 +477,9 @@ add_filter( 'render_block', 'u_seisbarra8_process_metaslider_in_blocks', 10, 2 )
 
 //* Ensure MetaSlider shortcodes are processed in classic content and assets enqueued
 function u_seisbarra8_process_metaslider_in_content( $content ) {
+	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+		return $content;
+	}
 	if ( ! empty( $content ) && function_exists('has_shortcode') && has_shortcode( $content, 'metaslider' ) ) {
 		// Register assets if plugin provides helpers
 		if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
@@ -496,6 +508,9 @@ add_filter( 'the_content', 'u_seisbarra8_process_metaslider_in_content', 9 );
 
 //* Initialize MetaSlider JavaScript after page load
 function u_seisbarra8_init_metaslider_js() {
+	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+		return;
+	}
     ?>
     <script type="text/javascript">
     (function() {

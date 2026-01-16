@@ -420,12 +420,12 @@ ol li::before {
 @keyframes searchExpand {
   from {
     max-height: 0;
-    padding: 0 !important;
+    padding: 0;
     opacity: 0;
   }
   to {
     max-height: 100px;
-    padding: 0.75rem 0 !important;
+    padding: 0.75rem 0;
     opacity: 1;
   }
 }

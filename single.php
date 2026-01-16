@@ -21,6 +21,7 @@
     </div>
 </div>
 
+<?php if ( ! ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) ) : ?>
 <script>
 (function(){
     if (!document.body.classList.contains('single-post')) return;
@@ -51,5 +52,6 @@
     if (resetBtn) resetBtn.addEventListener('click', function(){ scale = 1; change(0); });
 })();
 </script>
+<?php endif; ?>
 
 <?php get_footer(); ?>

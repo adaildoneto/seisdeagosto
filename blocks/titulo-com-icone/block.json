@@ -1,8 +1,8 @@
 {
     "apiVersion": 2,
     "name": "u-correio68/titulo-com-icone",
-    "title": "CTA",
-    "category": "layout",
+    "title": "Título com Ícone",
+    "category": "seisdeagosto",
     "icon": "heading",
     "description": "Bloco de título com ícone à esquerda e linha animada no hover.",
     "attributes": {
@@ -13,6 +13,10 @@
         "icone": {
             "type": "string",
             "default": "fa-star"
+        },
+        "mostrarIcone": {
+            "type": "boolean",
+            "default": true
         },
         "corIcone": {
             "type": "string",

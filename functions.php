@@ -203,16 +203,102 @@ function u_seisbarra8_setup() {
     add_editor_style( 'css/theme.css' );
     add_editor_style( 'bootstrap/css/bootstrap.css' );
     add_editor_style( 'css/blocks-layout.css' );
+
+    /*
+     * AMP support (requires AMP plugin).
+     */
+    add_theme_support( 'amp', array(
+        'paired' => true,
+    ) );
 }
 endif; // u_seisbarra8_setup
 
 add_action( 'after_setup_theme', 'u_seisbarra8_setup' );
 
 /**
+ * AMP request helper (requires AMP plugin).
+ */
+function u_seisbarra8_is_amp() {
+    return function_exists( 'amp_is_request' ) && amp_is_request();
+}
+
+/**
+ * Disable MetaSlider output and assets on AMP.
+ */
+function u_seisbarra8_disable_metaslider_on_amp() {
+    if ( ! u_seisbarra8_is_amp() || is_admin() ) {
+        return;
+    }
+
+    // Block MetaSlider widgets.
+    add_filter( 'widget_display_callback', function( $instance, $widget, $args ) {
+        if ( isset( $widget->id_base ) && $widget->id_base === 'metaslider_widget' ) {
+            return false;
+        }
+        if ( isset( $widget->id_base ) && stripos( $widget->id_base, 'metaslider' ) !== false ) {
+            return false;
+        }
+        if ( isset( $widget->id ) && stripos( $widget->id, 'metaslider' ) !== false ) {
+            return false;
+        }
+        return $instance;
+    }, 10, 3 );
+
+    // Remove MetaSlider shortcodes in content.
+    add_filter( 'pre_do_shortcode_tag', function( $return, $tag, $attr, $m ) {
+        if ( $tag === 'metaslider' ) {
+            return '';
+        }
+        return $return;
+    }, 10, 4 );
+
+    // Dequeue MetaSlider scripts/styles if enqueued.
+    add_action( 'wp_enqueue_scripts', function() {
+        $handles = array(
+            'metaslider-script',
+            'metaslider-easing',
+            'metaslider-flex-slider',
+            'metaslider-nivo-slider',
+            'metaslider-coin-slider',
+            'metaslider-responsive-slider',
+            'metaslider-public',
+            'metaslider-pro-public',
+        );
+        foreach ( $handles as $handle ) {
+            wp_dequeue_script( $handle );
+            wp_dequeue_style( $handle );
+        }
+    }, 100 );
+}
+add_action( 'wp', 'u_seisbarra8_disable_metaslider_on_amp', 1 );
+
+/**
+ * Remove jQuery (and migrate) on AMP to avoid disallowed scripts enqueued by plugins.
+ */
+function u_seisbarra8_disable_jquery_on_amp() {
+    if ( ! u_seisbarra8_is_amp() || is_admin() ) {
+        return;
+    }
+
+    add_action( 'wp_enqueue_scripts', function() {
+        wp_dequeue_script( 'jquery' );
+        wp_dequeue_script( 'jquery-core' );
+        wp_dequeue_script( 'jquery-migrate' );
+        wp_deregister_script( 'jquery' );
+        wp_deregister_script( 'jquery-core' );
+        wp_deregister_script( 'jquery-migrate' );
+    }, 100 );
+}
+add_action( 'wp', 'u_seisbarra8_disable_jquery_on_amp', 1 );
+
+/**
  * Ensure jQuery (and jQuery Migrate when available) load early for plugin compatibility (e.g., MetaSlider).
  * Loads with very low priority so other enqueues can safely depend on it.
  */
 function u_seisbarra8_ensure_jquery_first() {
+    if ( u_seisbarra8_is_amp() ) {
+        return;
+    }
     // Enqueue core jQuery (do not replace with bundled files)
     wp_enqueue_script( 'jquery' );
     // Ensure jQuery loads in header group to satisfy plugins expecting early availability
@@ -282,6 +368,23 @@ function u_seisbarra8_init() {
 endif; // u_seisbarra8_setup
 
 add_action( 'init', 'u_seisbarra8_init' );
+
+// Register custom block category for theme blocks
+add_filter( 'block_categories_all', function( $categories ) {
+    foreach ( $categories as $category ) {
+        if ( isset( $category['slug'] ) && $category['slug'] === 'seisdeagosto' ) {
+            return $categories;
+        }
+    }
+
+    $categories[] = array(
+        'slug'  => 'seisdeagosto',
+        'title' => __( 'Seis de Agosto', 'u_seisbarra8' ),
+        'icon'  => null,
+    );
+
+    return $categories;
+} );
 
 
 if ( ! function_exists( 'u_seisbarra8_custom_image_sizes_names' ) ) :
@@ -535,41 +638,39 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
         /* Pinegrow generated Enqueue Scripts Begin */
           
 
-    // Ensure core jQuery is loaded
-    wp_enqueue_script( 'jquery');
-    // Alias $ to jQuery for legacy scripts expecting global $
-    wp_add_inline_script( 'jquery', 'window.$ = window.$ || window.jQuery;', 'after' );
-    // Add jQuery Migrate for compatibility with plugins/themes using deprecated APIs (e.g., $.load, $.bind)
-    if ( wp_script_is( 'jquery-migrate', 'registered' ) ) {
-        wp_enqueue_script( 'jquery-migrate' );
+    // Skip scripts on AMP requests
+    $is_amp = u_seisbarra8_is_amp();
+
+    // jQuery is enqueued early by u_seisbarra8_ensure_jquery_first().
+
+    if ( ! $is_amp ) {
+        wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap'), null, true );
+
+        wp_enqueue_script( 'u_seisbarra8-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), null, true );
+
+        wp_enqueue_script( 'u_seisbarra8-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), null, true );
+
+        wp_enqueue_script( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', array('jquery', 'u_seisbarra8-popper'), null, true );
+
+        wp_enqueue_script( 'u_seisbarra8-outline', get_template_directory_uri() . '/assets/js/outline.js', null, null, true );
+
+        wp_deregister_script( 'u_seisbarra8-plugins' );
+        wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), null, true);
+
+        wp_deregister_script( 'u_seisbarra8-bskitscripts' );
+        wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), null, true);
+
+        // Remove external Google Maps API to avoid CDN/external dependency
+        wp_deregister_script( 'u_seisbarra8-script' );
+
+        wp_deregister_script( 'u_seisbarra8-slick' );
+        wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
+        wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+        // Weather forecast slider init (uses slick)
+        wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+        // Post-load i18n for weekday names (pt-BR)
+        wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), null, true );
     }
-
-    wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap'), null, true );
-
-    wp_enqueue_script( 'u_seisbarra8-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), null, true );
-
-    wp_enqueue_script( 'u_seisbarra8-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), null, true );
-
-    wp_enqueue_script( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', array('jquery', 'u_seisbarra8-popper'), null, true );
-
-    wp_enqueue_script( 'u_seisbarra8-outline', get_template_directory_uri() . '/assets/js/outline.js', null, null, true );
-
-    wp_deregister_script( 'u_seisbarra8-plugins' );
-    wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), null, true);
-
-    wp_deregister_script( 'u_seisbarra8-bskitscripts' );
-    wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), null, true);
-
-    // Remove external Google Maps API to avoid CDN/external dependency
-    wp_deregister_script( 'u_seisbarra8-script' );
-
-    wp_deregister_script( 'u_seisbarra8-slick' );
-    wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
-    wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
-    // Weather forecast slider init (uses slick)
-    wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), null, true );
-    // Post-load i18n for weekday names (pt-BR)
-    wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), null, true );
 
     /* Pinegrow generated Enqueue Scripts End */
 
@@ -699,12 +800,6 @@ function pgwp_sanitize_placeholder($input) { return $input; }
 /*
  * Resource files included by Pinegrow.*/
  
- function add_jquery() {
-     
-    }    
-
-    add_action('init', 'add_jquery');
- 
 /* Pinegrow generated Include Resources Begin */
 require_once "inc/custom.php";
 require_once "inc/wp_pg_helpers.php";
@@ -715,7 +810,7 @@ require_once "inc/customizer.php";
 
     /* Pinegrow generated Include Resources End */
     
-    add_filter( '1', '__return_false' );
+    // Removed invalid filter hook name.
     
     // Fallback shims for Advanced Custom Fields only if plugin is not active
     add_action( 'plugins_loaded', function() {
@@ -723,12 +818,71 @@ require_once "inc/customizer.php";
             return; // ACF available, no shim needed
         }
         function get_field( $selector, $post_id = false, $format_value = true ) {
-            return '';
+            $value = '';
+            if ( $format_value ) {
+                // Permite que filtros como acf/format_value* apliquem fallback de tema
+                $name = is_string( $selector ) ? $selector : '';
+                $field = array( 'name' => $name );
+                $value = apply_filters( "acf/format_value/name={$name}", $value, $post_id, $field );
+            }
+            return $value;
         }
         function the_field( $selector, $post_id = false ) {
             echo get_field( $selector, $post_id );
         }
     } );
+
+    /**
+     * Helper: obtém dados da badge (texto, cor, ícone) com fallbacks do tema.
+     */
+    function u_correio68_get_badge_data( $post_id = null ) {
+        $post_id = $post_id ? intval( $post_id ) : get_the_ID();
+
+        $text      = get_field( 'chamada', $post_id );
+        $color     = get_field( 'cor', $post_id );
+        $icon_raw  = get_field( 'icones', $post_id );
+
+        // Fallbacks adicionais
+        if ( empty( $color ) ) {
+            $color = get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
+        }
+        if ( empty( $icon_raw ) ) {
+            $icon_raw = get_theme_mod( 'u_correio68_badge_icon_class', 'fa-star' );
+        }
+
+        return array(
+            'text'  => wp_strip_all_tags( (string) $text ),
+            'color' => sanitize_hex_color( $color ) ?: $color,
+            'icon'  => sanitize_text_field( $icon_raw ),
+        );
+    }
+
+    /**
+     * Helper: renderiza badge com texto, cor e ícone.
+     */
+    function u_correio68_the_badge( $args = array() ) {
+        $defaults = array(
+            'post_id'   => null,
+            'class'     => 'badge badge-light text-white bg-orange badge-pill',
+            'show_icon' => true,
+        );
+        $args = wp_parse_args( $args, $defaults );
+
+        $badge = u_correio68_get_badge_data( $args['post_id'] );
+        if ( empty( $badge['text'] ) && empty( $badge['icon'] ) ) {
+            return;
+        }
+
+        $color_style = $badge['color'] ? 'style="background-color:' . esc_attr( $badge['color'] ) . ' !important;"' : '';
+
+        // Decide se o ícone é Font Awesome ou Ionicon
+        $icon_html = '';
+        if ( $args['show_icon'] && ! empty( $badge['icon'] ) ) {
+            $icon_html = '<i class="' . esc_attr( $badge['icon'] ) . '"></i> ';
+        }
+
+        echo '<span class="' . esc_attr( $args['class'] ) . '" ' . $color_style . '>' . $icon_html . '<span>' . esc_html( $badge['text'] ) . '</span></span>';
+    }
 
     // Register custom Block Pattern category for this theme
     add_action( 'init', function() {

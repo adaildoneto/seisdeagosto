@@ -36,10 +36,12 @@
     var registerBlockType = wp.blocks.registerBlockType;
     var el = wp.element.createElement;
     var useInnerBlocksProps = wp.blockEditor.useInnerBlocksProps;
+    var useBlockProps = wp.blockEditor && wp.blockEditor.useBlockProps ? wp.blockEditor.useBlockProps : null;
     var InspectorControls = wp.blockEditor.InspectorControls;
     var InnerBlocks = wp.blockEditor.InnerBlocks;
     var MediaUpload = wp.blockEditor.MediaUpload;
     var SelectControl = wp.components.SelectControl;
+    var ComboboxControl = wp.components.ComboboxControl || null;
     var TextControl = wp.components.TextControl;
     var PanelBody = wp.components.PanelBody;
     var RangeControl = wp.components.RangeControl;
@@ -117,7 +119,7 @@
     registerBlockType('seideagosto/destaques-home', {
         title: 'Destaques Home (1 Grande + 2 Pequenos)',
         icon: 'layout',
-        category: 'layout',
+        category: 'seisdeagosto',
         attributes: {
             categoryId: { type: 'string', default: '0' },
             layoutType: { type: 'string', default: 'default' }
@@ -177,7 +179,7 @@
     registerBlockType('seideagosto/colunistas-grid', {
         title: 'Grid de Colunistas',
         icon: 'groups',
-        category: 'layout',
+        category: 'seisdeagosto',
         attributes: {
             previewColumns: { type: 'number', default: 4 }
         },
@@ -253,7 +255,7 @@
     registerBlockType('seideagosto/colunista-item', {
         title: 'Colunista Item',
         icon: 'admin-users',
-        category: 'layout',
+        category: 'seisdeagosto',
         parent: ['seideagosto/colunistas-grid'],
         attributes: {
             name: { type: 'string', default: '' },
@@ -328,7 +330,7 @@
     registerBlockType('seideagosto/news-grid', {
         title: 'Grid de Notícias',
         icon: 'grid-view',
-        category: 'layout',
+        category: 'seisdeagosto',
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
             numberOfPosts: { type: 'number', default: 9 },
@@ -422,7 +424,7 @@
     registerBlockType('seideagosto/category-highlight', {
         title: 'Destaque Categoria (1 Grande + 3 Lista)',
         icon: 'list-view',
-        category: 'layout',
+        category: 'seisdeagosto',
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
             title: { type: 'string', default: '' },
@@ -507,9 +509,10 @@
     registerBlockType('seideagosto/destaque-misto', {
         title: 'Destaque Misto (2 Grandes + Lista + 1 Coluna)',
         icon: 'layout',
-        category: 'layout',
+        category: 'seisdeagosto',
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
+            showHighlights: { type: 'boolean', default: true },
             showList: { type: 'boolean', default: true },
             showListThumbs: { type: 'boolean', default: true },
             showBadges: { type: 'boolean', default: true },
@@ -549,6 +552,11 @@
                     TypographyPanel(props, '#FFFFFF'),
                     el(PanelBody, { title: 'Lista e Aparência', initialOpen: false },
                         el(wp.components.ToggleControl, {
+                            label: 'Mostrar destaques grandes',
+                            checked: attributes.showHighlights,
+                            onChange: function(val){ setAttributes({ showHighlights: !!val }); }
+                        }),
+                        el(wp.components.ToggleControl, {
                             label: 'Mostrar lista de matérias',
                             checked: attributes.showList,
                             onChange: function(val){ setAttributes({ showList: !!val }); }
@@ -576,7 +584,7 @@
                     }
                 },
                     el('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '🔀 Destaque Misto'),
-                    el('div', { style: { fontSize: '12px', color: '#666' } }, '2 Grandes + Lista + 1 Coluna'),
+                    el('div', { style: { fontSize: '12px', color: '#666' } }, (attributes.showHighlights ? '2 Grandes + ' : '') + 'Lista + 1 Coluna'),
                     el('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview - ver no frontend)')
                 )
             );
@@ -590,7 +598,7 @@
     registerBlockType('seideagosto/top-most-read', {
         title: 'Top Mais Lidas',
         icon: 'chart-area',
-        category: 'layout',
+        category: 'seisdeagosto',
         attributes: {
             title: { type: 'string', default: 'Mais lidas' },
             count: { type: 'number', default: 5 },
@@ -677,7 +685,7 @@
     registerBlockType('seideagosto/weather', {
         title: 'Clima / Tempo',
         icon: 'cloud',
-        category: 'widgets',
+        category: 'seisdeagosto',
         attributes: {
             cityName: { type: 'string', default: '' },
             latitude: { type: 'string', default: '' },
@@ -802,7 +810,7 @@
     registerBlockType('seideagosto/currency-monitor', {
         title: 'Monitor de Câmbio',
         icon: 'money',
-        category: 'widgets',
+        category: 'seisdeagosto',
         supports: { inserter: true },
         attributes: {
             provider: { type: 'string', default: 'currencyfreaks' },
@@ -995,7 +1003,7 @@
     registerBlockType('seideagosto/sidebar-area', {
         title: 'Área de Widgets (Sidebar)',
         icon: 'screenoptions',
-        category: 'widgets',
+        category: 'seisdeagosto',
         attributes: {
             sidebarId: { type: 'string', default: 'right-sidebar' },
             title: { type: 'string', default: '' }
@@ -1132,6 +1140,11 @@
             
             var oldNamespaces = ['u-correio68/', 'correio68/'];
             var isOld = oldNamespaces.some(function(ns) { return name.indexOf(ns) === 0; });
+
+            // Permite inserir o bloco de Título com Ícone (CTA)
+            if (name === 'u-correio68/titulo-com-icone') {
+                return settings;
+            }
             
             if (isOld) {
                 // Mark as non-insertable - will only render existing content
@@ -1154,7 +1167,7 @@
     registerBlockType('seideagosto/image-slider', {
         title: 'Galeria em Slider (Slick)',
         icon: 'images-alt2',
-        category: 'media',
+        category: 'seisdeagosto',
         attributes: {
             images: { type: 'array', default: [] },
             speed: { type: 'number', default: 3000 },
@@ -1360,22 +1373,19 @@
         }
     });
 
-    // CTA (antigo Título com Ícone)
+    // CTA (Título com Ícone)
     wp.domReady(function() {
         var ctaBlockName = 'u-correio68/titulo-com-icone';
-        // Evita erro "Block is already registered" se o PHP ou outro script já o registrou
-        if (wp.blocks.getBlockType(ctaBlockName)) {
-            wp.blocks.unregisterBlockType(ctaBlockName);
-        }
-
         try {
-            registerBlockType(ctaBlockName, {
-                title: 'CTA',
+            var existing = wp.blocks.getBlockType(ctaBlockName);
+            var settings = {
+                title: 'Título com Ícone',
                 icon: 'heading',
-                category: 'layout',
+                category: 'seisdeagosto',
                 attributes: {
                     titulo: { type: 'string', default: 'CTA' },
                     icone: { type: 'string', default: 'fa-star' },
+                    mostrarIcone: { type: 'boolean', default: true },
                     corIcone: { type: 'string', default: '#fd7e14' },
                     corLinha: { type: 'string', default: '#fd7e14' },
                     tamanhoIcone: { type: 'number', default: 24 },
@@ -1387,6 +1397,18 @@
                     var attributes = props.attributes;
                     var setAttributes = props.setAttributes;
                     var blockProps = useBlockProps ? useBlockProps() : {};
+                    var iconOptions = [
+                        { label: '⭐ Estrela', value: 'fa-star' },
+                        { label: '🔥 Fogo', value: 'fa-fire' },
+                        { label: '⚡ Raio', value: 'fa-bolt' },
+                        { label: '📰 Jornal', value: 'fa-newspaper-o' },
+                        { label: '📌 Pin', value: 'fa-map-pin' },
+                        { label: '🎯 Alvo', value: 'fa-bullseye' },
+                        { label: '🏷️ Tag', value: 'fa-tag' },
+                        { label: '📣 Megafone', value: 'fa-bullhorn' },
+                        { label: '📢 Alto-falante', value: 'fa-volume-up' },
+                        { label: '✅ Check', value: 'fa-check-circle' }
+                    ];
                     
                     // Safe ServerSideRender resolution
                     var SSR = wp.serverSideRender || (wp.components && wp.components.ServerSideRender);
@@ -1406,11 +1428,28 @@
                                     value: attributes.titulo,
                                     onChange: function(val) { setAttributes({ titulo: val }); }
                                 }),
+                                el(ToggleControl, {
+                                    label: 'Exibir ícone',
+                                    checked: !!attributes.mostrarIcone,
+                                    onChange: function(val) { setAttributes({ mostrarIcone: val }); }
+                                }),
+                                ComboboxControl ? el(ComboboxControl, {
+                                    label: 'Ícone (Font Awesome) - pesquisar',
+                                    value: attributes.icone,
+                                    options: iconOptions,
+                                    onChange: function(val) { setAttributes({ icone: val || '' }); },
+                                    allowReset: true
+                                }) : el(SelectControl, {
+                                    label: 'Ícone (Font Awesome)',
+                                    value: attributes.icone,
+                                    options: iconOptions,
+                                    onChange: function(val) { setAttributes({ icone: val }); }
+                                }),
                                 el(TextControl, {
-                                    label: 'Ícone (Classe FontAwesome)',
+                                    label: 'Classe do ícone (entrada direta)',
                                     value: attributes.icone,
                                     onChange: function(val) { setAttributes({ icone: val }); },
-                                    help: 'Ex: fa-star, fa-home'
+                                    help: 'Ex: fa-star, fas fa-bolt, far fa-newspaper'
                                 }),
                                 el(SelectControl, {
                                     label: 'Alinhamento',
@@ -1422,12 +1461,12 @@
                                     ],
                                     onChange: function(val) { setAttributes({ alinhamento: val }); }
                                 }),
-                                el(RangeControl, {
+                                attributes.mostrarIcone ? el(RangeControl, {
                                     label: 'Tamanho do Ícone (px)',
                                     value: attributes.tamanhoIcone,
                                     onChange: function(val) { setAttributes({ tamanhoIcone: val }); },
                                     min: 12, max: 60
-                                }),
+                                }) : null,
                                 el(RangeControl, {
                                     label: 'Tamanho do Título (px)',
                                     value: attributes.tamanhoTitulo,
@@ -1440,11 +1479,11 @@
                                     onChange: function(val) { setAttributes({ espessuraLinha: val }); },
                                     min: 1, max: 10
                                 }),
-                                el(ColorPalette, {
+                                attributes.mostrarIcone ? el(ColorPalette, {
                                     label: 'Cor do Ícone',
                                     value: attributes.corIcone,
                                     onChange: function(val) { setAttributes({ corIcone: val }); }
-                                }),
+                                }) : null,
                                 el(ColorPalette, {
                                     label: 'Cor da Linha',
                                     value: attributes.corLinha,
@@ -1463,9 +1502,24 @@
                 save: function() {
                     return null;
                 }
-            });
+            };
+
+            // Evita erro "Block is already registered" se o PHP ou outro script já o registrou
+            if (existing) {
+                wp.blocks.unregisterBlockType(ctaBlockName);
+            }
+
+            registerBlockType(ctaBlockName, settings);
         } catch (e) {
             console.error('SEISDEAGOSTO: Failed to register titulo-com-icone', e);
+            // Fallback: tenta restaurar a definição anterior, se existir
+            try {
+                if (!wp.blocks.getBlockType(ctaBlockName) && existing) {
+                    wp.blocks.registerBlockType(existing.name, existing);
+                }
+            } catch (err) {
+                // ignore
+            }
         }
     });
 

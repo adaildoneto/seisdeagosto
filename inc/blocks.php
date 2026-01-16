@@ -78,42 +78,27 @@ function u_correio68_apply_tag_keyword_filters( array $args, $attributes ) {
         $args['s'] = sanitize_text_field( $attributes['keyword'] );
     }
 
-    // Prefer explicit tag IDs
-    if ( isset( $attributes['tagIds'] ) && is_array( $attributes['tagIds'] ) ) {
-        $ids = array();
-        foreach ( $attributes['tagIds'] as $id ) {
-            $id = absint( $id );
-            if ( $id > 0 ) { $ids[] = $id; }
-        }
-        if ( ! empty( $ids ) ) {
-            $args['tag__in'] = array_values( array_unique( $ids ) );
-        }
-        return $args;
-    }
-
-    // Next, explicit tag slugs
-    if ( isset( $attributes['tagSlugs'] ) && is_array( $attributes['tagSlugs'] ) ) {
-        $slugs = array();
-        foreach ( $attributes['tagSlugs'] as $slug ) {
-            $slug = sanitize_title( $slug );
-            if ( $slug !== '' ) { $slugs[] = $slug; }
-        }
-        if ( ! empty( $slugs ) ) {
-            $args['tag_slug__in'] = array_values( array_unique( $slugs ) );
-        }
-        return $args;
-    }
-
-    // Finally, CSV of slugs via `tags`
+    // Tags (CSV string of slugs)
     if ( isset( $attributes['tags'] ) && is_string( $attributes['tags'] ) && $attributes['tags'] !== '' ) {
-        $parts = array_map( 'trim', explode( ',', $attributes['tags'] ) );
-        $slugs = array();
-        foreach ( $parts as $p ) {
-            $p = sanitize_title( $p );
-            if ( $p !== '' ) { $slugs[] = $p; }
+        $tag_slugs = array_filter( array_map( 'sanitize_title', array_map( 'trim', explode( ',', $attributes['tags'] ) ) ) );
+        if ( ! empty( $tag_slugs ) ) {
+            $args['tag_slug__in'] = $tag_slugs;
         }
-        if ( ! empty( $slugs ) ) {
-            $args['tag_slug__in'] = array_values( array_unique( $slugs ) );
+    }
+
+    // Tags from array of slugs
+    if ( isset( $attributes['tagSlugs'] ) && is_array( $attributes['tagSlugs'] ) ) {
+        $tag_slugs = array_filter( array_map( 'sanitize_title', $attributes['tagSlugs'] ) );
+        if ( ! empty( $tag_slugs ) ) {
+            $args['tag_slug__in'] = $tag_slugs;
+        }
+    }
+
+    // Tags from array of IDs
+    if ( isset( $attributes['tagIds'] ) && is_array( $attributes['tagIds'] ) ) {
+        $tag_ids = array_filter( array_map( 'absint', $attributes['tagIds'] ) );
+        if ( ! empty( $tag_ids ) ) {
+            $args['tag__in'] = $tag_ids;
         }
     }
 
@@ -121,76 +106,19 @@ function u_correio68_apply_tag_keyword_filters( array $args, $attributes ) {
 }
 
 function u_correio68_register_custom_blocks() {
-    // Register the block editor script
-    $blocks_script_src      = get_template_directory_uri() . '/assets/js/custom-blocks.js';
-    $blocks_script_deps     = array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-data', 'wp-server-side-render', 'wp-hooks', 'wp-dom-ready' );
-    $blocks_script_version  = filemtime( get_template_directory() . '/assets/js/custom-blocks.js' );
-
-    wp_register_script(
-        'seideagosto-blocks',
-        $blocks_script_src,
-        $blocks_script_deps,
-        $blocks_script_version
-    );
-
-    // Legacy alias for existing block.json files referencing the old handle
-    wp_register_script(
-        'u-correio68-custom-blocks',
-        false,
-        array( 'seideagosto-blocks' ),
-        $blocks_script_version
-    );
-
-    // Ensure Font Awesome is available inside the editor for icon-based blocks
-    $fa_handle   = 'u_seisbarra8-fontawesome';
-    $fa_vendor   = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+$fa_handle = 'u_seisbarra8-fontawesome';
+$fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+if ( file_exists( $fa_vendor_css ) ) {
+    $fa_fallback = get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+    $fa_version  = '4.7.0';
+} else {
     $fa_fallback = get_template_directory_uri() . '/css/local-fa-fallback.css';
-    if ( file_exists( $fa_vendor ) ) {
-        wp_register_style( $fa_handle, get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', array(), '4.7.0' );
-    } else {
-        wp_register_style( $fa_handle, $fa_fallback, array(), file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null );
-    }
+    $fa_version  = file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null;
+}
 
-    // Get categories for the dropdown
-    $categories = get_categories( array( 'hide_empty' => false ) );
-    $cat_options = array( array( 'value' => 0, 'label' => 'Todas as Categorias' ) );
-    foreach ( $categories as $cat ) {
-        $cat_options[] = array(
-            'value' => $cat->term_id,
-            'label' => $cat->name
-        );
-    }
-
-    // Get registered sidebars for sidebar selector block
-    $sidebar_options = array();
-    global $wp_registered_sidebars;
-    if ( is_array( $wp_registered_sidebars ) ) {
-        foreach ( $wp_registered_sidebars as $id => $sb ) {
-            $sidebar_options[] = array(
-                'value' => $id,
-                'label' => isset( $sb['name'] ) ? $sb['name'] . " (" . $id . ")" : $id
-            );
-        }
-    }
-
-    // Pass data to JS
-    wp_localize_script(
-        'seideagosto-blocks',
-        'seideagostoBlocks',
-        array(
-            'categories' => $cat_options,
-            'sidebars'   => $sidebar_options
-        )
-    );
-    // Backward compatibility - also expose as old name
-    wp_localize_script(
-        'seideagosto-blocks',
-        'uCorreio68Blocks',
-        array(
-            'categories' => $cat_options,
-            'sidebars'   => $sidebar_options
-        )
-    );
+if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
+    wp_register_style( $fa_handle, $fa_fallback, array(), $fa_version );
+}
 
     // Enqueue block editor assets
     add_action( 'enqueue_block_editor_assets', function() use ( $fa_handle ) {
@@ -198,6 +126,47 @@ function u_correio68_register_custom_blocks() {
         if ( wp_style_is( $fa_handle, 'registered' ) ) {
             wp_enqueue_style( $fa_handle );
         }
+
+        // Get categories for the dropdown
+        $categories = get_categories( array( 'hide_empty' => false ) );
+        $cat_options = array( array( 'value' => 0, 'label' => 'Todas as Categorias' ) );
+        foreach ( $categories as $cat ) {
+            $cat_options[] = array(
+                'value' => $cat->term_id,
+                'label' => $cat->name
+            );
+        }
+
+        // Get registered sidebars for sidebar selector block
+        $sidebar_options = array();
+        global $wp_registered_sidebars;
+        if ( is_array( $wp_registered_sidebars ) ) {
+            foreach ( $wp_registered_sidebars as $id => $sb ) {
+                $sidebar_options[] = array(
+                    'value' => $id,
+                    'label' => isset( $sb['name'] ) ? $sb['name'] . " (" . $id . ")" : $id
+                );
+            }
+        }
+
+        // Pass data to JS (editor only)
+        wp_localize_script(
+            'seideagosto-blocks',
+            'seideagostoBlocks',
+            array(
+                'categories' => $cat_options,
+                'sidebars'   => $sidebar_options
+            )
+        );
+        // Backward compatibility - also expose as old name
+        wp_localize_script(
+            'seideagosto-blocks',
+            'uCorreio68Blocks',
+            array(
+                'categories' => $cat_options,
+                'sidebars'   => $sidebar_options
+            )
+        );
     });
 
     $typography_default = u_correio68_typography_attribute_schema();
@@ -281,6 +250,7 @@ function u_correio68_register_custom_blocks() {
         'attributes' => array_merge(
             array(
                 'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+                'showHighlights' => array( 'type' => 'boolean', 'default' => true ),
                 'showList' => array( 'type' => 'boolean', 'default' => true ),
                 'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
                 'showBadges' => array( 'type' => 'boolean', 'default' => true ),
@@ -403,6 +373,7 @@ function u_correio68_register_custom_blocks() {
         'render_callback' => 'u_correio68_render_destaque_misto',
         'attributes'      => array(
             'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+            'showHighlights' => array( 'type' => 'boolean', 'default' => true ),
             'title' => array( 'type' => 'string', 'default' => '' ),
             'bigCount' => array( 'type' => 'number', 'default' => 1 ),
             'mediumCount' => array( 'type' => 'number', 'default' => 2 ),
@@ -692,7 +663,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                                         $chamada = get_field( 'chamada', $post->ID );
                                         if ( $chamada ) : ?>
                                             <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
-                                                <ion-icon class="<?php echo esc_attr($icones); ?>"></ion-icon> 
+                                                <i class="<?php echo esc_attr($icones); ?>"></i> 
                                                 <span><?php echo esc_html($chamada); ?></span>
                                             </span>
                                             <br>
@@ -731,7 +702,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                                             $chamada = get_field( 'chamada', $post->ID );
                                             if ( $chamada ) : ?>
                                                 <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
-                                                    <ion-icon class="<?php echo esc_attr($icones); ?>"></ion-icon> 
+                                                    <i class="<?php echo esc_attr($icones); ?>"></i> 
                                                     <span><?php echo esc_html($chamada); ?></span>
                                                 </span>
                                             <?php endif; ?>
@@ -779,7 +750,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                             $chamada = function_exists('get_field') ? get_field( 'chamada', $post->ID ) : '';
                             if ( !empty($chamada) ) : ?>
                                 <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
-                                    <ion-icon class="<?php echo esc_attr($icones); ?>"></ion-icon> 
+                                    <i class="<?php echo esc_attr($icones); ?>"></i> 
                                     <span><?php echo esc_html($chamada); ?></span>
                                 </span>
                                 <br>
@@ -794,6 +765,7 @@ function u_correio68_render_destaques_home( $attributes ) {
             <?php endforeach; wp_reset_postdata(); ?>
         </div>
 
+        <?php if ( ! u_seisbarra8_is_amp() ) : ?>
         <script>
         (function($){
             $(function(){
@@ -809,6 +781,7 @@ function u_correio68_render_destaques_home( $attributes ) {
             });
         })(jQuery);
         </script>
+        <?php endif; ?>
     <?php else: ?>
         <div class="alert alert-info">Nenhum post encontrado para os destaques.</div>
     <?php endif;
@@ -950,7 +923,7 @@ function u_correio68_render_news_grid( $attributes ) {
                                 $chamada = function_exists('get_field') ? get_field( 'chamada' ) : '';
                                 if ( !empty($chamada) ) : ?>
                                     <span class="badge badge-light text-white badge-pill news-grid-badge" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem; position: absolute; left: 12px; top: 12px; z-index: 10;"> 
-                                        <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                        <i class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></i> 
                                         <span><?php echo esc_html($chamada); ?></span>
                                     </span>
                                 <?php endif; ?>
@@ -1080,7 +1053,7 @@ function u_correio68_render_category_highlight( $attributes ) {
                         $chamada = function_exists('get_field') ? get_field( 'chamada', $post->ID ) : '';
                         if ( !empty( $chamada ) ) : ?>
                             <span class="badge badge-light text-white badge-pill category-highlight-badge" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem; position: absolute; left: 12px; top: 12px; z-index: 10;"> 
-                                <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                <i class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></i> 
                                 <span><?php echo esc_html($chamada); ?></span>
                             </span>
                         <?php endif; ?>
@@ -1107,7 +1080,7 @@ function u_correio68_render_category_highlight( $attributes ) {
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <?php if ( !empty( $chamada ) ) : ?>
                                 <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
-                                    <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                    <i class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></i> 
                                     <span><?php echo esc_html($chamada); ?></span>
                                 </span>
                             <?php endif; ?>
@@ -1230,14 +1203,16 @@ function u_correio68_render_destaque_misto( $attributes ) {
 
     $typography = u_correio68_resolve_typography( $attributes, '#FFFFFF' );
     $titleStyle = $typography['style'];
+    $showHighlights = isset( $attributes['showHighlights'] ) ? filter_var( $attributes['showHighlights'], FILTER_VALIDATE_BOOLEAN ) : true;
     $showList = isset( $attributes['showList'] ) ? filter_var( $attributes['showList'], FILTER_VALIDATE_BOOLEAN ) : true;
     $showListThumbs = isset( $attributes['showListThumbs'] ) ? filter_var( $attributes['showListThumbs'], FILTER_VALIDATE_BOOLEAN ) : true;
     $showBadges = isset( $attributes['showBadges'] ) ? filter_var( $attributes['showBadges'], FILTER_VALIDATE_BOOLEAN ) : true;
     
     // Total posts: 2 (Large) + 6 (List) = 8.
+    // Se não mostrar destaques grandes, usa apenas a lista.
     $args = array(
         'post_type'           => 'post',
-        'posts_per_page'      => 8, 
+        'posts_per_page'      => $showHighlights ? 8 : 6, 
         'ignore_sticky_posts' => true,
         'order'               => 'DESC',
         'orderby'             => 'date',
@@ -1256,6 +1231,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
         ?>
         <div class="destaque-misto-wrapper my-4">
             <!-- Row 1: 2 Large Highlights -->
+            <?php if ( $showHighlights ) : ?>
             <div class="row mb-4">
                 <?php 
                 // First 2 posts
@@ -1280,7 +1256,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                         $chamada = function_exists('get_field') ? get_field( 'chamada' ) : '';
                                         if ( !empty($chamada) ) : ?>
                                             <span class="badge badge-light text-white badge-pill dm-badge-overlay" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.7rem; padding: 0.25rem 0.5rem;"> 
-                                                <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></ion-icon> 
+                                                <i class="<?php echo esc_attr($icones); ?>" style="font-size: 0.8rem;"></i> 
                                                 <span><?php echo esc_html($chamada); ?></span>
                                             </span>
                                         <?php endif;
@@ -1296,6 +1272,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
                 endfor; 
                 ?>
             </div>
+            <?php endif; ?>
 
             <!-- Row 2: List (Full Width) -->
             <?php if ( $showList ): ?>
@@ -1304,8 +1281,10 @@ function u_correio68_render_destaque_misto( $attributes ) {
                 <div class="col-12">
                     <div class="row">
                         <?php 
-                        // Next 6 posts (index 2 to 7)
-                        for($i = 2; $i < 8; $i++):
+                        // Next 6 posts (index 2 to 7) or first 6 when highlights are hidden
+                        $start_index = $showHighlights ? 2 : 0;
+                        $end_index   = $start_index + 6;
+                        for($i = $start_index; $i < $end_index; $i++):
                              if(isset($posts[$i])):
                                 $post = $posts[$i];
                                 setup_postdata($post);
@@ -1332,7 +1311,7 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                                 if ( !empty($chamada) ) : ?>
                                                     <div class="mb-1">
                                                         <span class="badge badge-light text-white badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important; font-size: 0.65rem; padding: 0.2rem 0.4rem;"> 
-                                                            <ion-icon class="<?php echo esc_attr($icones); ?>" style="font-size: 0.7rem;"></ion-icon> 
+                                                            <i class="<?php echo esc_attr($icones); ?>" style="font-size: 0.7rem;"></i> 
                                                             <span><?php echo esc_html($chamada); ?></span>
                                                         </span>
                                                     </div>
@@ -1563,7 +1542,7 @@ function u_correio68_render_weather( $attributes ) {
     ob_start();
     
     // Enqueue Slick for forecast slider
-    if ( ! is_admin() ) {
+    if ( ! is_admin() && ! u_seisbarra8_is_amp() ) {
         wp_enqueue_style( 'u_seisbarra8-slick' );
         wp_enqueue_style( 'u_seisbarra8-slicktheme' );
         wp_enqueue_script( 'u_seisbarra8-slick' );
@@ -1713,6 +1692,7 @@ function u_correio68_render_weather( $attributes ) {
                 </div>
             </div>
             
+            <?php if ( ! u_seisbarra8_is_amp() ) : ?>
             <script>
             jQuery(document).ready(function($) {
                 if ( $('.weather-forecast-slider').length ) {
@@ -1730,6 +1710,7 @@ function u_correio68_render_weather( $attributes ) {
             });
             </script>
             <?php endif; ?>
+            <?php endif; ?>
         </div>
     </div>
     <?php
@@ -1741,7 +1722,7 @@ function u_correio68_render_weather( $attributes ) {
  */
 function u_correio68_render_currency_monitor( $attributes ) {
     // Enqueue Slick CSS/JS - use handle já registrado em functions.php
-    if ( ! is_admin() ) {
+    if ( ! is_admin() && ! u_seisbarra8_is_amp() ) {
         // Força o carregamento do Slick que já está registrado
         wp_enqueue_style( 'u_seisbarra8-slick' );
         wp_enqueue_style( 'u_seisbarra8-slicktheme' );
@@ -2030,6 +2011,7 @@ function u_correio68_render_currency_monitor( $attributes ) {
         }
         </style>
         <?php if ( ! empty( $symbols ) && ! empty( $rates ) ) : ?>
+        <?php if ( ! u_seisbarra8_is_amp() ) : ?>
         <script>
         jQuery(document).ready(function($){
             var slidesToShowDefault = <?php echo intval( $slides_to_show ); ?>;
@@ -2099,6 +2081,7 @@ function u_correio68_render_currency_monitor( $attributes ) {
         });
         </script>
         <?php endif; ?>
+        <?php endif; ?>
     </div>
     <?php
     return ob_get_clean();
@@ -2109,9 +2092,11 @@ function u_correio68_render_currency_monitor( $attributes ) {
  */
 function u_correio68_render_image_slider( $attributes ) {
     // Enqueue Slick dependencies
-    wp_enqueue_style( 'u_seisbarra8-slick' );
-    wp_enqueue_style( 'u_seisbarra8-slicktheme' );
-    wp_enqueue_script( 'u_seisbarra8-slick' );
+    if ( ! u_seisbarra8_is_amp() ) {
+        wp_enqueue_style( 'u_seisbarra8-slick' );
+        wp_enqueue_style( 'u_seisbarra8-slicktheme' );
+        wp_enqueue_script( 'u_seisbarra8-slick' );
+    }
     
     $images = isset( $attributes['images'] ) ? $attributes['images'] : array();
     
@@ -2162,6 +2147,7 @@ function u_correio68_render_image_slider( $attributes ) {
         </div>
     </div>
     
+    <?php if ( ! u_seisbarra8_is_amp() ) : ?>
     <script>
     (function($){
         $(function(){
@@ -2207,6 +2193,7 @@ function u_correio68_render_image_slider( $attributes ) {
         });
     })(jQuery);
     </script>
+    <?php endif; ?>
     <?php
     return ob_get_clean();
 }

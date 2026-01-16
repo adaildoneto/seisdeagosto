@@ -117,6 +117,7 @@
                                 </div>
                             </nav>
 
+                            <?php if ( ! ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) ) : ?>
                             <script>
                             (function() {
                                 // Scroll handler for categories and header with debounce
@@ -193,6 +194,7 @@
                                 }
                             })();
                             </script>
+                            <?php endif; ?>
                         </div>
                     </header>
                     

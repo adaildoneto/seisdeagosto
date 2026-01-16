@@ -2,7 +2,7 @@
     "apiVersion": 2,
     "name": "u-correio68/lista-noticias",
     "title": "Lista de Notícias",
-    "category": "widgets",
+    "category": "seisdeagosto",
     "icon": "list-view",
     "description": "Bloco para listar notícias em grade.",
     "attributes": {

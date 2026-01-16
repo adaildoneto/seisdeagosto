@@ -305,6 +305,81 @@ function u_correio68_customize_register_extended( $wp_customize ) {
             'type'        => 'dropdown-pages',
             'section'     => 'u_correio68_templates',
         ) );
+
+        // ====================
+        // SEÇÃO: Posts e Badges
+        // ====================
+        $wp_customize->add_section( 'u_correio68_posts_badges', array(
+            'title'       => __( 'Posts e Badges', 'u_correio68' ),
+            'description' => __( 'Opções para a chamada dos posts e exibição da badge.', 'u_correio68' ),
+            'panel'       => $content_panel,
+            'priority'    => 50,
+        ) );
+
+        // Usar chamada nativa (resumo) do post
+        $wp_customize->add_setting( 'u_correio68_use_native_chamada', array(
+            'default'           => 0,
+            'sanitize_callback' => 'u_correio68_sanitize_checkbox',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( 'u_correio68_use_native_chamada', array(
+            'label'       => __( 'Usar chamada nativa do post', 'u_correio68' ),
+            'description' => __( 'Quando ativo, usa o resumo/excerpt do post como chamada nativa. Se vazio, mantém o campo personalizado.', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'type'        => 'checkbox',
+        ) );
+
+        // Exibir categoria na badge com a cor primária
+        $wp_customize->add_setting( 'u_correio68_badge_show_category_primary', array(
+            'default'           => 0,
+            'sanitize_callback' => 'u_correio68_sanitize_checkbox',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( 'u_correio68_badge_show_category_primary', array(
+            'label'       => __( 'Badge com categoria na cor primária', 'u_correio68' ),
+            'description' => __( 'Substitui o texto da badge pela categoria principal do post e força o uso da cor primária do tema.', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'type'        => 'checkbox',
+        ) );
+
+        // Texto padrão para a chamada (fallback)
+        $wp_customize->add_setting( 'u_correio68_default_chamada', array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( 'u_correio68_default_chamada', array(
+            'label'       => __( 'Chamada padrão', 'u_correio68' ),
+            'description' => __( 'Usada quando o campo personalizado estiver vazio ou o plugin de campos não estiver ativo.', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'type'        => 'text',
+        ) );
+
+        // Ícone Font Awesome padrão para a badge
+        $wp_customize->add_setting( 'u_correio68_badge_icon_class', array(
+            'default'           => 'fa-star',
+            'sanitize_callback' => 'sanitize_text_field',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( 'u_correio68_badge_icon_class', array(
+            'label'       => __( 'Ícone padrão da badge (Font Awesome)', 'u_correio68' ),
+            'description' => __( 'Ex.: fa-star, fa-bolt, fa-fire. Usado se o post não definir outro ícone.', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'type'        => 'text',
+        ) );
+
+        // Cor opcional da badge/ícone definida pelo usuário
+        $wp_customize->add_setting( 'u_correio68_badge_custom_color', array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_hex_color',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'u_correio68_badge_custom_color', array(
+            'label'       => __( 'Cor opcional da badge/ícone', 'u_correio68' ),
+            'description' => __( 'Se definido, usa esta cor; caso contrário, usa a cor primária do tema.', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'settings'    => 'u_correio68_badge_custom_color',
+        ) ) );
 }
 add_action( 'customize_register', 'u_correio68_customize_register_extended', 20 );
 
@@ -313,6 +388,13 @@ add_action( 'customize_register', 'u_correio68_customize_register_extended', 20 
  */
 function u_correio68_sanitize_float( $value ) {
     return floatval( $value );
+}
+
+/**
+ * Sanitize checkbox values (1 or 0)
+ */
+function u_correio68_sanitize_checkbox( $checked ) {
+    return isset( $checked ) && (bool) $checked ? 1 : 0;
 }
 
 /**
@@ -584,6 +666,114 @@ function u_correio68_customizer_css() {
     <?php
 }
 add_action( 'wp_head', 'u_correio68_customizer_css' );
+
+/**
+ * Retorna o nome da categoria principal do post (Yoast se existir, senão a primeira).
+ */
+function u_correio68_get_primary_category_name( $post_id = null ) {
+    $post_id = $post_id ? intval( $post_id ) : get_the_ID();
+    if ( ! $post_id ) {
+        return '';
+    }
+
+    $cat_id       = 0;
+    $yoast_primary = intval( get_post_meta( $post_id, '_yoast_wpseo_primary_category', true ) );
+    if ( $yoast_primary && term_exists( $yoast_primary, 'category' ) ) {
+        $cat_id = $yoast_primary;
+    } else {
+        $cats = get_the_category( $post_id );
+        if ( ! empty( $cats ) && isset( $cats[0]->term_id ) ) {
+            $cat_id = intval( $cats[0]->term_id );
+        }
+    }
+
+    if ( $cat_id ) {
+        $term = get_term( $cat_id );
+        if ( $term && ! is_wp_error( $term ) ) {
+            return (string) $term->name;
+        }
+    }
+
+    return '';
+}
+
+/**
+ * Filtra o valor de "chamada" para suportar as opções do Customizer.
+ */
+function u_correio68_filter_chamada_value( $value, $post_id, $field ) {
+    $post_id         = $post_id ? intval( $post_id ) : get_the_ID();
+    $use_native      = (bool) get_theme_mod( 'u_correio68_use_native_chamada', false );
+    $use_cat_badge   = (bool) get_theme_mod( 'u_correio68_badge_show_category_primary', false );
+    $default_callout = get_theme_mod( 'u_correio68_default_chamada', '' );
+    $value           = is_string( $value ) ? $value : '';
+
+    // Se o usuário quer mostrar a categoria no badge, prioriza o nome dela.
+    if ( $use_cat_badge ) {
+        $cat_label = u_correio68_get_primary_category_name( $post_id );
+        if ( $cat_label ) {
+            return wp_strip_all_tags( $cat_label );
+        }
+    }
+
+    // Usa o excerpt do post como chamada nativa, se habilitado.
+    if ( $use_native && empty( $value ) ) {
+        $value = get_the_excerpt( $post_id );
+    }
+
+    // Fallback para texto padrão configurável
+    if ( empty( $value ) && ! empty( $default_callout ) ) {
+        $value = $default_callout;
+    }
+
+    // Fallback final: excerpt mesmo sem a opção, caso o campo esteja vazio.
+    if ( empty( $value ) ) {
+        $value = get_the_excerpt( $post_id );
+    }
+
+    return wp_strip_all_tags( (string) $value );
+}
+
+/**
+ * Força a cor da badge para a cor primária quando a opção estiver ativa.
+ */
+function u_correio68_filter_badge_color_value( $value, $post_id, $field ) {
+    $use_primary_badge = (bool) get_theme_mod( 'u_correio68_badge_show_category_primary', false );
+    $custom_color      = get_theme_mod( 'u_correio68_badge_custom_color', '' );
+
+    // Cor definida pelo usuário no Customizer
+    if ( ! empty( $custom_color ) ) {
+        return $custom_color;
+    }
+
+    // Se opção de categoria estiver ativa, força cor primária
+    if ( $use_primary_badge ) {
+        return get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
+    }
+
+    // Fallback: cor do campo ou cor principal do tema
+    if ( empty( $value ) ) {
+        $value = get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
+    }
+
+    return $value;
+}
+
+/**
+ * Define ícone padrão (Font Awesome) quando ausente.
+ */
+function u_correio68_filter_badge_icon_value( $value, $post_id, $field ) {
+    $value         = is_string( $value ) ? trim( $value ) : '';
+    $default_icon  = get_theme_mod( 'u_correio68_badge_icon_class', 'fa-star' );
+    if ( empty( $value ) ) {
+        $value = $default_icon;
+    }
+    return sanitize_text_field( $value );
+}
+
+// Aplica os filtros aos campos ACF correspondentes, se o plugin estiver presente ou shimado.
+add_filter( 'acf/format_value/name=chamada', 'u_correio68_filter_chamada_value', 10, 3 );
+add_filter( 'acf/format_value/name=cor', 'u_correio68_filter_badge_color_value', 10, 3 );
+add_filter( 'acf/format_value/name=icones', 'u_correio68_filter_badge_icon_value', 10, 3 );
 
 /**
  * Live preview support for Customizer

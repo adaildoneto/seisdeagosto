@@ -3,7 +3,7 @@
             <?php PG_Helper::rememberShownPost(); ?>
             <article <?php post_class(); ?> itemscope itemtype="https://schema.org/NewsArticle" id="post-<?php the_ID(); ?>">
                 <header class="entry-header"><meta charset="utf-8">
-                    <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo get_field( 'cor' ); ?> !important;"> <ion-icon class="<?php echo get_field( 'icones' ); ?>"></ion-icon> <span><?php echo get_field( 'chamada' ); ?></span></span>
+                    <?php u_correio68_the_badge( array( 'class' => 'badge badge-light text-white bg-orange badge-pill' ) ); ?>
                     <p class="title-post" itemprop="headline"><?php the_title(); ?></p>
                     <div class="entry-meta">
                         <p>

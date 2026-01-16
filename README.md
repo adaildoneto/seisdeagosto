@@ -35,6 +35,8 @@ Tema WordPress moderno e robusto, especialmente desenvolvido para portais de not
 
 ## 🧩 Blocos Gutenberg
 
+Todos os blocos do tema aparecem no inseridor dentro da seção **Seis de Agosto**.
+
 ### 📰 Blocos de Conteúdo
 
 - **🎯 Destaques Home** (1 Grande + 2 Pequenos)
@@ -87,11 +89,19 @@ Tema WordPress moderno e robusto, especialmente desenvolvido para portais de not
   - Atualização automática via cron
   - Fallback entre múltiplos provedores de API
 
+- **🖼️ Galeria em Slider (Slick)**
+  - Slider de imagens configurável
+  - Suporte a autoplay, fade, vertical e RTL
+
+- **📦 Área de Widgets (Sidebar)**
+  - Renderiza uma área de widgets selecionada no editor
+
 ### 📦 Blocos Metadata (theme/blocks)
 
 - **destaque-grande** - Post em destaque tamanho grande
 - **destaque-pequeno** - Post em destaque compacto
 - **lista-noticias** - Lista simples de notícias
+- **titulo-com-icone** - Título com ícone e linha animada
 
 ---
 
@@ -127,6 +137,10 @@ Tema WordPress moderno e robusto, especialmente desenvolvido para portais de not
     - Tags
     - Busca
   - Permite usar blocos Gutenberg em páginas de arquivo
+
+- **📰 Posts e Badges**
+  - Chamada nativa via excerpt (fallback automático)
+  - Badge opcional com categoria e cor primária do tema
 
 - **👁️ Live Preview**
   - Atualiza estilos em tempo real
@@ -193,6 +207,7 @@ Otimizados para performance e qualidade visual em diferentes dispositivos.
 - **Base**: Bootstrap e Starter Theme (ST2/UnderStrap)
 - **Namespaces dos blocos**: 
   - `seideagosto/*` (principal)
+  - `u-correio68/*` (metadata blocks)
   - `correio68/*` (compatibilidade de renderização)
 
 ### Recursos Avançados
