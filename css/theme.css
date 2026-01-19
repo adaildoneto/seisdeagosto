@@ -927,7 +927,7 @@ body.admin-bar {
   background-color: var(--u68-primary-color, #0a4579);
   border-top: 1px solid rgba(255,255,255,.1);
   max-height: 50px;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to allow dropdown */
   transition: 
     max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
@@ -973,6 +973,129 @@ body.admin-bar {
   text-decoration: underline;
   transform: translateY(-2px);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* =============================================
+   CATEGORIES DROPDOWN MENU
+   ============================================= */
+
+/* Dropdown toggle */
+.navbar-categorias .nav-item.dropdown > .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navbar-categorias .nav-item.dropdown > .nav-link::after {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 5px solid currentColor;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  transition: transform 0.3s ease;
+}
+
+.navbar-categorias .nav-item.dropdown:hover > .nav-link::after,
+.navbar-categorias .nav-item.dropdown.show > .nav-link::after {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu styling */
+.navbar-categorias .dropdown-menu {
+  background-color: var(--wp--preset--color--primary, #0a4579);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  padding: 8px 0;
+  min-width: 200px;
+  margin-top: 8px;
+  animation: dropdownFadeIn 0.25s ease-out;
+  z-index: 1050;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dropdown items */
+.navbar-categorias .dropdown-menu .dropdown-item {
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.navbar-categorias .dropdown-menu .dropdown-item:hover,
+.navbar-categorias .dropdown-menu .dropdown-item:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-left-color: var(--wp--preset--color--accent, #ec940d);
+  padding-left: 24px;
+}
+
+.navbar-categorias .dropdown-menu .dropdown-item.active,
+.navbar-categorias .dropdown-menu .dropdown-item:active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-left-color: var(--wp--preset--color--accent, #ec940d);
+}
+
+/* Dropdown divider */
+.navbar-categorias .dropdown-menu .dropdown-divider {
+  border-top-color: rgba(0, 0, 0, 0.08);
+  margin: 4px 0;
+}
+
+/* Show dropdown on hover (desktop) */
+@media (min-width: 992px) {
+  .navbar-categorias .nav-item.dropdown:hover > .dropdown-menu {
+    display: block;
+  }
+  
+  .navbar-categorias .nav-item.dropdown > .dropdown-menu {
+    margin-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+/* Mobile dropdown adjustments */
+@media (max-width: 991px) {
+  .navbar-categorias .dropdown-menu {
+    position: static !important;
+    float: none;
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: rgba(0, 0, 0, 0.1);
+    animation: none;
+  }
+  
+  .navbar-categorias .dropdown-menu .dropdown-item {
+    color: #fff;
+    padding: 8px 24px;
+    font-size: 0.85rem;
+  }
+  
+  .navbar-categorias .dropdown-menu .dropdown-item:hover,
+  .navbar-categorias .dropdown-menu .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-left-color: var(--wp--preset--color--accent, #ec940d);
+  }
 }
 
 /* Header compression on scroll - scrolled state with smooth effects */

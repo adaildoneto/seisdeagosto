@@ -525,6 +525,7 @@ function u68_nav_menu_shortcode( $atts ) {
             'menu'     => '',
             'class'    => '',
             'depth'    => 2,
+            'dropdown' => 'true',
         ),
         $atts,
         'u68_nav_menu'
@@ -534,9 +535,16 @@ function u68_nav_menu_shortcode( $atts ) {
     $menu     = sanitize_text_field( $atts['menu'] );
     $class    = sanitize_text_field( $atts['class'] );
     $depth    = absint( $atts['depth'] );
+    $dropdown = ( $atts['dropdown'] === 'true' || $atts['dropdown'] === '1' );
 
     if ( $location && ! has_nav_menu( $location ) ) {
         return '';
+    }
+
+    // Use Bootstrap navwalker if dropdown is enabled and walker class exists
+    $walker = null;
+    if ( $dropdown && class_exists( 'WP_Bootstrap4_Navwalker' ) ) {
+        $walker = new WP_Bootstrap4_Navwalker();
     }
 
     $args = array(
@@ -548,6 +556,10 @@ function u68_nav_menu_shortcode( $atts ) {
         'echo'           => false,
         'fallback_cb'    => false,
     );
+
+    if ( $walker ) {
+        $args['walker'] = $walker;
+    }
 
     $html = wp_nav_menu( $args );
     return $html ? $html : '';
@@ -636,7 +648,7 @@ add_filter( 'nav_menu_css_class', 'u68_nav_item_classes', 10, 4 );
 /**
  * Add link attributes for Bootstrap 5 menus.
  */
-function u68_nav_link_attributes( $atts, $item, $args, $depth ) {
+function u68_nav_link_attributes( $atts, $item, $args, $depth = 0 ) {
     if ( isset( $args->theme_location ) && in_array( $args->theme_location, array( 'primary', 'categorias' ), true ) ) {
         $base_class     = $depth > 0 ? 'dropdown-item' : 'nav-link';
         $existing_class = isset( $atts['class'] ) ? $atts['class'] . ' ' : '';
