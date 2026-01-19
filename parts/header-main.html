@@ -6,8 +6,13 @@
         <div class="container">
             <div class="d-flex align-items-center w-100 justify-content-between">
                 [u68_header_brand]
-                
-                <div class="d-flex align-items-center ms-auto">
+                <button id="searchToggleMobile" class="btn-search-toggle d-lg-none ms-auto" aria-label="Abrir busca">
+                    <i class="fa fa-search"></i>
+                </button>
+                <div id="mobileSearchWrapper" class="d-lg-none position-absolute w-100" style="top:100%;left:0;z-index:1000;background:rgba(10,69,121,0.98);padding:10px 0;">
+                    [u68_header_search]
+                </div>
+                <div class="d-none d-lg-flex align-items-center ms-auto">
                     [u68_header_search]
                 </div>
             </div>
@@ -16,8 +21,8 @@
     
     <nav id="categoriesNav" class="navbar navbar-expand navbar-categorias categories-nav-top bg-body-tertiary border-0" aria-label="Categorias">
         <div class="container justify-content-center">
-            [u68_nav_menu location="categorias" class="navbar-nav gap-2 mb-0 justify-content-center" depth="2" slider="mobile"]
-        </div>
+            [u68_nav_menu location="categorias" class="navbar-nav gap-2 mb-0 justify-content-center" depth="2"]
+                </div>
     </nav>
 </div>
 <!-- /wp:html -->
