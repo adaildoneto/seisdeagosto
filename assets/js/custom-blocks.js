@@ -40,6 +40,7 @@
     var InspectorControls = wp.blockEditor.InspectorControls;
     var InnerBlocks = wp.blockEditor.InnerBlocks;
     var MediaUpload = wp.blockEditor.MediaUpload;
+    var MediaUploadCheck = wp.blockEditor.MediaUploadCheck || null;
     var SelectControl = wp.components.SelectControl;
     var ComboboxControl = wp.components.ComboboxControl || null;
     var TextControl = wp.components.TextControl;
@@ -261,11 +262,18 @@
             name: { type: 'string', default: '' },
             columnTitle: { type: 'string', default: '' },
             imageUrl: { type: 'string', default: '' },
+            imageId: { type: 'number', default: 0 },
             categoryId: { type: 'string', default: '0' }
         },
         edit: function(props) {
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
+            var hasImage = !!attributes.imageUrl || !!attributes.imageId;
+            var onSelectImage = function(media) {
+                var url = media && media.url ? media.url : '';
+                var id = media && media.id ? media.id : 0;
+                setAttributes({ imageUrl: url, imageId: id });
+            };
             return el(
                 wp.element.Fragment,
                 null,
@@ -285,8 +293,35 @@
                             value: attributes.columnTitle,
                             onChange: function(val) { setAttributes({ columnTitle: val }); }
                         }),
+                        el('div', { style: { marginTop: '8px' } },
+                            MediaUploadCheck ?
+                                el(MediaUploadCheck, null,
+                                    el(MediaUpload, {
+                                        onSelect: onSelectImage,
+                                        allowedTypes: ['image'],
+                                        value: attributes.imageId,
+                                        render: function(obj) {
+                                            return el(Button, { onClick: obj.open, isSecondary: true }, hasImage ? 'Trocar imagem' : 'Selecionar imagem');
+                                        }
+                                    })
+                                ) :
+                                el(MediaUpload, {
+                                    onSelect: onSelectImage,
+                                    allowedTypes: ['image'],
+                                    value: attributes.imageId,
+                                    render: function(obj) {
+                                        return el(Button, { onClick: obj.open, isSecondary: true }, hasImage ? 'Trocar imagem' : 'Selecionar imagem');
+                                    }
+                                }),
+                            hasImage ? el(Button, {
+                                isLink: true,
+                                isDestructive: true,
+                                style: { marginLeft: '8px' },
+                                onClick: function() { setAttributes({ imageUrl: '', imageId: 0 }); }
+                            }, 'Remover') : null
+                        ),
                         el(TextControl, {
-                            label: 'URL da Imagem',
+                            label: 'URL da Imagem (opcional)',
                             value: attributes.imageUrl,
                             onChange: function(val) { setAttributes({ imageUrl: val }); }
                         }),
@@ -430,6 +465,7 @@
             title: { type: 'string', default: '' },
             bigCount: { type: 'number', default: 1 },
             listCount: { type: 'number', default: 3 },
+            showListThumbs: { type: 'boolean', default: true },
             tags: { type: 'string', default: '' },
             keyword: { type: 'string', default: '' }
         }, getTypographyAttributes()),
@@ -470,6 +506,11 @@
                             onChange: function(val) { setAttributes({ listCount: parseInt(val) }); },
                             min: 0,
                             max: 12
+                        }),
+                        el(ToggleControl, {
+                            label: 'Mostrar fotos na lista',
+                            checked: attributes.showListThumbs !== false,
+                            onChange: function(val) { setAttributes({ showListThumbs: !!val }); }
                         }),
                         el(TextControl, {
                             label: 'Tags (slugs separados por vírgula)',

@@ -1,6 +1,6 @@
 <?php if ( have_posts() ) : ?>
         <?php while ( have_posts() ) : the_post(); ?>
-            <?php PG_Helper::rememberShownPost(); ?>
+            <?php if ( class_exists( 'PG_Helper' ) ) { PG_Helper::rememberShownPost(); } ?>
             <article <?php post_class(); ?> itemscope itemtype="https://schema.org/NewsArticle" id="post-<?php the_ID(); ?>">
                 <header class="entry-header"><meta charset="utf-8">
                     <?php u_correio68_the_badge( array( 'class' => 'badge badge-light text-white bg-orange badge-pill' ) ); ?>
@@ -22,11 +22,22 @@
                         <button type="button" class="btn btn-outline-secondary" id="font-increase" aria-label="Aumentar fonte">A+</button>
                     </div>
                 </div>
-                <div class="col-12"> 
-                    <a href="#"> <?php if ( get_field('foto_destacada') ) : ?><?php echo PG_Image::getPostImage( null, 'large', array(
-                                    'class' => 'w-100 img-thumbnail',
-                                    'sizes' => 'max-width(320px) 73vw, max-width(640px) 470px, max-width(768px) 65vw, max-width(1024px) 48vw, max-width(1280px) 595px, 595px'
-                            ), 'both', null ) ?><?php endif; ?><?php if ( get_field('foto_destacada') ) : ?><?php endif; ?> </a> 
+                <div class="col-12">
+                    <?php if ( get_field( 'foto_destacada' ) ) : ?>
+                        <?php
+                        if ( class_exists( 'PG_Image' ) ) {
+                            echo PG_Image::getPostImage( null, 'large', array(
+                                'class' => 'w-100 img-thumbnail',
+                                'sizes' => 'max-width(320px) 73vw, max-width(640px) 470px, max-width(768px) 65vw, max-width(1024px) 48vw, max-width(1280px) 595px, 595px'
+                            ), 'both', null );
+                        } else {
+                            echo get_the_post_thumbnail( get_the_ID(), 'large', array(
+                                'class' => 'w-100 img-thumbnail',
+                                'sizes' => 'max-width(320px) 73vw, max-width(640px) 470px, max-width(768px) 65vw, max-width(1024px) 48vw, max-width(1280px) 595px, 595px'
+                            ) );
+                        }
+                        ?>
+                    <?php endif; ?>
                 </div>
                 <div class="entry-content">
                     <?php the_content(); ?>

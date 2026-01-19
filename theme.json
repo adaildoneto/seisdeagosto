@@ -108,5 +108,10 @@
     "seisdeagosto/mais-lidas",
     "seisdeagosto/noticias-grid-bloco",
     "seisdeagosto/previsao-tempo"
+  ],
+  "templateParts": [
+    { "name": "header-main", "title": "Header Main", "area": "header" },
+    { "name": "footer-main", "title": "Footer Main", "area": "footer" },
+    { "name": "sidebar", "title": "Sidebar", "area": "uncategorized" }
   ]
 }

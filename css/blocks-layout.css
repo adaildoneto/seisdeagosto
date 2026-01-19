@@ -44,3 +44,18 @@
         grid-template-columns: 1fr !important;
     }
 }
+
+/* =============================================
+   FSE Block Theme - Layout Fixes
+   ============================================= */
+
+/* Fix for Site Editor iframe adding extra height */
+.editor-styles-wrapper .site-header,
+.editor-styles-wrapper #wrapper-navbar {
+    min-height: unset !important;
+}
+
+/* Ensure Bootstrap collapse works properly */
+.site-header .navbar-collapse.show {
+    display: flex !important;
+}

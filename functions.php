@@ -21,6 +21,14 @@ function u_seisbarra8_setup() {
      */
     add_theme_support( 'title-tag' );
 
+    // Block theme capabilities (align with Twenty Twenty-Four)
+    add_theme_support( 'block-templates' );
+    add_theme_support( 'wp-block-styles' );
+    add_theme_support( 'responsive-embeds' );
+    add_theme_support( 'appearance-tools' );
+    add_theme_support( 'custom-units' );
+    add_theme_support( 'custom-line-height' );
+
     /*
      * Enable support for Post Thumbnails on posts and pages.
      */
@@ -214,6 +222,284 @@ function u_seisbarra8_setup() {
 endif; // u_seisbarra8_setup
 
 add_action( 'after_setup_theme', 'u_seisbarra8_setup' );
+
+/**
+ * Process shortcodes inside wp:html blocks in FSE templates.
+ * This ensures [u68_*] shortcodes render correctly in header/footer/sidebar.
+ */
+add_filter( 'render_block_core/html', function( $block_content, $block ) {
+    // Only process if the content contains our shortcodes
+    if ( strpos( $block_content, '[u68_' ) !== false || strpos( $block_content, '[' ) !== false ) {
+        $block_content = do_shortcode( $block_content );
+    }
+    return $block_content;
+}, 10, 2 );
+
+/**
+ * Also process shortcodes in template parts content.
+ */
+add_filter( 'render_block_core/template-part', function( $block_content, $block ) {
+    // Process shortcodes in template part content
+    if ( strpos( $block_content, '[u68_' ) !== false || strpos( $block_content, '[' ) !== false ) {
+        $block_content = do_shortcode( $block_content );
+    }
+    return $block_content;
+}, 10, 2 );
+
+/**
+ * Global filter to ensure shortcodes work in all block content.
+ * This catches any shortcodes that might slip through specific block filters.
+ */
+add_filter( 'render_block', function( $block_content, $block ) {
+    // Process shortcodes if content contains bracket notation
+    if ( strpos( $block_content, '[u68_' ) !== false ) {
+        $block_content = do_shortcode( $block_content );
+    }
+    return $block_content;
+}, 10, 2 );
+
+/**
+ * Shortcode: Sidebar intro text (classic theme setting).
+ */
+function u68_sidebar_intro_shortcode() {
+    $default = function_exists( 'u_correio68_get_sidebar_intro_default_text' )
+        ? u_correio68_get_sidebar_intro_default_text()
+        : '';
+    $text = get_theme_mod( 'u_correio68_sidebar_intro_text', $default );
+    if ( empty( $text ) ) {
+        return '';
+    }
+    return wp_kses_post( nl2br( $text ) );
+}
+add_shortcode( 'u68_sidebar_intro', 'u68_sidebar_intro_shortcode' );
+
+/**
+ * Shortcode: Footer text (classic theme setting).
+ */
+function u68_footer_text_shortcode() {
+    $default = function_exists( 'u_seisbarra8_get_footer_default_text' )
+        ? u_seisbarra8_get_footer_default_text()
+        : sprintf(
+            'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>%s</b>',
+            esc_html( wp_parse_url( home_url(), PHP_URL_HOST ) ?: home_url() )
+        );
+    $text = get_theme_mod( 'footer_text', $default );
+    if ( empty( $text ) ) {
+        return '';
+    }
+    return wp_kses_post( $text );
+}
+add_shortcode( 'u68_footer_text', 'u68_footer_text_shortcode' );
+
+/**
+ * Shortcode: Render a widget area with optional condition.
+ * Usage: [u68_widget_area id="left-sidebar" class="col-md-4 widget-area" role="complementary" condition="show_left_sidebar"]
+ */
+function u68_widget_area_shortcode( $atts ) {
+    $atts = shortcode_atts(
+        array(
+            'id'        => '',
+            'class'     => '',
+            'role'      => '',
+            'condition' => '',
+        ),
+        $atts,
+        'u68_widget_area'
+    );
+
+    $sidebar_id = sanitize_text_field( $atts['id'] );
+    if ( empty( $sidebar_id ) ) {
+        return '';
+    }
+
+    if ( $atts['condition'] ) {
+        $flag = (bool) get_theme_mod( sanitize_key( $atts['condition'] ), false );
+        if ( ! $flag ) {
+            return '';
+        }
+    }
+
+    if ( ! is_active_sidebar( $sidebar_id ) ) {
+        return '';
+    }
+
+    $classes = trim( sanitize_text_field( $atts['class'] ) );
+    $role    = trim( sanitize_text_field( $atts['role'] ) );
+    $role    = $role ? ' role="' . esc_attr( $role ) . '"' : '';
+
+    ob_start();
+    echo '<div class="' . esc_attr( $classes ) . '" id="' . esc_attr( $sidebar_id ) . '"' . $role . '>';
+    dynamic_sidebar( $sidebar_id );
+    echo '</div>';
+    return ob_get_clean();
+}
+add_shortcode( 'u68_widget_area', 'u68_widget_area_shortcode' );
+
+/**
+ * Shortcode: Render menus using classic walker when available.
+ * Usage: [u68_nav_menu location="categorias" class="navbar-nav ..." depth="2"]
+ */
+function u68_nav_menu_shortcode( $atts ) {
+    $atts = shortcode_atts(
+        array(
+            'location' => '',
+            'menu'     => '',
+            'class'    => '',
+            'depth'    => 2,
+        ),
+        $atts,
+        'u68_nav_menu'
+    );
+
+    $location = sanitize_key( $atts['location'] );
+    $menu     = sanitize_text_field( $atts['menu'] );
+    $class    = sanitize_text_field( $atts['class'] );
+    $depth    = absint( $atts['depth'] );
+
+    if ( $location && ! has_nav_menu( $location ) ) {
+        return '';
+    }
+
+    $args = array(
+        'menu'           => $menu,
+        'theme_location' => $location,
+        'menu_class'     => $class,
+        'container'      => '',
+        'depth'          => $depth,
+        'echo'           => false,
+        'fallback_cb'    => false,
+    );
+
+    $html = wp_nav_menu( $args );
+    return $html ? $html : '';
+}
+add_shortcode( 'u68_nav_menu', 'u68_nav_menu_shortcode' );
+
+/**
+ * Bootstrap 5 header brand markup.
+ */
+function u68_header_brand_markup() {
+    ob_start();
+
+    if ( has_custom_logo() ) {
+        echo '<div class="navbar-brand mb-0 d-flex align-items-center gap-2">';
+        the_custom_logo();
+        echo '</div>';
+    } else {
+        echo '<a rel="home" class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="' . esc_url( home_url( '/' ) ) . '">' . esc_html( get_bloginfo( 'name' ) ) . '</a>';
+    }
+
+    return trim( ob_get_clean() );
+}
+
+/**
+ * Shortcode: header brand.
+ * Usage: [u68_header_brand] or [u68_header_brand class="text-white p-0 m-0 h5 d-inline-block"]
+ */
+function u68_header_brand_shortcode( $atts ) {
+    $atts = shortcode_atts(
+        array(
+            'class' => '',
+        ),
+        $atts,
+        'u68_header_brand'
+    );
+    
+    $custom_class = sanitize_text_field( $atts['class'] );
+    
+    ob_start();
+    
+    if ( has_custom_logo() ) {
+        if ( $custom_class ) {
+            echo '<div class="' . esc_attr( $custom_class ) . '">';
+            the_custom_logo();
+            echo '</div>';
+        } else {
+            echo '<div class="navbar-brand mb-0 d-flex align-items-center gap-2">';
+            the_custom_logo();
+            echo '</div>';
+        }
+    } else {
+        $link_class = $custom_class ? $custom_class : 'navbar-brand d-flex align-items-center gap-2 fw-semibold';
+        echo '<a rel="home" class="' . esc_attr( $link_class ) . '" href="' . esc_url( home_url( '/' ) ) . '">' . esc_html( get_bloginfo( 'name' ) ) . '</a>';
+    }
+    
+    return trim( ob_get_clean() );
+}
+add_shortcode( 'u68_header_brand', 'u68_header_brand_shortcode' );
+
+/**
+ * Shortcode: header search form.
+ */
+function u68_header_search_shortcode() {
+    return get_search_form( false );
+}
+add_shortcode( 'u68_header_search', 'u68_header_search_shortcode' );
+
+/**
+ * Add Bootstrap 5 classes to header menus.
+ */
+function u68_nav_item_classes( $classes, $item, $args, $depth ) {
+    if ( isset( $args->theme_location ) && in_array( $args->theme_location, array( 'primary', 'categorias' ), true ) ) {
+        if ( $depth === 0 ) {
+            $classes[] = 'nav-item';
+
+            if ( in_array( 'menu-item-has-children', (array) $item->classes, true ) ) {
+                $classes[] = 'dropdown';
+            }
+        }
+    }
+
+    return $classes;
+}
+add_filter( 'nav_menu_css_class', 'u68_nav_item_classes', 10, 4 );
+
+/**
+ * Add link attributes for Bootstrap 5 menus.
+ */
+function u68_nav_link_attributes( $atts, $item, $args, $depth ) {
+    if ( isset( $args->theme_location ) && in_array( $args->theme_location, array( 'primary', 'categorias' ), true ) ) {
+        $base_class     = $depth > 0 ? 'dropdown-item' : 'nav-link';
+        $existing_class = isset( $atts['class'] ) ? $atts['class'] . ' ' : '';
+        $atts['class']  = trim( $existing_class . $base_class );
+
+        if ( in_array( 'menu-item-has-children', (array) $item->classes, true ) && $depth === 0 ) {
+            $atts['class']         .= ' dropdown-toggle';
+            $atts['data-bs-toggle'] = 'dropdown';
+            $atts['aria-expanded'] = 'false';
+            $atts['role']          = 'button';
+        }
+    }
+
+    return $atts;
+}
+add_filter( 'nav_menu_link_attributes', 'u68_nav_link_attributes', 10, 4 );
+
+/**
+ * Submenu classes for Bootstrap 5 menus.
+ */
+function u68_nav_submenu_classes( $classes, $args, $depth ) {
+    if ( isset( $args->theme_location ) && in_array( $args->theme_location, array( 'primary', 'categorias' ), true ) ) {
+        $classes[] = 'dropdown-menu';
+    }
+
+    return $classes;
+}
+add_filter( 'nav_menu_submenu_css_class', 'u68_nav_submenu_classes', 10, 3 );
+
+/**
+ * Add body classes based on sidebar toggles.
+ */
+function u68_sidebar_body_classes( $classes ) {
+    if ( ! get_theme_mod( 'show_left_sidebar', false ) ) {
+        $classes[] = 'u68-no-left-sidebar';
+    }
+    if ( ! get_theme_mod( 'show_right_sidebar', false ) ) {
+        $classes[] = 'u68-no-right-sidebar';
+    }
+    return $classes;
+}
+add_filter( 'body_class', 'u68_sidebar_body_classes' );
 
 /**
  * AMP request helper (requires AMP plugin).
@@ -612,8 +898,20 @@ function u_seisbarra8_customize_register( $wp_customize ) {
         'priority'    => 10,
     ));
 
+    if ( ! function_exists( 'u_seisbarra8_get_footer_default_text' ) ) {
+        function u_seisbarra8_get_footer_default_text() {
+            $site_url  = home_url();
+            $site_host = wp_parse_url( $site_url, PHP_URL_HOST );
+            $site_display = $site_host ? $site_host : $site_url;
+            return sprintf(
+                'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>%s</b>',
+                esc_html( $site_display )
+            );
+        }
+    }
+
     $wp_customize->add_setting( 'footer_text', array(
-        'default'           => 'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>6barra8.com</b>',
+        'default'           => u_seisbarra8_get_footer_default_text(),
         'type'              => 'theme_mod',
         'sanitize_callback' => 'wp_kses_post',
     ));
@@ -654,33 +952,111 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
 
         wp_enqueue_script( 'u_seisbarra8-outline', get_template_directory_uri() . '/assets/js/outline.js', null, null, true );
 
-        wp_deregister_script( 'u_seisbarra8-plugins' );
-        wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), null, true);
+        if ( ! wp_script_is( 'u_seisbarra8-plugins', 'enqueued' ) ) {
+            wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), null, true);
+        }
 
-        wp_deregister_script( 'u_seisbarra8-bskitscripts' );
-        wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), null, true);
+        if ( ! wp_script_is( 'u_seisbarra8-bskitscripts', 'enqueued' ) ) {
+            wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), null, true);
+        }
 
         // Remove external Google Maps API to avoid CDN/external dependency
         wp_deregister_script( 'u_seisbarra8-script' );
 
-        wp_deregister_script( 'u_seisbarra8-slick' );
-        wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
-        wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+        if ( ! wp_script_is( 'u_seisbarra8-slick', 'enqueued' ) ) {
+            wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
+        }
+        if ( apply_filters( 'u_seisbarra8_enable_colunistas_slick', false ) ) {
+            wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+        }
         // Weather forecast slider init (uses slick)
         wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), null, true );
         // Post-load i18n for weekday names (pt-BR)
         wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), null, true );
+
+        // Header behavior: categories hide on scroll + mobile search toggle
+        $u68_header_js = <<<'JS'
+(function() {
+    var categoriesNav = document.getElementById('categoriesNav');
+    var header = document.querySelector('.site-header');
+    var contentWrapper = document.getElementById('content');
+    var searchToggle = document.getElementById('searchToggleMobile');
+    var mobileSearchWrapper = document.getElementById('mobileSearchWrapper');
+    var scrollThreshold = 50;
+    var ticking = false;
+
+    function updateScrollState() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (scrollTop > scrollThreshold) {
+            if (header) header.classList.add('scrolled', 'fixed-header');
+            if (categoriesNav) categoriesNav.classList.add('hidden');
+            if (contentWrapper) contentWrapper.classList.add('header-fixed');
+            if (mobileSearchWrapper && searchToggle) {
+                mobileSearchWrapper.classList.remove('active');
+                searchToggle.classList.remove('active');
+            }
+        } else {
+            if (header) header.classList.remove('scrolled', 'fixed-header');
+            if (categoriesNav) categoriesNav.classList.remove('hidden');
+            if (contentWrapper) contentWrapper.classList.remove('header-fixed');
+        }
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            window.requestAnimationFrame(updateScrollState);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    if (searchToggle) {
+        searchToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (mobileSearchWrapper) mobileSearchWrapper.classList.toggle('active');
+            searchToggle.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchToggle.contains(e.target) && mobileSearchWrapper && !mobileSearchWrapper.contains(e.target)) {
+                mobileSearchWrapper.classList.remove('active');
+                searchToggle.classList.remove('active');
+            }
+        });
+
+        if (mobileSearchWrapper) {
+            var searchInput = mobileSearchWrapper.querySelector('input[type="search"]');
+            if (searchInput) {
+                searchInput.addEventListener('blur', function() {
+                    setTimeout(function() {
+                        if (!document.activeElement || !document.activeElement.closest('.navbar-search')) {
+                            mobileSearchWrapper.classList.remove('active');
+                            searchToggle.classList.remove('active');
+                        }
+                    }, 200);
+                });
+            }
+        }
+    }
+})();
+JS;
+        wp_add_inline_script( 'u_seisbarra8-bootstrap', $u68_header_js );
     }
 
     /* Pinegrow generated Enqueue Scripts End */
 
         /* Pinegrow generated Enqueue Styles Begin */
 
-    wp_deregister_style( 'u_seisbarra8-bootstrap' );
-    wp_enqueue_style( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css', false, null, 'all');
+    // Estilos são carregados pelo enqueue_block_assets; apenas adicionar inline CSS aqui
+    if ( ! wp_style_is( 'u_seisbarra8-bootstrap', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css', false, null, 'all');
+    }
 
-    wp_deregister_style( 'u_seisbarra8-theme' );
-    wp_enqueue_style( 'u_seisbarra8-theme', get_template_directory_uri() . '/css/theme.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-theme', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-theme', get_template_directory_uri() . '/css/theme.css', array('u_seisbarra8-bootstrap'), null, 'all');
+    }
     // Inline CSS to align icon colors and spacing with theme variables
     wp_add_inline_style( 'u_seisbarra8-theme', '
     .weather-forecast .fa.icon-color-primary { color: var(--u68-primary-color, #007bff); }
@@ -721,36 +1097,43 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
         .weather-block .current-info { min-width:0; }
     ' );
 
-    wp_deregister_style( 'u_seisbarra8-woocommerce' );
-    wp_enqueue_style( 'u_seisbarra8-woocommerce', get_template_directory_uri() . '/css/woocommerce.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-woocommerce', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-woocommerce', get_template_directory_uri() . '/css/woocommerce.css', false, null, 'all');
+    }
 
-    wp_deregister_style( 'u_seisbarra8-blocks' );
-    wp_enqueue_style( 'u_seisbarra8-blocks', get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-blocks', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-blocks', get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css', false, null, 'all');
+    }
 
-    wp_deregister_style( 'u_seisbarra8-plugins' );
-    wp_enqueue_style( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-plugins', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css', false, null, 'all');
+    }
 
-    wp_deregister_style( 'u_seisbarra8-stylelibrary' );
-    wp_enqueue_style( 'u_seisbarra8-stylelibrary', get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-stylelibrary', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-stylelibrary', get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css', false, null, 'all');
+    }
 
     // Remove Google Fonts to avoid CDN/external dependency (use local fonts instead)
     wp_deregister_style( 'u_seisbarra8-style' );
     wp_deregister_style( 'u_seisbarra8-style-1' );
 
     // Prefer local Font Awesome 4.7 if present; otherwise fallback to hiding icons to avoid broken glyphs
-    wp_deregister_style( 'u_seisbarra8-fontawesome' );
-    $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
-    if ( file_exists( $fa_vendor_css ) ) {
-        wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', false, '4.7.0', 'all');
-    } else {
-        wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/css/local-fa-fallback.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-fontawesome', 'enqueued' ) ) {
+        $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+        if ( file_exists( $fa_vendor_css ) ) {
+            wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', false, '4.7.0', 'all');
+        } else {
+            wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/css/local-fa-fallback.css', false, null, 'all');
+        }
     }
 
-    wp_deregister_style( 'u_seisbarra8-slick' );
-    wp_enqueue_style( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-slick', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.css', false, null, 'all');
+    }
 
-    wp_deregister_style( 'u_seisbarra8-slicktheme' );
-    wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
+    if ( ! wp_style_is( 'u_seisbarra8-slicktheme', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
+    }
 
     // Enqueue blocks layout CSS
     wp_enqueue_style( 'seideagosto-blocks-layout', get_template_directory_uri() . '/css/blocks-layout.css', false, null, 'all');
@@ -759,29 +1142,115 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     $stylesheet_dir = get_stylesheet_directory();
     $stylesheet_uri = get_stylesheet_directory_uri();
     $font_dir = $stylesheet_dir . '/assets/fonts';
-    
+
     $open_sans_file = $font_dir . '/open-sans/OpenSans-Variable.ttf';
     $lato_file = $font_dir . '/lato/Lato-Regular.ttf';
-    
-    if ( file_exists( $open_sans_file ) && file_exists( $lato_file ) ) {
+
+    $enable_google_fonts = (bool) get_theme_mod( 'u_correio68_enable_google_fonts', false );
+    $google_families = get_theme_mod( 'u_correio68_google_fonts_family', 'Open+Sans:wght@300;400;600;700|Lato:wght@300;400;700' );
+    if ( function_exists( 'u_correio68_sanitize_google_fonts_family' ) ) {
+        $google_families = u_correio68_sanitize_google_fonts_family( $google_families );
+    }
+    $preset_key = get_theme_mod( 'u_correio68_google_fonts_preset', 'custom' );
+    if ( function_exists( 'u_correio68_get_google_font_presets' ) ) {
+        $presets = u_correio68_get_google_font_presets();
+        if ( isset( $presets[ $preset_key ] ) && $preset_key !== 'custom' ) {
+            $google_families = $presets[ $preset_key ]['families'];
+            $enable_google_fonts = true;
+        }
+    }
+    if ( $enable_google_fonts && ! empty( $google_families ) ) {
+        $google_families_query = str_replace( '+', ' ', $google_families );
+        $google_url = add_query_arg(
+            array(
+                'family'  => $google_families_query,
+                'display' => 'swap',
+            ),
+            'https://fonts.googleapis.com/css2'
+        );
+        wp_enqueue_style( 'u_seisbarra8-google-fonts', esc_url( $google_url ), false, null, 'all' );
+    } elseif ( file_exists( $open_sans_file ) && file_exists( $lato_file ) ) {
         // Use local self-hosted fonts with absolute URLs
-        wp_register_style( 'u_seisbarra8-fonts', false, array(), filemtime( $lato_file ) );
-        wp_enqueue_style( 'u_seisbarra8-fonts' );
-        
-        // Cache buster using file modification time
-        $font_mtime = '?v=' . filemtime( $lato_file );
         $font_uri = $stylesheet_uri . '/assets/fonts';
-        
-        $u68_font_faces = "@font-face { font-family: 'Open Sans'; src: url('" . esc_url( $font_uri . '/open-sans/OpenSans-Variable.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Open Sans'; src: url('" . esc_url( $font_uri . '/open-sans/OpenSans-Italic-Variable.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300 700; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Light.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-LightItalic.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Regular.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Italic.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-Bold.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Lato'; src: url('" . esc_url( $font_uri . '/lato/Lato-BoldItalic.ttf' . $font_mtime ) . "') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }";
-        
-        wp_add_inline_style( 'u_seisbarra8-fonts', $u68_font_faces );
+
+        $font_files = array(
+            array(
+                'family' => 'Open Sans',
+                'file'   => $font_dir . '/open-sans/OpenSans-Variable.ttf',
+                'uri'    => '/open-sans/OpenSans-Variable.ttf',
+                'weight' => '300 700',
+                'style'  => 'normal',
+            ),
+            array(
+                'family' => 'Open Sans',
+                'file'   => $font_dir . '/open-sans/OpenSans-Italic-Variable.ttf',
+                'uri'    => '/open-sans/OpenSans-Italic-Variable.ttf',
+                'weight' => '300 700',
+                'style'  => 'italic',
+            ),
+            array(
+                'family' => 'Lato',
+                'file'   => $font_dir . '/lato/Lato-Light.ttf',
+                'uri'    => '/lato/Lato-Light.ttf',
+                'weight' => '300',
+                'style'  => 'normal',
+            ),
+            array(
+                'family' => 'Lato',
+                'file'   => $font_dir . '/lato/Lato-LightItalic.ttf',
+                'uri'    => '/lato/Lato-LightItalic.ttf',
+                'weight' => '300',
+                'style'  => 'italic',
+            ),
+            array(
+                'family' => 'Lato',
+                'file'   => $font_dir . '/lato/Lato-Regular.ttf',
+                'uri'    => '/lato/Lato-Regular.ttf',
+                'weight' => '400',
+                'style'  => 'normal',
+            ),
+            array(
+                'family' => 'Lato',
+                'file'   => $font_dir . '/lato/Lato-Italic.ttf',
+                'uri'    => '/lato/Lato-Italic.ttf',
+                'weight' => '400',
+                'style'  => 'italic',
+            ),
+            array(
+                'family' => 'Lato',
+                'file'   => $font_dir . '/lato/Lato-Bold.ttf',
+                'uri'    => '/lato/Lato-Bold.ttf',
+                'weight' => '700',
+                'style'  => 'normal',
+            ),
+            array(
+                'family' => 'Lato',
+                'file'   => $font_dir . '/lato/Lato-BoldItalic.ttf',
+                'uri'    => '/lato/Lato-BoldItalic.ttf',
+                'weight' => '700',
+                'style'  => 'italic',
+            ),
+        );
+
+        $u68_font_faces = array();
+        $font_mtime = 0;
+        foreach ( $font_files as $font_file ) {
+            if ( ! file_exists( $font_file['file'] ) ) {
+                continue;
+            }
+            $file_mtime = filemtime( $font_file['file'] );
+            $font_mtime = max( $font_mtime, $file_mtime );
+            $u68_font_faces[] = "@font-face { font-family: '" . esc_attr( $font_file['family'] ) . "'; src: url('" . esc_url( $font_uri . $font_file['uri'] . '?v=' . $file_mtime ) . "') format('truetype'); font-weight: " . esc_attr( $font_file['weight'] ) . "; font-style: " . esc_attr( $font_file['style'] ) . "; font-display: swap; }";
+        }
+
+        if ( ! empty( $u68_font_faces ) ) {
+            wp_register_style( 'u_seisbarra8-fonts', false, array(), $font_mtime ? $font_mtime : null );
+            wp_enqueue_style( 'u_seisbarra8-fonts' );
+            wp_add_inline_style( 'u_seisbarra8-fonts', implode( "\n", $u68_font_faces ) );
+        } else {
+            // Fallback to Google Fonts CDN when local fonts are missing
+            wp_enqueue_style( 'u_seisbarra8-google-fonts', 'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap', false, null, 'all');
+        }
     } else {
         // Fallback to Google Fonts CDN
         wp_enqueue_style( 'u_seisbarra8-google-fonts', 'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap', false, null, 'all');
@@ -795,6 +1264,263 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     }
     add_action( 'wp_enqueue_scripts', 'u_seisbarra8_enqueue_scripts' );
 endif;
+
+/**
+ * Ensure Font Awesome is always enqueued (frontend + admin/editor).
+ */
+function u_seisbarra8_ensure_fontawesome() {
+    $handle = 'u_seisbarra8-fontawesome';
+    $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+    if ( file_exists( $fa_vendor_css ) ) {
+        $src = get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+        $ver = '4.7.0';
+    } else {
+        $src = get_template_directory_uri() . '/css/local-fa-fallback.css';
+        $ver = file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null;
+    }
+
+    if ( ! wp_style_is( $handle, 'registered' ) ) {
+        wp_register_style( $handle, $src, array(), $ver );
+    }
+    wp_enqueue_style( $handle );
+}
+add_action( 'wp_enqueue_scripts', 'u_seisbarra8_ensure_fontawesome', 1 );
+add_action( 'admin_enqueue_scripts', 'u_seisbarra8_ensure_fontawesome', 1 );
+
+// Load key styles AND scripts (Bootstrap, theme, icons, layout) in both frontend and Site Editor to keep header/footer styled and functional.
+function u_seisbarra8_enqueue_block_assets() {
+    $theme_uri = get_template_directory_uri();
+
+    // CSS: Bootstrap + main + theme + icons + blocks + slick
+    wp_enqueue_style( 'u_seisbarra8-bootstrap', $theme_uri . '/bootstrap/css/bootstrap.min.css', array(), null );
+    wp_enqueue_style( 'u_seisbarra8-main', $theme_uri . '/css/main.css', array( 'u_seisbarra8-bootstrap' ), null );
+    wp_enqueue_style( 'u_seisbarra8-theme', $theme_uri . '/css/theme.css', array( 'u_seisbarra8-bootstrap', 'u_seisbarra8-main' ), null );
+    wp_enqueue_style( 'u_seisbarra8-fontawesome', $theme_uri . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', array(), '4.7.0' );
+    wp_enqueue_style( 'u_seisbarra8-blocks', $theme_uri . '/components/pg.blocks.wp/css/blocks.css', array( 'u_seisbarra8-theme' ), null );
+    wp_enqueue_style( 'u_seisbarra8-plugins', $theme_uri . '/components/pg.blocks.wp/css/plugins.css', array( 'u_seisbarra8-theme' ), null );
+    wp_enqueue_style( 'u_seisbarra8-stylelibrary', $theme_uri . '/components/pg.blocks.wp/css/style-library-1.css', array( 'u_seisbarra8-theme' ), null );
+    wp_enqueue_style( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.css', array( 'u_seisbarra8-theme' ), null );
+    wp_enqueue_style( 'u_seisbarra8-slicktheme', $theme_uri . '/slick/slick-theme.css', array( 'u_seisbarra8-slick' ), null );
+    wp_enqueue_style( 'seideagosto-blocks-layout', $theme_uri . '/css/blocks-layout.css', array( 'u_seisbarra8-theme' ), null );
+
+    // JS: Bootstrap and dependencies needed for navbar toggler, dropdowns, etc.
+    // Skip on AMP requests
+    if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+        return;
+    }
+
+    // Ensure jQuery is available
+    wp_enqueue_script( 'jquery' );
+
+    // Popper.js (Bootstrap 5 dependency)
+    if ( ! wp_script_is( 'u_seisbarra8-popper', 'registered' ) ) {
+        wp_register_script( 'u_seisbarra8-popper', $theme_uri . '/assets/js/popper.js', array(), null, true );
+    }
+    wp_enqueue_script( 'u_seisbarra8-popper' );
+
+    // Bootstrap JS
+    if ( ! wp_script_is( 'u_seisbarra8-bootstrap', 'registered' ) ) {
+        wp_register_script( 'u_seisbarra8-bootstrap', $theme_uri . '/bootstrap/js/bootstrap.min.js', array( 'jquery', 'u_seisbarra8-popper' ), null, true );
+    }
+    wp_enqueue_script( 'u_seisbarra8-bootstrap' );
+
+    // Slick carousel JS
+    if ( ! wp_script_is( 'u_seisbarra8-slick', 'registered' ) ) {
+        wp_register_script( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.min.js', array( 'jquery' ), null, true );
+    }
+    wp_enqueue_script( 'u_seisbarra8-slick' );
+}
+add_action( 'enqueue_block_assets', 'u_seisbarra8_enqueue_block_assets' );
+
+// Also hook to wp_enqueue_scripts at priority 1 to ensure block theme loads assets on frontend
+add_action( 'wp_enqueue_scripts', 'u_seisbarra8_enqueue_block_assets', 1 );
+
+// Fallback guarantee: enqueue theme.css once for both frontend and editor if it was dropped by another hook.
+function u68_force_theme_css() {
+    $handle   = 'u_seisbarra8-theme';
+    $css_path = get_theme_file_path( 'css/theme.css' );
+    $css_uri  = get_theme_file_uri( 'css/theme.css' );
+
+    if ( ! wp_style_is( $handle, 'enqueued' ) && file_exists( $css_path ) ) {
+        $ver = filemtime( $css_path );
+        wp_enqueue_style( $handle, $css_uri, array(), $ver );
+    }
+}
+add_action( 'enqueue_block_assets', 'u68_force_theme_css', 1 );
+add_action( 'wp_enqueue_scripts', 'u68_force_theme_css', 1 );
+
+// Admin-only asset health checks to quickly debug missing header/footer or CSS loads.
+function u68_get_asset_statuses() {
+    global $wp_styles, $wp_scripts;
+
+    $style_handles = array(
+        'u_seisbarra8-bootstrap',
+        'u_seisbarra8-main',
+        'u_seisbarra8-theme',
+        'u_seisbarra8-blocks',
+        'u_seisbarra8-plugins',
+        'u_seisbarra8-stylelibrary',
+        'seideagosto-blocks-layout',
+    );
+
+    $script_handles = array(
+        'u_seisbarra8-bootstrap',
+        'u_seisbarra8-popper',
+        'u_seisbarra8-slick',
+        'u_seisbarra8-plugins',
+        'u_seisbarra8-bskitscripts',
+        'u_seisbarra8-carousel_init',
+        'u_seisbarra8-outline',
+        'u_seisbarra8-weather-forecast',
+        'u_seisbarra8-weather-i18n',
+    );
+
+    $styles = array();
+    foreach ( $style_handles as $handle ) {
+        $styles[ $handle ] = array(
+            'registered' => wp_style_is( $handle, 'registered' ),
+            'enqueued'   => wp_style_is( $handle, 'enqueued' ),
+            'src'        => isset( $wp_styles->registered[ $handle ] ) ? $wp_styles->registered[ $handle ]->src : '',
+        );
+    }
+
+    $scripts = array();
+    foreach ( $script_handles as $handle ) {
+        $scripts[ $handle ] = array(
+            'registered' => wp_script_is( $handle, 'registered' ),
+            'enqueued'   => wp_script_is( $handle, 'enqueued' ),
+            'src'        => isset( $wp_scripts->registered[ $handle ] ) ? $wp_scripts->registered[ $handle ]->src : '',
+        );
+    }
+
+    return array(
+        'styles'  => $styles,
+        'scripts' => $scripts,
+    );
+}
+
+function u68_adminbar_asset_status( $wp_admin_bar ) {
+    if ( ! is_admin_bar_showing() || ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    $status = u68_get_asset_statuses();
+    $missing = array();
+
+    foreach ( $status['styles'] as $handle => $data ) {
+        if ( ! $data['enqueued'] ) {
+            $missing[] = $handle;
+        }
+    }
+    foreach ( $status['scripts'] as $handle => $data ) {
+        if ( ! $data['enqueued'] ) {
+            $missing[] = $handle;
+        }
+    }
+
+    $title = empty( $missing ) ? 'Tema OK: assets carregados' : 'Tema alerta: faltam ' . count( $missing );
+    $meta  = empty( $missing ) ? 'Todos os CSS/JS principais estão enfileirados.' : 'Faltando: ' . implode( ', ', $missing );
+
+    $wp_admin_bar->add_node( array(
+        'id'    => 'u68-asset-health',
+        'title' => esc_html( $title ),
+        'meta'  => array( 'title' => esc_html( $meta ) ),
+        'href'  => '#',
+    ) );
+}
+add_action( 'admin_bar_menu', 'u68_adminbar_asset_status', 120 );
+
+// Console report to quickly inspect header/footer and CSS presence (admins only, front and editor).
+function u68_asset_console_probe() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    $status = u68_get_asset_statuses();
+    $data   = array(
+        'styles'        => $status['styles'],
+        'scripts'       => $status['scripts'],
+        'selectors'     => array(
+            'header' => 'header.site-header, .site-header',
+            'footer' => 'footer.site-footer, .site-footer',
+        ),
+        'checks'        => array(
+            'themeCssSubstring' => '/css/theme.css',
+        ),
+    );
+
+    $json = wp_json_encode( $data );
+
+    $probe_js = <<<JS
+(() => {
+    const data = {$json};
+    const findNode = (sel) => document.querySelector(sel);
+
+    const themeCss = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(link => link.href && link.href.includes(data.checks.themeCssSubstring));
+    const headerEl = findNode(data.selectors.header);
+    const footerEl = findNode(data.selectors.footer);
+
+    const summary = {
+        headerFound: !!headerEl,
+        footerFound: !!footerEl,
+        themeCssFound: !!themeCss,
+        styles: data.styles,
+        scripts: data.scripts,
+    };
+
+    console.info('[u68] Asset/DOM check', summary);
+
+    if (!headerEl) console.warn('[u68] Header não encontrado no DOM. Verifique template-part header.');
+    if (!footerEl) console.warn('[u68] Footer não encontrado no DOM. Verifique template-part footer.');
+    if (!themeCss) console.warn('[u68] theme.css não encontrado nos <link rel="stylesheet">.');
+})();
+JS;
+
+    wp_print_inline_script_tag( $probe_js );
+}
+add_action( 'wp_footer', 'u68_asset_console_probe', 20 );
+add_action( 'admin_footer', 'u68_asset_console_probe', 20 );
+
+// Safety net: guarantee core header/footer assets are enqueued on the frontend even in block templates.
+function u_seisbarra8_force_front_assets() {
+    // Styles
+    foreach ( array(
+        'u_seisbarra8-bootstrap' => get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css',
+        'u_seisbarra8-main' => get_template_directory_uri() . '/css/main.css',
+        'u_seisbarra8-theme' => get_template_directory_uri() . '/css/theme.css',
+        'u_seisbarra8-fontawesome' => get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css',
+        'u_seisbarra8-blocks' => get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css',
+        'u_seisbarra8-plugins' => get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css',
+        'u_seisbarra8-stylelibrary' => get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css',
+        'u_seisbarra8-slick' => get_template_directory_uri() . '/slick/slick.css',
+        'u_seisbarra8-slicktheme' => get_template_directory_uri() . '/slick/slick-theme.css',
+        'seideagosto-blocks-layout' => get_template_directory_uri() . '/css/blocks-layout.css',
+    ) as $handle => $src ) {
+        if ( ! wp_style_is( $handle, 'enqueued' ) ) {
+            wp_enqueue_style( $handle, $src, array(), null );
+        }
+    }
+
+    // Scripts (ensure navbar/search behavior works)
+    $scripts = array(
+        'u_seisbarra8-popper' => array( 'src' => get_template_directory_uri() . '/assets/js/popper.js', 'deps' => array(), 'in_footer' => true ),
+        'u_seisbarra8-bootstrap' => array( 'src' => get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', 'deps' => array( 'jquery', 'u_seisbarra8-popper' ), 'in_footer' => true ),
+        'u_seisbarra8-menustick' => array( 'src' => get_template_directory_uri() . '/assets/js/menustick.js', 'deps' => array( 'jquery' ), 'in_footer' => true ),
+        'u_seisbarra8-slick' => array( 'src' => get_template_directory_uri() . '/slick/slick.min.js', 'deps' => array( 'jquery' ), 'in_footer' => true ),
+        'u_seisbarra8-carousel_init' => array( 'src' => get_template_directory_uri() . '/assets/js/carousel_init.js', 'deps' => array( 'jquery', 'u_seisbarra8-bootstrap' ), 'in_footer' => true ),
+        'u_seisbarra8-outline' => array( 'src' => get_template_directory_uri() . '/assets/js/outline.js', 'deps' => array(), 'in_footer' => true ),
+        'u_seisbarra8-plugins' => array( 'src' => get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', 'deps' => array( 'jquery' ), 'in_footer' => true ),
+        'u_seisbarra8-bskitscripts' => array( 'src' => get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', 'deps' => array( 'jquery' ), 'in_footer' => true ),
+        'u_seisbarra8-weather-forecast' => array( 'src' => get_template_directory_uri() . '/assets/js/weather-forecast.js', 'deps' => array( 'jquery', 'u_seisbarra8-slick' ), 'in_footer' => true ),
+        'u_seisbarra8-weather-i18n' => array( 'src' => get_template_directory_uri() . '/assets/js/weather-i18n.js', 'deps' => array( 'jquery', 'u_seisbarra8-weather-forecast' ), 'in_footer' => true ),
+    );
+    foreach ( $scripts as $handle => $data ) {
+        if ( ! wp_script_is( $handle, 'enqueued' ) ) {
+            wp_enqueue_script( $handle, $data['src'], $data['deps'], null, $data['in_footer'] );
+        }
+    }
+}
+add_action( 'wp_enqueue_scripts', 'u_seisbarra8_force_front_assets', 5 );
 
 function pgwp_sanitize_placeholder($input) { return $input; }
 /*
@@ -841,18 +1567,27 @@ require_once "inc/customizer.php";
         $text      = get_field( 'chamada', $post_id );
         $color     = get_field( 'cor', $post_id );
         $icon_raw  = get_field( 'icones', $post_id );
+        $text_color = get_theme_mod( 'u_correio68_badge_text_color', '#ffffff' );
 
         // Fallbacks adicionais
         if ( empty( $color ) ) {
             $color = get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
         }
         if ( empty( $icon_raw ) ) {
-            $icon_raw = get_theme_mod( 'u_correio68_badge_icon_class', 'fa-star' );
+            $icon_raw = (string) get_theme_mod( 'u_correio68_badge_icon_class', '' );
+            $icon_raw = trim( $icon_raw );
+        }
+        if ( empty( $icon_raw ) ) {
+            $icon_raw = '';
+        }
+        if ( function_exists( 'u_correio68_normalize_fa_icon_class' ) ) {
+            $icon_raw = u_correio68_normalize_fa_icon_class( $icon_raw );
         }
 
         return array(
             'text'  => wp_strip_all_tags( (string) $text ),
             'color' => sanitize_hex_color( $color ) ?: $color,
+            'text_color' => sanitize_hex_color( $text_color ) ?: $text_color,
             'icon'  => sanitize_text_field( $icon_raw ),
         );
     }
@@ -873,7 +1608,14 @@ require_once "inc/customizer.php";
             return;
         }
 
-        $color_style = $badge['color'] ? 'style="background-color:' . esc_attr( $badge['color'] ) . ' !important;"' : '';
+        $style_parts = array();
+        if ( $badge['color'] ) {
+            $style_parts[] = 'background-color:' . esc_attr( $badge['color'] ) . ' !important;';
+        }
+        if ( $badge['text_color'] ) {
+            $style_parts[] = 'color:' . esc_attr( $badge['text_color'] ) . ' !important;';
+        }
+        $color_style = ! empty( $style_parts ) ? 'style="' . implode( ' ', $style_parts ) . '"' : '';
 
         // Decide se o ícone é Font Awesome ou Ionicon
         $icon_html = '';
@@ -882,6 +1624,77 @@ require_once "inc/customizer.php";
         }
 
         echo '<span class="' . esc_attr( $args['class'] ) . '" ' . $color_style . '>' . $icon_html . '<span>' . esc_html( $badge['text'] ) . '</span></span>';
+    }
+
+    /**
+     * Render a selected template page using its page template layout (without header/footer).
+     */
+    if ( ! function_exists( 'u_correio68_render_template_page' ) ) {
+        function u_correio68_render_template_page( $page_id ) {
+            $page_id = absint( $page_id );
+            if ( ! $page_id ) {
+                return false;
+            }
+
+            $page = get_post( $page_id );
+            if ( ! $page || $page->post_status !== 'publish' ) {
+                return false;
+            }
+
+            $template_slug = get_page_template_slug( $page_id );
+            $old_post = $GLOBALS['post'] ?? null;
+            $GLOBALS['post'] = $page;
+            setup_postdata( $page );
+
+            $content = apply_filters( 'the_content', $page->post_content );
+            $title   = get_the_title( $page_id );
+
+            ob_start();
+            if ( $template_slug === 'page-centered.php' ) {
+                echo '<div class="container" id="content" tabindex="-1"><div class="row"><div class="col-12"><main id="main" class="site-main py-4">';
+                if ( ! empty( $title ) ) {
+                    echo '<h1>' . esc_html( $title ) . '</h1>';
+                }
+                echo $content;
+                echo '</main></div></div></div>';
+            } else {
+                // Default page layout (page.php)
+                echo '<div id="page-wrapper" class="wrapper">';
+                echo '<div class="container" id="content" tabindex="-1">';
+                echo '<div class="row">';
+                if ( get_theme_mod( 'show_left_sidebar' ) ) {
+                    echo '<div class="col-md-4 widget-area" role="complementary" id="left-sidebar">';
+                    if ( is_active_sidebar( 'left-sidebar' ) ) {
+                        dynamic_sidebar( 'left-sidebar' );
+                    }
+                    echo '</div>';
+                }
+                $content_col = get_theme_mod( 'show_right_sidebar' ) || get_theme_mod( 'show_left_sidebar' ) ? 'col-md-8' : 'col-12';
+                echo '<div class="content-area ' . esc_attr( $content_col ) . '" id="primary">';
+                echo '<main class="site-main" id="main">';
+                if ( ! empty( $title ) ) {
+                    echo '<h1>' . esc_html( $title ) . '</h1>';
+                }
+                echo $content;
+                echo '</main></div>';
+                if ( get_theme_mod( 'show_right_sidebar' ) ) {
+                    echo '<div class="col-md-4 widget-area" role="complementary" id="right-sidebar">';
+                    if ( is_active_sidebar( 'right-sidebar' ) ) {
+                        dynamic_sidebar( 'right-sidebar' );
+                    }
+                    echo '</div>';
+                }
+                echo '</div></div></div>';
+            }
+            $output = ob_get_clean();
+
+            wp_reset_postdata();
+            if ( $old_post ) {
+                $GLOBALS['post'] = $old_post;
+            }
+
+            return $output;
+        }
     }
 
     // Register custom Block Pattern category for this theme

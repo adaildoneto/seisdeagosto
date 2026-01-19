@@ -1,0 +1,72 @@
+<!-- wp:html -->
+<div id="wrapper">
+<div id="content">
+<div class="hfeed site" id="page">
+<header class="site-header sticky-top shadow-sm" role="banner">
+<!-- /wp:html -->
+
+<!-- wp:template-part {"slug":"header-main","area":"header"} /-->
+
+<!-- wp:html -->
+</header>
+
+<div class="wrapper" id="home-wrapper">
+    <div class="container">
+        <div class="row">
+<!-- /wp:html -->
+
+<!-- wp:shortcode -->
+[u68_widget_area id="left-sidebar" class="widget-area col-md-3" role="complementary" condition="show_left_sidebar"]
+<!-- /wp:shortcode -->
+
+<!-- wp:html -->
+            <div id="primary" class="col-md-8 col-sm-12 content-area">
+                <main class="site-main py-4">
+<!-- /wp:html -->
+
+<!-- wp:query {"queryId":1,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"displayLayout":{"type":"list"}} -->
+<!-- wp:post-template -->
+<!-- wp:group {"className":"mb-4"} -->
+<!-- wp:post-title {"isLink":true,"level":2} /-->
+<!-- wp:post-featured-image {"isLink":true,"width":"100%"} /-->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"},"style":{"spacing":{"blockGap":"0.5rem"}}} -->
+<!-- wp:post-date /-->
+<!-- wp:post-author-name /-->
+<!-- /wp:group -->
+<!-- wp:post-excerpt /-->
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} -->
+<!-- wp:query-pagination-previous /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>Nenhum post encontrado.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results -->
+<!-- /wp:query -->
+
+<!-- wp:html -->
+                </main>
+            </div>
+<!-- /wp:html -->
+
+<!-- wp:shortcode -->
+[u68_widget_area id="right-sidebar" class="widget-area col-md-3" role="complementary" condition="show_right_sidebar"]
+<!-- /wp:shortcode -->
+
+<!-- wp:html -->
+        </div>
+    </div>
+</div>
+<!-- /wp:html -->
+
+<!-- wp:template-part {"slug":"footer-main","area":"footer"} /-->
+
+<!-- wp:html -->
+</div>
+</div>
+</div>
+<!-- /wp:html -->

@@ -106,6 +106,18 @@ function u_correio68_apply_tag_keyword_filters( array $args, $attributes ) {
 }
 
 function u_correio68_register_custom_blocks() {
+$blocks_js_path = get_template_directory() . '/assets/js/custom-blocks.js';
+$blocks_js_url  = get_template_directory_uri() . '/assets/js/custom-blocks.js';
+if ( file_exists( $blocks_js_path ) && ! wp_script_is( 'seideagosto-blocks', 'registered' ) ) {
+    wp_register_script(
+        'seideagosto-blocks',
+        $blocks_js_url,
+        array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render', 'wp-hooks', 'wp-i18n' ),
+        filemtime( $blocks_js_path ),
+        true
+    );
+}
+
 $fa_handle = 'u_seisbarra8-fontawesome';
 $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
 if ( file_exists( $fa_vendor_css ) ) {
@@ -204,6 +216,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
             'name' => array( 'type' => 'string', 'default' => '' ),
             'columnTitle' => array( 'type' => 'string', 'default' => '' ),
             'imageUrl' => array( 'type' => 'string', 'default' => '' ),
+            'imageId' => array( 'type' => 'number', 'default' => 0 ),
             'categoryId' => array( 'type' => 'string', 'default' => '0' ),
         ),
     ) );
@@ -236,6 +249,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
                 'title'      => array( 'type' => 'string', 'default' => '' ),
                 'bigCount'   => array( 'type' => 'number', 'default' => 1 ),
                 'listCount'  => array( 'type' => 'number', 'default' => 3 ),
+                'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
                 'tags'       => array( 'type' => 'string', 'default' => '' ),
                 'keyword'    => array( 'type' => 'string', 'default' => '' ),
             ),
@@ -366,6 +380,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
             'title' => array( 'type' => 'string', 'default' => '' ),
             'bigCount' => array( 'type' => 'number', 'default' => 1 ),
             'listCount' => array( 'type' => 'number', 'default' => 3 ),
+            'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
         ) + u_correio68_typography_attribute_schema(),
     ) );
     register_block_type( 'correio68/destaque-misto', array(
@@ -655,9 +670,8 @@ function u_correio68_render_destaques_home( $attributes ) {
                                     echo get_the_post_thumbnail( $post->ID, 'destatquegrande', array( 'class' => 'imagem-destaque w-100' ) );
                                 }
                                 ?>
-                                <div class="card-img-overlay gradiente space">
-                                    <div class="tituloD">
-                                        <?php 
+                                <div class="card-img-overlay gradiente space d-flex flex-column justify-content-end">
+                                <?php 
                                         $cor = get_field( 'cor', $post->ID );
                                         $icones = get_field( 'icones', $post->ID );
                                         $chamada = get_field( 'chamada', $post->ID );
@@ -666,8 +680,10 @@ function u_correio68_render_destaques_home( $attributes ) {
                                                 <i class="<?php echo esc_attr($icones); ?>"></i> 
                                                 <span><?php echo esc_html($chamada); ?></span>
                                             </span>
-                                            <br>
-                                        <?php endif; ?>
+                                        <?php endif; ?>    
+                                
+                                <div class="tituloD">
+                                        
                                         <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><span class="TituloGrande text-white text-shadow"><?php echo get_the_title( $post->ID ); ?></span></a>
                                     </div>
                                 </div>
@@ -694,9 +710,8 @@ function u_correio68_render_destaques_home( $attributes ) {
                                         echo get_the_post_thumbnail( $post->ID, 'destatquegrande', array( 'class' => 'w-100' ) );
                                     }
                                     ?>
-                                    <div class="card-img-overlay grad gradiente space">
-                                        <div class="tituloD">
-                                            <?php 
+                                    <div class="card-img-overlay grad gradiente space d-flex flex-column justify-content-end">
+                                     <?php 
                                             $cor = get_field( 'cor', $post->ID );
                                             $icones = get_field( 'icones', $post->ID );
                                             $chamada = get_field( 'chamada', $post->ID );
@@ -705,8 +720,10 @@ function u_correio68_render_destaques_home( $attributes ) {
                                                     <i class="<?php echo esc_attr($icones); ?>"></i> 
                                                     <span><?php echo esc_html($chamada); ?></span>
                                                 </span>
-                                            <?php endif; ?>
-                                            <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><br><span class="TituloGrande2 text-shadow text-white"><?php echo get_the_title( $post->ID ); ?></span></a>
+                                            <?php endif; ?>    
+                                    <div class="tituloD">
+                                           
+                                            <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><span class="TituloGrande2 text-shadow text-white"><?php echo get_the_title( $post->ID ); ?></span></a>
                                         </div>
                                     </div>
                                 </div>
@@ -753,7 +770,6 @@ function u_correio68_render_destaques_home( $attributes ) {
                                     <i class="<?php echo esc_attr($icones); ?>"></i> 
                                     <span><?php echo esc_html($chamada); ?></span>
                                 </span>
-                                <br>
                             <?php endif; ?>
                             <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>">
                                 <span class="TituloGrande text-white text-shadow"><?php echo get_the_title( $post->ID ); ?></span>
@@ -999,6 +1015,7 @@ function u_correio68_render_category_highlight( $attributes ) {
     $title      = isset( $attributes['title'] ) ? $attributes['title'] : '';
     $bigCount   = isset( $attributes['bigCount'] ) ? max(0, intval( $attributes['bigCount'] )) : 1;
     $listCount  = isset( $attributes['listCount'] ) ? max(0, intval( $attributes['listCount'] )) : 3;
+    $showListThumbs = isset( $attributes['showListThumbs'] ) ? filter_var( $attributes['showListThumbs'], FILTER_VALIDATE_BOOLEAN ) : true;
 
     $typography = u_correio68_resolve_typography( $attributes );
     $titleStyle = $typography['style'];
@@ -1087,25 +1104,27 @@ function u_correio68_render_category_highlight( $attributes ) {
                             <small class="text-muted" style="font-size: 0.8rem;"><i class="fa fa-clock-o"></i> <?php echo get_the_date('d/m/Y', $post->ID); ?></small>
                         </div>
                         <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0 mr-3" style="width: 90px; height: 90px; overflow: hidden; border-radius: 4px;">
-                                <?php 
-                                if ( has_post_thumbnail( $post->ID ) ) :
-                                    if ( class_exists( 'PG_Image' ) ) {
-                                        echo PG_Image::getPostImage( $post->ID, 'thumbnail', array(
-                                            'class' => 'w-100 h-100',
-                                            'style' => 'object-fit: cover;'
-                                        ), null, null );
-                                    } else {
-                                        echo get_the_post_thumbnail( $post->ID, 'thumbnail', array(
-                                            'class' => 'w-100 h-100',
-                                            'style' => 'object-fit: cover;'
-                                        ) );
-                                    }
-                                else:
-                                    echo '<div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light"><i class="fa fa-image text-muted"></i></div>';
-                                endif;
-                                ?>
-                            </div>
+                            <?php if ( $showListThumbs ) : ?>
+                                <div class="flex-shrink-0 mr-3" style="width: 90px; height: 90px; overflow: hidden; border-radius: 4px;">
+                                    <?php 
+                                    if ( has_post_thumbnail( $post->ID ) ) :
+                                        if ( class_exists( 'PG_Image' ) ) {
+                                            echo PG_Image::getPostImage( $post->ID, 'thumbnail', array(
+                                                'class' => 'w-100 h-100',
+                                                'style' => 'object-fit: cover;'
+                                            ), null, null );
+                                        } else {
+                                            echo get_the_post_thumbnail( $post->ID, 'thumbnail', array(
+                                                'class' => 'w-100 h-100',
+                                                'style' => 'object-fit: cover;'
+                                            ) );
+                                        }
+                                    else:
+                                        echo '<div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light"><i class="fa fa-image text-muted"></i></div>';
+                                    endif;
+                                    ?>
+                                </div>
+                            <?php endif; ?>
                             <div class="flex-grow-1">
                                 <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="text-decoration-none">
                                     <h6 class="mb-1" style="line-height: 1.4; font-size: 0.95rem; color: #333; font-weight: 600; <?php echo esc_attr( $titleStyle ); ?>"><?php echo get_the_title( $post->ID ); ?></h6>
@@ -1126,7 +1145,7 @@ function u_correio68_render_category_highlight( $attributes ) {
  * Render Callback: Colunistas Grid
  */
 function u_correio68_render_colunistas_grid( $attributes, $content ) {
-    return '<div class="row colunistas-grid">' . $content . '</div>';
+    return '<div class="row colunistas-grid colunistas-grid--scroll">' . $content . '</div>';
 }
 
 /**
@@ -1136,6 +1155,7 @@ function u_correio68_render_colunista_item( $attributes ) {
     $name = isset($attributes['name']) ? $attributes['name'] : '';
     $columnTitle = isset($attributes['columnTitle']) ? $attributes['columnTitle'] : '';
     $imageUrl = isset($attributes['imageUrl']) ? $attributes['imageUrl'] : '';
+    $imageId = isset($attributes['imageId']) ? intval($attributes['imageId']) : 0;
     $categoryId = isset($attributes['categoryId']) ? intval($attributes['categoryId']) : 0;
 
     $postUrl = '';
@@ -1175,8 +1195,23 @@ function u_correio68_render_colunista_item( $attributes ) {
             <?php endif; ?>
             
             <div class="picture">
-                <?php if ( $imageUrl ) : ?>
-                    <img class="img-fluid" src="<?php echo esc_url( $imageUrl ); ?>" alt="<?php echo esc_attr( $columnTitle ); ?>">
+                <?php if ( $imageId ) : ?>
+                    <?php
+                    echo wp_get_attachment_image(
+                        $imageId,
+                        'thumbnail',
+                        false,
+                        array(
+                            'class' => 'img-fluid',
+                            'loading' => 'lazy',
+                            'decoding' => 'async',
+                            'fetchpriority' => 'low',
+                            'alt' => $columnTitle,
+                        )
+                    );
+                    ?>
+                <?php elseif ( $imageUrl ) : ?>
+                    <img class="img-fluid" src="<?php echo esc_url( $imageUrl ); ?>" alt="<?php echo esc_attr( $columnTitle ); ?>" loading="lazy" decoding="async" fetchpriority="low">
                 <?php else: ?>
                     <div style="background:#ccc; height:200px; display:flex; align-items:center; justify-content:center;">Foto</div>
                 <?php endif; ?>

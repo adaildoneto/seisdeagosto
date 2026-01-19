@@ -458,22 +458,70 @@ function u_seisbarra8_force_metaslider_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'u_seisbarra8_force_metaslider_scripts', 99 );
 
-//* Ensure MetaSlider shortcodes are processed in block content
-function u_seisbarra8_process_metaslider_in_blocks( $block_content, $block ) {
+//* Ensure all legacy shortcodes are processed in block content (templates, parts, etc.)
+function u_seisbarra8_process_shortcodes_in_blocks( $block_content, $block ) {
 	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
 		return $block_content;
 	}
-    if ( ! empty( $block_content ) && has_shortcode( $block_content, 'metaslider' ) ) {
-        // Force enqueue MetaSlider assets
-        if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
-            metaslider_register_public_styles();
-            metaslider_register_public_scripts();
-        }
-        return do_shortcode( $block_content );
-    }
-    return $block_content;
+	
+	// Check if this is a shortcode block or contains shortcodes
+	if ( ! empty( $block_content ) ) {
+		// List of legacy shortcodes that need processing
+		$legacy_shortcodes = array(
+			'u68_widget_area',
+			'u68_nav_menu',
+			'u68_footer_text',
+			'u68_sidebar_intro',
+			'metaslider',
+		);
+		
+		$has_legacy_shortcode = false;
+		foreach ( $legacy_shortcodes as $shortcode ) {
+			if ( has_shortcode( $block_content, $shortcode ) ) {
+				$has_legacy_shortcode = true;
+				break;
+			}
+		}
+		
+		if ( $has_legacy_shortcode ) {
+			// Special handling for MetaSlider assets
+			if ( has_shortcode( $block_content, 'metaslider' ) ) {
+				if ( function_exists( 'metaslider_register_public_styles' ) && function_exists( 'metaslider_register_public_scripts' ) ) {
+					metaslider_register_public_styles();
+					metaslider_register_public_scripts();
+				}
+			}
+			// Process all shortcodes
+			return do_shortcode( $block_content );
+		}
+	}
+	return $block_content;
 }
-add_filter( 'render_block', 'u_seisbarra8_process_metaslider_in_blocks', 10, 2 );
+add_filter( 'render_block', 'u_seisbarra8_process_shortcodes_in_blocks', 10, 2 );
+
+//* Also ensure shortcodes in paragraph blocks are processed
+add_filter( 'render_block_core/paragraph', function( $block_content, $block ) {
+	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+		return $block_content;
+	}
+	
+	if ( ! empty( $block_content ) ) {
+		$legacy_shortcodes = array(
+			'u68_widget_area',
+			'u68_nav_menu',
+			'u68_footer_text',
+			'u68_sidebar_intro',
+			'metaslider',
+		);
+		
+		foreach ( $legacy_shortcodes as $shortcode ) {
+			if ( has_shortcode( $block_content, $shortcode ) ) {
+				return do_shortcode( $block_content );
+			}
+		}
+	}
+	return $block_content;
+}, 10, 2 );
 
 //* Ensure MetaSlider shortcodes are processed in classic content and assets enqueued
 function u_seisbarra8_process_metaslider_in_content( $content ) {

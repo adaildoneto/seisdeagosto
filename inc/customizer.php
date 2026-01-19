@@ -8,6 +8,86 @@
 /**
  * Register Extended Customizer Settings
  */
+function u_correio68_get_google_font_presets() {
+    return array(
+        'custom' => array(
+            'label'    => __( 'Personalizado (manual)', 'u_correio68' ),
+            'families' => '',
+            'body'     => '',
+            'heading'  => '',
+        ),
+        'roboto' => array(
+            'label'    => __( 'Roboto + Roboto Slab', 'u_correio68' ),
+            'families' => 'Roboto:wght@300;400;500;700|Roboto+Slab:wght@400;600;700',
+            'body'     => 'Roboto',
+            'heading'  => 'Roboto Slab',
+        ),
+        'montserrat' => array(
+            'label'    => __( 'Montserrat + Montserrat', 'u_correio68' ),
+            'families' => 'Montserrat:wght@300;400;500;600;700',
+            'body'     => 'Montserrat',
+            'heading'  => 'Montserrat',
+        ),
+        'inter' => array(
+            'label'    => __( 'Inter + Inter', 'u_correio68' ),
+            'families' => 'Inter:wght@300;400;500;600;700',
+            'body'     => 'Inter',
+            'heading'  => 'Inter',
+        ),
+        'poppins' => array(
+            'label'    => __( 'Poppins + Poppins', 'u_correio68' ),
+            'families' => 'Poppins:wght@300;400;500;600;700',
+            'body'     => 'Poppins',
+            'heading'  => 'Poppins',
+        ),
+        'opensans_lato' => array(
+            'label'    => __( 'Open Sans + Lato', 'u_correio68' ),
+            'families' => 'Open+Sans:wght@300;400;600;700|Lato:wght@300;400;700',
+            'body'     => 'Open Sans',
+            'heading'  => 'Lato',
+        ),
+        'sourcesans_playfair' => array(
+            'label'    => __( 'Source Sans 3 + Playfair Display', 'u_correio68' ),
+            'families' => 'Source+Sans+3:wght@300;400;600;700|Playfair+Display:wght@400;600;700',
+            'body'     => 'Source Sans 3',
+            'heading'  => 'Playfair Display',
+        ),
+        'nunito_merriweather' => array(
+            'label'    => __( 'Nunito + Merriweather', 'u_correio68' ),
+            'families' => 'Nunito:wght@300;400;600;700|Merriweather:wght@400;700',
+            'body'     => 'Nunito',
+            'heading'  => 'Merriweather',
+        ),
+        'raleway_montserrat' => array(
+            'label'    => __( 'Raleway + Montserrat', 'u_correio68' ),
+            'families' => 'Raleway:wght@300;400;600;700|Montserrat:wght@300;400;600;700',
+            'body'     => 'Raleway',
+            'heading'  => 'Montserrat',
+        ),
+        'dm_sans_dm_serif' => array(
+            'label'    => __( 'DM Sans + DM Serif Display', 'u_correio68' ),
+            'families' => 'DM+Sans:wght@300;400;500;700|DM+Serif+Display',
+            'body'     => 'DM Sans',
+            'heading'  => 'DM Serif Display',
+        ),
+    );
+}
+
+/**
+ * Default sidebar intro text using site name.
+ */
+function u_correio68_get_sidebar_intro_default_text() {
+    $site_name = get_bloginfo( 'name' );
+    if ( empty( $site_name ) ) {
+        $site_name = wp_parse_url( home_url(), PHP_URL_HOST );
+    }
+    $site_name = $site_name ? $site_name : __( 'o site', 'u_correio68' );
+    return sprintf(
+        'O %s é um jornal em homenagem a seis de agosto, data da revolução acreana. Temos orgulho de ser acreano e a revolução virá através da informação.',
+        $site_name
+    );
+}
+
 function u_correio68_customize_register_extended( $wp_customize ) {
     
     // ====================
@@ -187,6 +267,87 @@ function u_correio68_customize_register_extended( $wp_customize ) {
         ),
     ) );
 
+    // Google Fonts (opcional)
+    $presets = u_correio68_get_google_font_presets();
+    $preset_choices = array();
+    foreach ( $presets as $key => $preset ) {
+        $preset_choices[ $key ] = $preset['label'];
+    }
+
+    $wp_customize->add_setting( 'u_correio68_google_fonts_preset', array(
+        'default'           => 'custom',
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( 'u_correio68_google_fonts_preset', array(
+        'label'       => __( 'Preset de fontes (2025)', 'u_correio68' ),
+        'description' => __( 'Selecione um conjunto pronto para facilitar o uso.', 'u_correio68' ),
+        'section'     => 'u_correio68_typography',
+        'type'        => 'select',
+        'choices'     => $preset_choices,
+    ) );
+
+    $wp_customize->add_setting( 'u_correio68_enable_google_fonts', array(
+        'default'           => 0,
+        'sanitize_callback' => 'u_correio68_sanitize_checkbox',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( 'u_correio68_enable_google_fonts', array(
+        'label'       => __( 'Carregar Google Fonts', 'u_correio68' ),
+        'description' => __( 'Ative para padronizar fontes via Google Fonts.', 'u_correio68' ),
+        'section'     => 'u_correio68_typography',
+        'type'        => 'checkbox',
+    ) );
+
+    $wp_customize->add_setting( 'u_correio68_google_fonts_family', array(
+        'default'           => 'Open+Sans:wght@300;400;600;700|Lato:wght@300;400;700',
+        'sanitize_callback' => 'u_correio68_sanitize_google_fonts_family',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( 'u_correio68_google_fonts_family', array(
+        'label'       => __( 'Famílias Google Fonts (URL)', 'u_correio68' ),
+        'description' => __( 'Ex.: Open+Sans:wght@300;400;600;700|Lato:wght@300;400;700', 'u_correio68' ),
+        'section'     => 'u_correio68_typography',
+        'type'        => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'u_correio68_font_body', array(
+        'default'           => 'Open Sans',
+        'sanitize_callback' => 'u_correio68_sanitize_font_name',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( 'u_correio68_font_body', array(
+        'label'       => __( 'Fonte do corpo (nome)', 'u_correio68' ),
+        'description' => __( 'Ex.: Open Sans', 'u_correio68' ),
+        'section'     => 'u_correio68_typography',
+        'type'        => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'u_correio68_font_heading', array(
+        'default'           => 'Lato',
+        'sanitize_callback' => 'u_correio68_sanitize_font_name',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( 'u_correio68_font_heading', array(
+        'label'       => __( 'Fonte de títulos (nome)', 'u_correio68' ),
+        'description' => __( 'Ex.: Lato', 'u_correio68' ),
+        'section'     => 'u_correio68_typography',
+        'type'        => 'text',
+    ) );
+
+    // Hifenização automática
+    $wp_customize->add_setting( 'u_correio68_enable_hyphenation', array(
+        'default'           => 0,
+        'sanitize_callback' => 'u_correio68_sanitize_checkbox',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( 'u_correio68_enable_hyphenation', array(
+        'label'       => __( 'Hifenizar textos automaticamente', 'u_correio68' ),
+        'description' => __( 'Quando ativo, o tema permite hifenização automática em textos longos.', 'u_correio68' ),
+        'section'     => 'u_correio68_typography',
+        'type'        => 'checkbox',
+    ) );
+
     // ====================
     // SEÇÃO: Espaçamentos e Dimensões
     // ====================
@@ -243,7 +404,7 @@ function u_correio68_customize_register_extended( $wp_customize ) {
 
         // Texto introdutório do menu lateral
         $wp_customize->add_setting( 'u_correio68_sidebar_intro_text', array(
-            'default'           => 'O 6barra8 é um jornal em homenagem a seis de agosto, data da revolução acreana. Temos orgulho de ser acreano e a revolução virá através da informação.',
+            'default'           => u_correio68_get_sidebar_intro_default_text(),
             'sanitize_callback' => 'sanitize_textarea_field',
             'transport'         => 'refresh',
         ) );
@@ -316,17 +477,34 @@ function u_correio68_customize_register_extended( $wp_customize ) {
             'priority'    => 50,
         ) );
 
-        // Usar chamada nativa (resumo) do post
-        $wp_customize->add_setting( 'u_correio68_use_native_chamada', array(
-            'default'           => 0,
-            'sanitize_callback' => 'u_correio68_sanitize_checkbox',
+        // Fonte da chamada (tema ou nativa)
+        $wp_customize->add_setting( 'u_correio68_chamada_source', array(
+            'default'           => 'theme',
+            'sanitize_callback' => 'sanitize_text_field',
             'transport'         => 'refresh',
         ) );
-        $wp_customize->add_control( 'u_correio68_use_native_chamada', array(
-            'label'       => __( 'Usar chamada nativa do post', 'u_correio68' ),
-            'description' => __( 'Quando ativo, usa o resumo/excerpt do post como chamada nativa. Se vazio, mantém o campo personalizado.', 'u_correio68' ),
+        $wp_customize->add_control( 'u_correio68_chamada_source', array(
+            'label'       => __( 'Fonte da chamada', 'u_correio68' ),
+            'description' => __( 'Escolha entre a chamada definida no tema ou o resumo nativo do post.', 'u_correio68' ),
             'section'     => 'u_correio68_posts_badges',
-            'type'        => 'checkbox',
+            'type'        => 'select',
+            'choices'     => array(
+                'theme'  => __( 'Chamada do tema', 'u_correio68' ),
+                'native' => __( 'Resumo nativo (excerpt)', 'u_correio68' ),
+            ),
+        ) );
+
+        // Chamada definida no tema
+        $wp_customize->add_setting( 'u_correio68_theme_chamada', array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( 'u_correio68_theme_chamada', array(
+            'label'       => __( 'Chamada do tema', 'u_correio68' ),
+            'description' => __( 'Texto usado quando a fonte estiver em "Chamada do tema".', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'type'        => 'text',
         ) );
 
         // Exibir categoria na badge com a cor primária
@@ -368,17 +546,30 @@ function u_correio68_customize_register_extended( $wp_customize ) {
             'type'        => 'text',
         ) );
 
-        // Cor opcional da badge/ícone definida pelo usuário
+        // Cor opcional do fundo da badge definida pelo usuário
         $wp_customize->add_setting( 'u_correio68_badge_custom_color', array(
             'default'           => '',
             'sanitize_callback' => 'sanitize_hex_color',
             'transport'         => 'refresh',
         ) );
         $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'u_correio68_badge_custom_color', array(
-            'label'       => __( 'Cor opcional da badge/ícone', 'u_correio68' ),
-            'description' => __( 'Se definido, usa esta cor; caso contrário, usa a cor primária do tema.', 'u_correio68' ),
+            'label'       => __( 'Cor opcional do fundo da badge', 'u_correio68' ),
+            'description' => __( 'Se definido, usa esta cor no fundo; caso contrário, usa a cor primária do tema.', 'u_correio68' ),
             'section'     => 'u_correio68_posts_badges',
             'settings'    => 'u_correio68_badge_custom_color',
+        ) ) );
+
+        // Cor do texto/ícone da badge
+        $wp_customize->add_setting( 'u_correio68_badge_text_color', array(
+            'default'           => '#ffffff',
+            'sanitize_callback' => 'sanitize_hex_color',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'u_correio68_badge_text_color', array(
+            'label'       => __( 'Cor do texto/ícone da badge', 'u_correio68' ),
+            'description' => __( 'Define a cor do texto e do ícone da badge. O ícone seguirá a mesma cor do texto.', 'u_correio68' ),
+            'section'     => 'u_correio68_posts_badges',
+            'settings'    => 'u_correio68_badge_text_color',
         ) ) );
 }
 add_action( 'customize_register', 'u_correio68_customize_register_extended', 20 );
@@ -398,11 +589,36 @@ function u_correio68_sanitize_checkbox( $checked ) {
 }
 
 /**
+ * Sanitize Google Fonts family query string.
+ */
+function u_correio68_sanitize_google_fonts_family( $value ) {
+    $value = sanitize_text_field( $value );
+    $value = trim( $value );
+    $value = str_replace( array( "\n", "\r", "\t" ), '', $value );
+    $value = preg_replace( '/\s+/', ' ', $value );
+    $value = str_replace( ' ', '+', $value );
+    $value = preg_replace( '/[^A-Za-z0-9\+\:\;\@\|\,_-]/', '', $value );
+    $value = preg_replace( '/\+{2,}/', '+', $value );
+    return $value;
+}
+
+/**
+ * Sanitize font family display name.
+ */
+function u_correio68_sanitize_font_name( $value ) {
+    $value = sanitize_text_field( $value );
+    $value = preg_replace( '/[^A-Za-z0-9\s\-_]/', '', $value );
+    $value = preg_replace( '/\s+/', ' ', $value );
+    return trim( $value );
+}
+
+/**
  * Generate custom CSS from Customizer settings
  */
 function u_correio68_customizer_css() {
     $primary_color    = get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
     $badge_color      = get_theme_mod( 'u_correio68_badge_color', '#ec940d' );
+    $badge_text_color = get_theme_mod( 'u_correio68_badge_text_color', '#ffffff' );
     $highlight_bg     = get_theme_mod( 'u_correio68_highlight_bg', '#efefef' );
     $team_bg          = get_theme_mod( 'u_correio68_team_bg', '#f6f6f6' );
     $header_bg        = get_theme_mod( 'u_correio68_header_bg', $primary_color );
@@ -415,12 +631,24 @@ function u_correio68_customizer_css() {
     
     $featured_height  = get_theme_mod( 'u_correio68_featured_height', 425 );
     $card_spacing     = get_theme_mod( 'u_correio68_card_spacing', 8 );
+    $enable_hyphenation = (bool) get_theme_mod( 'u_correio68_enable_hyphenation', false );
+    $hyphens_value      = $enable_hyphenation ? 'auto' : 'manual';
+    $overflow_wrap      = $enable_hyphenation ? 'anywhere' : 'normal';
+    $font_body          = get_theme_mod( 'u_correio68_font_body', 'Open Sans' );
+    $font_heading       = get_theme_mod( 'u_correio68_font_heading', 'Lato' );
+    $preset_key         = get_theme_mod( 'u_correio68_google_fonts_preset', 'custom' );
+    $presets            = u_correio68_get_google_font_presets();
+    if ( isset( $presets[ $preset_key ] ) && $preset_key !== 'custom' ) {
+        $font_body    = $presets[ $preset_key ]['body'];
+        $font_heading = $presets[ $preset_key ]['heading'];
+    }
     
     ?>
     <style type="text/css" id="u-correio68-customizer-css">
         :root {
             --u68-primary-color: <?php echo esc_attr( $primary_color ); ?>;
             --u68-badge-color: <?php echo esc_attr( $badge_color ); ?>;
+            --u68-badge-text-color: <?php echo esc_attr( $badge_text_color ); ?>;
             --u68-highlight-bg: <?php echo esc_attr( $highlight_bg ); ?>;
             --u68-team-bg: <?php echo esc_attr( $team_bg ); ?>;
             --u68-header-bg: <?php echo esc_attr( $header_bg ); ?>;
@@ -431,6 +659,8 @@ function u_correio68_customizer_css() {
             --u68-title-weight: <?php echo esc_attr( $title_weight ); ?>;
             --u68-featured-height: <?php echo absint( $featured_height ); ?>px;
             --u68-card-spacing: <?php echo absint( $card_spacing ); ?>px;
+            --u68-font-body: '<?php echo esc_attr( $font_body ); ?>', sans-serif;
+            --u68-font-heading: '<?php echo esc_attr( $font_heading ); ?>', sans-serif;
         }
 
         /* Cores primárias */
@@ -455,6 +685,58 @@ function u_correio68_customizer_css() {
         }
 
         /* Tipografia */
+        body,
+        .entry-content,
+        .entry-content p,
+        button,
+        input,
+        select,
+        textarea,
+        .wp-block,
+        .widget,
+        .widget-area,
+        .site-footer,
+        .site-header,
+        .navbar,
+        .nav,
+        .nav-link,
+        .menu,
+        .menu a {
+            font-family: var(--u68-font-body, 'Open Sans', sans-serif);
+        }
+
+        h1, h2, h3, h4, h5, h6,
+        .TituloGrande,
+        .TituloGrande2,
+        .title-post,
+        .news-grid .card-title,
+        .colunista-bubble p,
+        .site-title,
+        .site-description,
+        .widget-title,
+        .card-title,
+        .badge,
+        .btn,
+        .navbar .nav-link,
+        .menu a {
+            font-family: var(--u68-font-heading, 'Lato', sans-serif);
+        }
+
+        body,
+        .entry-content,
+        .entry-content p,
+        .TituloGrande,
+        .TituloGrande2,
+        .title-post,
+        .news-grid,
+        .colunista-bubble p {
+            hyphens: <?php echo esc_attr( $hyphens_value ); ?>;
+            -webkit-hyphens: <?php echo esc_attr( $hyphens_value ); ?>;
+            -ms-hyphens: <?php echo esc_attr( $hyphens_value ); ?>;
+            overflow-wrap: <?php echo esc_attr( $overflow_wrap ); ?>;
+            word-break: normal;
+        }
+
         .TituloGrande {
             font-size: <?php echo absint( $title_large ); ?>px;
             font-weight: <?php echo esc_attr( $title_weight ); ?>;
@@ -516,6 +798,12 @@ function u_correio68_customizer_css() {
 
         .bg-orange {
             background-color: <?php echo esc_attr( $badge_color ); ?> !important;
+            color: <?php echo esc_attr( $badge_text_color ); ?> !important;
+        }
+
+        .badge,
+        .badge i {
+            color: <?php echo esc_attr( $badge_text_color ); ?>;
         }
 
         /* Mobile search toggle: outline white, pressed uses badge color */
@@ -702,10 +990,20 @@ function u_correio68_get_primary_category_name( $post_id = null ) {
  */
 function u_correio68_filter_chamada_value( $value, $post_id, $field ) {
     $post_id         = $post_id ? intval( $post_id ) : get_the_ID();
-    $use_native      = (bool) get_theme_mod( 'u_correio68_use_native_chamada', false );
+    $source          = get_theme_mod( 'u_correio68_chamada_source', '' );
+    $legacy_native   = (bool) get_theme_mod( 'u_correio68_use_native_chamada', false );
+    $theme_callout   = get_theme_mod( 'u_correio68_theme_chamada', '' );
+    if ( empty( $source ) ) {
+        $source = $legacy_native ? 'native' : 'acf';
+    }
     $use_cat_badge   = (bool) get_theme_mod( 'u_correio68_badge_show_category_primary', false );
     $default_callout = get_theme_mod( 'u_correio68_default_chamada', '' );
     $value           = is_string( $value ) ? $value : '';
+
+    // Só considera o valor do ACF quando o usuário escolhe "acf".
+    if ( $source !== 'acf' ) {
+        $value = '';
+    }
 
     // Se o usuário quer mostrar a categoria no badge, prioriza o nome dela.
     if ( $use_cat_badge ) {
@@ -715,8 +1013,13 @@ function u_correio68_filter_chamada_value( $value, $post_id, $field ) {
         }
     }
 
-    // Usa o excerpt do post como chamada nativa, se habilitado.
-    if ( $use_native && empty( $value ) ) {
+    // Usa o texto do tema como chamada quando selecionado.
+    if ( $source === 'theme' && ! empty( $theme_callout ) ) {
+        $value = $theme_callout;
+    }
+
+    // Usa o excerpt do post como chamada nativa, quando selecionado.
+    if ( $source === 'native' ) {
         $value = get_the_excerpt( $post_id );
     }
 
@@ -725,7 +1028,7 @@ function u_correio68_filter_chamada_value( $value, $post_id, $field ) {
         $value = $default_callout;
     }
 
-    // Fallback final: excerpt mesmo sem a opção, caso o campo esteja vazio.
+    // Fallback final: excerpt caso o campo esteja vazio.
     if ( empty( $value ) ) {
         $value = get_the_excerpt( $post_id );
     }
@@ -752,7 +1055,7 @@ function u_correio68_filter_badge_color_value( $value, $post_id, $field ) {
 
     // Fallback: cor do campo ou cor principal do tema
     if ( empty( $value ) ) {
-        $value = get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
+        $value = get_theme_mod( 'u_correio68_badge_color', '#ec940d' );
     }
 
     return $value;
@@ -763,11 +1066,38 @@ function u_correio68_filter_badge_color_value( $value, $post_id, $field ) {
  */
 function u_correio68_filter_badge_icon_value( $value, $post_id, $field ) {
     $value         = is_string( $value ) ? trim( $value ) : '';
-    $default_icon  = get_theme_mod( 'u_correio68_badge_icon_class', 'fa-star' );
     if ( empty( $value ) ) {
-        $value = $default_icon;
+        $value = (string) get_theme_mod( 'u_correio68_badge_icon_class', '' );
+        $value = trim( $value );
     }
+    if ( empty( $value ) ) {
+        return '';
+    }
+    $value = u_correio68_normalize_fa_icon_class( $value );
     return sanitize_text_field( $value );
+}
+
+/**
+ * Normaliza a classe de ícone para Font Awesome 4.7 (garante prefixo "fa").
+ */
+function u_correio68_normalize_fa_icon_class( $value ) {
+    $value = is_string( $value ) ? trim( $value ) : '';
+    if ( $value === '' ) {
+        return $value;
+    }
+    $parts = preg_split( '/\s+/', $value );
+    $has_fa = in_array( 'fa', $parts, true ) || in_array( 'fas', $parts, true ) || in_array( 'far', $parts, true ) || in_array( 'fal', $parts, true ) || in_array( 'fab', $parts, true );
+    $has_fa_dash = false;
+    foreach ( $parts as $part ) {
+        if ( strpos( $part, 'fa-' ) === 0 ) {
+            $has_fa_dash = true;
+            break;
+        }
+    }
+    if ( ! $has_fa && $has_fa_dash ) {
+        array_unshift( $parts, 'fa' );
+    }
+    return implode( ' ', $parts );
 }
 
 // Aplica os filtros aos campos ACF correspondentes, se o plugin estiver presente ou shimado.
