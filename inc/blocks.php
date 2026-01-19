@@ -52,15 +52,50 @@ function u_correio68_resolve_typography( $attributes, $defaultColor = '#000000' 
 
 /**
  * Apply category filter (by term ID) to a query args array.
+ * Supports single categoryId, multiple categoryIds (array), and excludeCategories.
  */
-function u_correio68_apply_category_filter( array $args, $categoryId ) {
-    $categoryId = absint( $categoryId );
-
-    if ( $categoryId > 0 ) {
-        // Use core "cat" param for simple filtering by term ID.
-        $args['cat'] = $categoryId;
+function u_correio68_apply_category_filter( array $args, $categoryId, $attributes = array() ) {
+    // Handle multiple categories (categoryIds array)
+    if ( isset( $attributes['categoryIds'] ) && is_array( $attributes['categoryIds'] ) && ! empty( $attributes['categoryIds'] ) ) {
+        $cat_ids = array_filter( array_map( 'absint', $attributes['categoryIds'] ) );
+        if ( ! empty( $cat_ids ) ) {
+            $args['category__in'] = $cat_ids;
+        }
+    } elseif ( is_numeric( $categoryId ) && absint( $categoryId ) > 0 ) {
+        // Single category
+        $args['cat'] = absint( $categoryId );
     }
 
+    // Handle exclude categories
+    if ( isset( $attributes['excludeCategories'] ) ) {
+        $exclude = $attributes['excludeCategories'];
+        if ( is_string( $exclude ) && ! empty( $exclude ) ) {
+            // CSV string of category IDs
+            $exclude_ids = array_filter( array_map( 'absint', array_map( 'trim', explode( ',', $exclude ) ) ) );
+        } elseif ( is_array( $exclude ) ) {
+            $exclude_ids = array_filter( array_map( 'absint', $exclude ) );
+        } else {
+            $exclude_ids = array();
+        }
+        
+        if ( ! empty( $exclude_ids ) ) {
+            $args['category__not_in'] = $exclude_ids;
+        }
+    }
+
+    return $args;
+}
+
+/**
+ * Apply offset to query args.
+ */
+function u_correio68_apply_offset( array $args, $attributes ) {
+    if ( isset( $attributes['offset'] ) && is_numeric( $attributes['offset'] ) ) {
+        $offset = absint( $attributes['offset'] );
+        if ( $offset > 0 ) {
+            $args['offset'] = $offset;
+        }
+    }
     return $args;
 }
 
@@ -193,10 +228,20 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
                 'type' => 'string',
                 'default' => '0',
             ),
+            'categoryIds' => array(
+                'type' => 'array',
+                'default' => array(),
+                'items' => array( 'type' => 'number' ),
+            ),
+            'excludeCategories' => array(
+                'type' => 'string',
+                'default' => '',
+            ),
             'layoutType' => array(
                 'type' => 'string',
                 'default' => 'default',
             ),
+            'offset' => array( 'type' => 'number', 'default' => 0 ),
             'tags' => array( 'type' => 'string', 'default' => '' ),
             'keyword' => array( 'type' => 'string', 'default' => '' ),
         ),
@@ -228,6 +273,8 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         'attributes' => array_merge(
             array(
                 'categoryId'    => array( 'type' => 'string', 'default' => '0' ),
+                'categoryIds'   => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
+                'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
                 'numberOfPosts' => array( 'type' => 'number', 'default' => 9 ),
                 'offset'        => array( 'type' => 'number', 'default' => 0 ),
                 'columns'       => array( 'type' => 'number', 'default' => 3 ),
@@ -246,9 +293,12 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         'attributes' => array_merge(
             array(
                 'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+                'categoryIds' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
+                'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
                 'title'      => array( 'type' => 'string', 'default' => '' ),
                 'bigCount'   => array( 'type' => 'number', 'default' => 1 ),
                 'listCount'  => array( 'type' => 'number', 'default' => 3 ),
+                'offset'     => array( 'type' => 'number', 'default' => 0 ),
                 'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
                 'tags'       => array( 'type' => 'string', 'default' => '' ),
                 'keyword'    => array( 'type' => 'string', 'default' => '' ),
@@ -264,6 +314,9 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         'attributes' => array_merge(
             array(
                 'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+                'categoryIds' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
+                'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
+                'offset' => array( 'type' => 'number', 'default' => 0 ),
                 'showHighlights' => array( 'type' => 'boolean', 'default' => true ),
                 'showList' => array( 'type' => 'boolean', 'default' => true ),
                 'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
@@ -635,10 +688,12 @@ function u_correio68_render_destaques_home( $attributes ) {
         'ignore_sticky_posts' => true,
         'post__not_in'   => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
-    if ( $category_id ) {
-        $args_all['cat'] = $category_id;
-    }
-    // Apply tag and keyword filters if provided in attributes
+    
+    // Apply category filter (with multiple categories and exclusions)
+    $args_all = u_correio68_apply_category_filter( $args_all, $category_id, $attributes );
+    // Apply offset
+    $args_all = u_correio68_apply_offset( $args_all, $attributes );
+    // Apply tag and keyword filters
     $args_all = u_correio68_apply_tag_keyword_filters( $args_all, $attributes );
     
     $query_all = new WP_Query( $args_all );
@@ -903,7 +958,7 @@ function u_correio68_render_news_grid( $attributes ) {
         } elseif ( ! empty( $shownPosts ) ) {
             $args['post__not_in'] = $shownPosts;
         }
-        $args = u_correio68_apply_category_filter( $args, $categoryId );
+        $args = u_correio68_apply_category_filter( $args, $categoryId, $attributes );
         $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
         $query = new WP_Query( $args );
     }
@@ -1018,6 +1073,7 @@ function u_correio68_render_category_highlight( $attributes ) {
     $bigCount   = isset( $attributes['bigCount'] ) ? max(0, intval( $attributes['bigCount'] )) : 1;
     $listCount  = isset( $attributes['listCount'] ) ? max(0, intval( $attributes['listCount'] )) : 3;
     $showListThumbs = isset( $attributes['showListThumbs'] ) ? filter_var( $attributes['showListThumbs'], FILTER_VALIDATE_BOOLEAN ) : true;
+    $offset     = isset( $attributes['offset'] ) ? max(0, intval( $attributes['offset'] )) : 0;
 
     $typography = u_correio68_resolve_typography( $attributes );
     $titleStyle = $typography['style'];
@@ -1033,7 +1089,12 @@ function u_correio68_render_category_highlight( $attributes ) {
         'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
 
-    $args = u_correio68_apply_category_filter( $args, $categoryId );
+    // Apply offset
+    if ( $offset > 0 ) {
+        $args['offset'] = $offset;
+    }
+
+    $args = u_correio68_apply_category_filter( $args, $categoryId, $attributes );
     $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
 
     $query = new WP_Query( $args );
@@ -1237,6 +1298,7 @@ function u_correio68_render_colunista_item( $attributes ) {
 function u_correio68_render_destaque_misto( $attributes ) {
     global $post;
     $categoryId = isset( $attributes['categoryId'] ) ? intval( $attributes['categoryId'] ) : 0;
+    $offset     = isset( $attributes['offset'] ) ? max(0, intval( $attributes['offset'] )) : 0;
 
     $typography = u_correio68_resolve_typography( $attributes, '#FFFFFF' );
     $titleStyle = $typography['style'];
@@ -1257,7 +1319,12 @@ function u_correio68_render_destaque_misto( $attributes ) {
         'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
 
-    $args = u_correio68_apply_category_filter( $args, $categoryId );
+    // Apply offset
+    if ( $offset > 0 ) {
+        $args['offset'] = $offset;
+    }
+
+    $args = u_correio68_apply_category_filter( $args, $categoryId, $attributes );
     $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
 
     $query = new WP_Query( $args );
@@ -1417,7 +1484,7 @@ function u_correio68_render_top_most_read( $attributes ) {
         'date_query'          => array( $date_query ),
         'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
-    $args = u_correio68_apply_category_filter( $args, $categoryId );
+    $args = u_correio68_apply_category_filter( $args, $categoryId, array() );
 
     $query = new WP_Query( $args );
 
@@ -1433,7 +1500,7 @@ function u_correio68_render_top_most_read( $attributes ) {
             'date_query'          => array( $date_query ),
             'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
         );
-        $args_fallback = u_correio68_apply_category_filter( $args_fallback, $categoryId );
+        $args_fallback = u_correio68_apply_category_filter( $args_fallback, $categoryId, array() );
         $query = new WP_Query( $args_fallback );
     }
 

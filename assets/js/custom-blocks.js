@@ -116,6 +116,46 @@
         );
     }
 
+    /**
+     * Advanced Query Filters Panel - Reusable component for blocks with post queries
+     * Includes: offset, excludeCategories, tags, keyword
+     */
+    function QueryFiltersPanel(props) {
+        var attributes = props.attributes;
+        var setAttributes = props.setAttributes;
+
+        return el(
+            PanelBody,
+            { title: 'Filtros Avançados de Query', initialOpen: false },
+            el(RangeControl, {
+                label: 'Offset (Pular posts)',
+                help: 'Quantos posts pular antes de começar a exibir',
+                value: attributes.offset || 0,
+                onChange: function(val) { setAttributes({ offset: parseInt(val) || 0 }); },
+                min: 0,
+                max: 50
+            }),
+            el(TextControl, {
+                label: 'Excluir Categorias (IDs)',
+                help: 'IDs de categorias separados por vírgula. Ex: 5,12,18',
+                value: attributes.excludeCategories || '',
+                onChange: function(val) { setAttributes({ excludeCategories: String(val || '') }); }
+            }),
+            el(TextControl, {
+                label: 'Tags (slugs)',
+                help: 'Slugs de tags separados por vírgula. Ex: destaque,urgente',
+                value: attributes.tags || '',
+                onChange: function(val) { setAttributes({ tags: String(val || '') }); }
+            }),
+            el(TextControl, {
+                label: 'Palavra-chave (busca)',
+                help: 'Buscar posts que contenham este termo',
+                value: attributes.keyword || '',
+                onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
+            })
+        );
+    }
+
     // Destaques Home
     registerBlockType('seideagosto/destaques-home', {
         title: 'Destaques Home (1 Grande + 2 Pequenos)',
@@ -123,7 +163,12 @@
         category: 'seisdeagosto',
         attributes: {
             categoryId: { type: 'string', default: '0' },
-            layoutType: { type: 'string', default: 'default' }
+            categoryIds: { type: 'array', default: [] },
+            excludeCategories: { type: 'string', default: '' },
+            layoutType: { type: 'string', default: 'default' },
+            offset: { type: 'number', default: 0 },
+            tags: { type: 'string', default: '' },
+            keyword: { type: 'string', default: '' }
         },
         edit: function(props) {
             var attributes = props.attributes;
@@ -153,7 +198,8 @@
                             options: seideagostoBlocks.categories,
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
                         })
-                    )
+                    ),
+                    QueryFiltersPanel(props)
                 ),
                 el('div', {
                     style: {
@@ -368,6 +414,8 @@
         category: 'seisdeagosto',
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
+            categoryIds: { type: 'array', default: [] },
+            excludeCategories: { type: 'string', default: '' },
             numberOfPosts: { type: 'number', default: 9 },
             offset: { type: 'number', default: 0 },
             columns: { type: 'number', default: 3 },
@@ -402,13 +450,6 @@
                             max: 50
                         }),
                         el(RangeControl, {
-                            label: 'Offset (Pular posts)',
-                            value: attributes.offset,
-                            onChange: function(val) { setAttributes({ offset: parseInt(val) }); },
-                            min: 0,
-                            max: 50
-                        }),
-                        el(RangeControl, {
                             label: 'Colunas',
                             value: attributes.columns,
                             onChange: function(val) { setAttributes({ columns: parseInt(val) }); },
@@ -419,18 +460,9 @@
                             label: 'Mostrar paginação',
                             checked: !!attributes.paginate,
                             onChange: function(val) { setAttributes({ paginate: !!val }); }
-                        }),
-                        el(TextControl, {
-                            label: 'Tags (slugs separados por vírgula)',
-                            value: attributes.tags || '',
-                            onChange: function(val) { setAttributes({ tags: String(val || '') }); }
-                        }),
-                        el(TextControl, {
-                            label: 'Palavra-chave (busca)',
-                            value: attributes.keyword || '',
-                            onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
                         })
                     ),
+                    QueryFiltersPanel(props),
                     TypographyPanel(props)
                 ),
                 el('div', {
@@ -462,9 +494,12 @@
         category: 'seisdeagosto',
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
+            categoryIds: { type: 'array', default: [] },
+            excludeCategories: { type: 'string', default: '' },
             title: { type: 'string', default: '' },
             bigCount: { type: 'number', default: 1 },
             listCount: { type: 'number', default: 3 },
+            offset: { type: 'number', default: 0 },
             showListThumbs: { type: 'boolean', default: true },
             tags: { type: 'string', default: '' },
             keyword: { type: 'string', default: '' }
@@ -511,18 +546,9 @@
                             label: 'Mostrar fotos na lista',
                             checked: attributes.showListThumbs !== false,
                             onChange: function(val) { setAttributes({ showListThumbs: !!val }); }
-                        }),
-                        el(TextControl, {
-                            label: 'Tags (slugs separados por vírgula)',
-                            value: attributes.tags || '',
-                            onChange: function(val) { setAttributes({ tags: String(val || '') }); }
-                        }),
-                        el(TextControl, {
-                            label: 'Palavra-chave (busca)',
-                            value: attributes.keyword || '',
-                            onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
                         })
                     ),
+                    QueryFiltersPanel(props),
                     TypographyPanel(props)
                 ),
                 el('div', {
@@ -553,6 +579,9 @@
         category: 'seisdeagosto',
         attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
+            categoryIds: { type: 'array', default: [] },
+            excludeCategories: { type: 'string', default: '' },
+            offset: { type: 'number', default: 0 },
             showHighlights: { type: 'boolean', default: true },
             showList: { type: 'boolean', default: true },
             showListThumbs: { type: 'boolean', default: true },
@@ -578,18 +607,9 @@
                             value: attributes.categoryId,
                             options: seideagostoBlocks.categories,
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
-                        }),
-                        el(TextControl, {
-                            label: 'Tags (slugs separados por vírgula)',
-                            value: attributes.tags || '',
-                            onChange: function(val) { setAttributes({ tags: String(val || '') }); }
-                        }),
-                        el(TextControl, {
-                            label: 'Palavra-chave (busca)',
-                            value: attributes.keyword || '',
-                            onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
                         })
                     ),
+                    QueryFiltersPanel(props),
                     TypographyPanel(props, '#FFFFFF'),
                     el(PanelBody, { title: 'Lista e Aparência', initialOpen: false },
                         el(wp.components.ToggleControl, {
