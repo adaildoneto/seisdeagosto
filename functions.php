@@ -1,3 +1,4 @@
+
 <?php
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
@@ -2135,3 +2136,20 @@ add_action('wp_enqueue_scripts', function() {
     $inline = "console.log('[Currency Debug] Verificando bloco de cambio...');console.log('[Currency Debug] Bloco registrado: " . esc_js( $registered ) . "');console.log('[Currency Debug] " . $api_msg . "');";
     wp_add_inline_script('jquery', $inline, 'after');
 }, 12);
+
+/**
+ * Shortcode: header search form only for mobile (toggle).
+ */
+function u68_header_search_mobile_shortcode() {
+    $search_form = get_search_form( false );
+    $output = '';
+    // Mobile: toggle button + expandable search
+    $output .= '<button id="searchToggleMobile" class="btn btn-link text-white d-lg-none p-0 ms-2" type="button" aria-label="' . esc_attr__( 'Abrir busca', 'u_correio68' ) . '">';
+    $output .= '<i class="fa fa-search fa-lg"></i>';
+    $output .= '</button>';
+    $output .= '<div id="mobileSearchWrapper" class="d-lg-none position-absolute start-0 end-0 bg-primary px-3 py-2" style="top: 100%; z-index: 1030;">';
+    $output .= $search_form;
+    $output .= '</div>';
+    return $output;
+}
+add_shortcode( 'u68_header_search_mobile', 'u68_header_search_mobile_shortcode' );
