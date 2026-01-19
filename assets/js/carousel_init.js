@@ -28,6 +28,54 @@ $(document).ready(function(){
 			});
 		}
 	}
+
+	// Categories slider - Mobile only (swipe navigation, no arrows/dots)
+	function initCategoriesSlider() {
+		var $catSlider = $('.categories-slider-wrapper .navbar-nav');
+		var isMobile = $(window).width() <= 767;
+		
+		if ($catSlider.length) {
+			if (isMobile && !$catSlider.hasClass('slick-initialized')) {
+				$catSlider.slick({
+					arrows: false,
+					dots: false,
+					infinite: false,
+					speed: 300,
+					slidesToShow: 3,
+					slidesToScroll: 1,
+					variableWidth: true,
+					swipeToSlide: true,
+					touchThreshold: 10,
+					accessibility: false,
+					mobileFirst: true,
+					centerMode: false,
+					responsive: [
+						{
+							breakpoint: 480,
+							settings: {
+								slidesToShow: 2
+							}
+						}
+					]
+				});
+			} else if (!isMobile && $catSlider.hasClass('slick-initialized')) {
+				// Destroy slider on desktop
+				$catSlider.slick('unslick');
+			}
+		}
+	}
+	
+	// Init on load
+	initCategoriesSlider();
+	
+	// Re-init on resize (with debounce)
+	var resizeTimer;
+	$(window).on('resize', function() {
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(function() {
+			initCategoriesSlider();
+		}, 250);
+	});
 });
 
 

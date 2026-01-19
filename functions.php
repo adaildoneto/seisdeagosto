@@ -517,7 +517,7 @@ add_shortcode( 'u68_widget_area', 'u68_widget_area_shortcode' );
 
 /**
  * Shortcode: Render menus using classic walker when available.
- * Usage: [u68_nav_menu location="categorias" class="navbar-nav ..." depth="2"]
+ * Usage: [u68_nav_menu location="categorias" class="navbar-nav ..." depth="2" slider="mobile"]
  */
 function u68_nav_menu_shortcode( $atts ) {
     $atts = shortcode_atts(
@@ -527,6 +527,7 @@ function u68_nav_menu_shortcode( $atts ) {
             'class'    => '',
             'depth'    => 2,
             'dropdown' => 'true',
+            'slider'   => '',  // 'mobile' para habilitar slider em dispositivos móveis
         ),
         $atts,
         'u68_nav_menu'
@@ -537,6 +538,7 @@ function u68_nav_menu_shortcode( $atts ) {
     $class    = sanitize_text_field( $atts['class'] );
     $depth    = absint( $atts['depth'] );
     $dropdown = ( $atts['dropdown'] === 'true' || $atts['dropdown'] === '1' );
+    $slider   = sanitize_key( $atts['slider'] );
 
     if ( $location && ! has_nav_menu( $location ) ) {
         return '';
@@ -563,6 +565,12 @@ function u68_nav_menu_shortcode( $atts ) {
     }
 
     $html = wp_nav_menu( $args );
+    
+    // Envolver em wrapper para Slick slider mobile se slider='mobile' e location='categorias'
+    if ( $html && $slider === 'mobile' && $location === 'categorias' ) {
+        $html = '<div class="categories-slider-wrapper">' . $html . '</div>';
+    }
+    
     return $html ? $html : '';
 }
 add_shortcode( 'u68_nav_menu', 'u68_nav_menu_shortcode' );

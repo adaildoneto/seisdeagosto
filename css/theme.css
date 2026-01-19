@@ -1098,6 +1098,86 @@ body.admin-bar {
   }
 }
 
+/* =============================================
+   CATEGORIES SLIDER - MOBILE
+   ============================================= */
+.categories-slider-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* No mobile: slider horizontal */
+@media (max-width: 767px) {
+  .categories-slider-wrapper {
+    position: relative;
+  }
+  
+  .categories-slider-wrapper .navbar-nav {
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+  }
+  
+  .categories-slider-wrapper .navbar-nav .nav-item {
+    flex-shrink: 0;
+  }
+  
+  /* Quando Slick estiver ativo */
+  .categories-slider-wrapper .navbar-nav.slick-initialized {
+    display: flex !important;
+  }
+  
+  .categories-slider-wrapper .slick-list {
+    overflow: visible;
+    padding: 0 10px;
+  }
+  
+  .categories-slider-wrapper .slick-track {
+    display: flex;
+    align-items: center;
+  }
+  
+  .categories-slider-wrapper .slick-slide {
+    float: none;
+    margin: 0 2px;
+  }
+  
+  /* Indicador visual de que pode deslizar */
+  .categories-slider-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, transparent, var(--u68-primary-color, #0a4579));
+    pointer-events: none;
+    z-index: 2;
+  }
+  
+  .categories-slider-wrapper::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, transparent, var(--u68-primary-color, #0a4579));
+    pointer-events: none;
+    z-index: 2;
+  }
+}
+
+/* No desktop: comportamento normal */
+@media (min-width: 768px) {
+  .categories-slider-wrapper .navbar-nav.slick-initialized {
+    display: flex !important;
+  }
+  
+  .categories-slider-wrapper .navbar-nav {
+    flex-wrap: wrap !important;
+  }
+}
+
 /* Header compression on scroll - scrolled state with smooth effects */
 .site-header.scrolled #headnev {
   padding: 0.35rem 0 !important;

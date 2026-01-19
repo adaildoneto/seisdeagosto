@@ -87,6 +87,7 @@
                             <?php if ( has_nav_menu( 'categorias' ) ) : ?>
                                 <nav id="categoriesNav" class="navbar navbar-expand navbar-categorias categories-nav-top bg-body-tertiary border-top" aria-label="<?php esc_attr_e( 'Categorias', 'u_correio68' ); ?>">
                                     <div class="container">
+                                        <div class="categories-slider-wrapper">
                                         <?php
                                         wp_nav_menu( array(
                                             'theme_location' => 'categorias',
@@ -96,6 +97,7 @@
                                             'fallback_cb'    => false,
                                         ) );
                                         ?>
+                                        </div>
                                     </div>
                                 </nav>
                             <?php endif; ?>
