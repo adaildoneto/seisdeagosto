@@ -17,6 +17,7 @@
             arrows: true,
             infinite: false,
             adaptiveHeight: true,
+            accessibility: false,
             responsive: [
               {
                 breakpoint: 768,

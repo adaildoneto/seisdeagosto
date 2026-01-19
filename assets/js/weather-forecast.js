@@ -12,7 +12,8 @@
         autoplaySpeed: 4000,
         arrows: false,
         dots: true,
-        adaptiveHeight: true
+        adaptiveHeight: true,
+        accessibility: false
       });
     });
   });

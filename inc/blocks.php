@@ -792,7 +792,8 @@ function u_correio68_render_destaques_home( $attributes ) {
                         dots: true,
                         arrows: false,
                         slidesToShow: 1,
-                        adaptiveHeight: true
+                        adaptiveHeight: true,
+                        accessibility: false
                     });
                 }
             });
@@ -1907,7 +1908,8 @@ function u_correio68_render_weather( $attributes ) {
                         dots: true,
                         arrows: false,
                         infinite: true,
-                        speed: 300
+                        speed: 300,
+                        accessibility: false
                     });
                 }
             });
@@ -2260,6 +2262,7 @@ function u_correio68_render_currency_monitor( $attributes ) {
                     autoplaySpeed: autoplaySpeedVal,
                     pauseOnHover: true,
                     pauseOnFocus: true,
+                    accessibility: false,
                     responsive: [
                         { breakpoint: 1200, settings: { slidesToShow: Math.max(1, slidesToShowDefault - 1) } },
                         { breakpoint: 992,  settings: { slidesToShow: Math.max(1, Math.floor(slidesToShowDefault / 2)) } },
@@ -2381,6 +2384,7 @@ function u_correio68_render_image_slider( $attributes ) {
                 pauseOnFocus: true,
                 adaptiveHeight: false,
                 cssEase: 'ease-in-out',
+                accessibility: false,
                 responsive: [
                     {
                         breakpoint: 768,

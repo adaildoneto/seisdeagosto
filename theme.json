@@ -27,12 +27,12 @@
           "name": "Lato",
           "fontFamily": "\"Lato\", sans-serif",
           "fontFace": [
-            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "300", "src": [ "assets/fonts/lato/Lato-Light.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "300", "src": [ "assets/fonts/lato/Lato-LightItalic.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "400", "src": [ "assets/fonts/lato/Lato-Regular.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "400", "src": [ "assets/fonts/lato/Lato-Italic.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "700", "src": [ "assets/fonts/lato/Lato-Bold.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "700", "src": [ "assets/fonts/lato/Lato-BoldItalic.ttf" ] }
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "300", "src": [ "file:./assets/fonts/lato/Lato-Light.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "300", "src": [ "file:./assets/fonts/lato/Lato-LightItalic.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "400", "src": [ "file:./assets/fonts/lato/Lato-Regular.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "400", "src": [ "file:./assets/fonts/lato/Lato-Italic.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "700", "src": [ "file:./assets/fonts/lato/Lato-Bold.ttf" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "700", "src": [ "file:./assets/fonts/lato/Lato-BoldItalic.ttf" ] }
           ]
         },
         {
@@ -40,8 +40,8 @@
           "name": "Open Sans",
           "fontFamily": "\"Open Sans\", sans-serif",
           "fontFace": [
-            { "fontFamily": "Open Sans", "fontStyle": "normal", "fontWeight": "300 800", "src": [ "assets/fonts/open-sans/OpenSans-Variable.ttf" ] },
-            { "fontFamily": "Open Sans", "fontStyle": "italic", "fontWeight": "300 800", "src": [ "assets/fonts/open-sans/OpenSans-Italic-Variable.ttf" ] }
+            { "fontFamily": "Open Sans", "fontStyle": "normal", "fontWeight": "300 800", "src": [ "file:./assets/fonts/open-sans/OpenSans-Variable.ttf" ] },
+            { "fontFamily": "Open Sans", "fontStyle": "italic", "fontWeight": "300 800", "src": [ "file:./assets/fonts/open-sans/OpenSans-Italic-Variable.ttf" ] }
           ]
         }
       ],

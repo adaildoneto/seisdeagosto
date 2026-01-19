@@ -394,6 +394,7 @@ function u68_weather_selector_shortcode( $atts ) {
                                     slidesToShow: 4,
                                     slidesToScroll: 1,
                                     arrows: false,
+                                    accessibility: false,
                                     responsive: [
                                         { breakpoint: 992, settings: { slidesToShow: 3 } },
                                         { breakpoint: 768, settings: { slidesToShow: 2 } },
@@ -1651,14 +1652,17 @@ function u68_asset_console_probe() {
     const data = {$json};
     const findNode = (sel) => document.querySelector(sel);
 
+    // Check for theme.css (may be combined/minified by cache plugins)
     const themeCss = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(link => link.href && link.href.includes(data.checks.themeCssSubstring));
+    const boostCache = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(link => link.href && link.href.includes('boost-cache'));
     const headerEl = findNode(data.selectors.header);
     const footerEl = findNode(data.selectors.footer);
 
     const summary = {
         headerFound: !!headerEl,
         footerFound: !!footerEl,
-        themeCssFound: !!themeCss,
+        themeCssFound: !!themeCss || !!boostCache,
+        cssOptimized: !!boostCache,
         styles: data.styles,
         scripts: data.scripts,
     };
@@ -1667,7 +1671,8 @@ function u68_asset_console_probe() {
 
     if (!headerEl) console.warn('[u68] Header não encontrado no DOM. Verifique template-part header.');
     if (!footerEl) console.warn('[u68] Footer não encontrado no DOM. Verifique template-part footer.');
-    if (!themeCss) console.warn('[u68] theme.css não encontrado nos <link rel="stylesheet">.');
+    // Only warn about missing theme.css if no cache optimization is detected
+    if (!themeCss && !boostCache) console.warn('[u68] theme.css não encontrado nos <link rel="stylesheet">.');
 })();
 JS;
 
