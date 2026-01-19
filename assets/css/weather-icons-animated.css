@@ -1,0 +1,282 @@
+/* =============================================
+   WEATHER ANIMATED ICONS
+   Inspired by Meteocons (Bas Milius) - MIT License
+   Pure CSS animated weather icons
+   ============================================= */
+
+/* Base container */
+.weather-icon-animated {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-icon-animated svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* =============================================
+   SUN ICON - Clear sky
+   ============================================= */
+.weather-icon-sun {
+  --sun-color: #ffd93d;
+  --sun-glow: rgba(255, 217, 61, 0.3);
+}
+
+.weather-icon-sun .sun-core {
+  fill: var(--sun-color);
+  transform-origin: center;
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+
+.weather-icon-sun .sun-rays {
+  fill: var(--sun-color);
+  transform-origin: center;
+  animation: sun-rotate 20s linear infinite;
+}
+
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes sun-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   CLOUD ICON - Cloudy
+   ============================================= */
+.weather-icon-cloud {
+  --cloud-color: #e8e8e8;
+  --cloud-shadow: #d0d0d0;
+}
+
+.weather-icon-cloud .cloud-main {
+  fill: var(--cloud-color);
+  animation: cloud-float 4s ease-in-out infinite;
+}
+
+.weather-icon-cloud .cloud-shadow {
+  fill: var(--cloud-shadow);
+  animation: cloud-float 4s ease-in-out infinite 0.2s;
+}
+
+@keyframes cloud-float {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+/* =============================================
+   PARTLY CLOUDY - Sun + Cloud
+   ============================================= */
+.weather-icon-partly-cloudy .sun-behind {
+  fill: #ffd93d;
+  transform-origin: center;
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+
+.weather-icon-partly-cloudy .cloud-front {
+  fill: #e8e8e8;
+  animation: cloud-float 4s ease-in-out infinite;
+}
+
+/* =============================================
+   RAIN ICON
+   ============================================= */
+.weather-icon-rain {
+  --rain-color: #64b5f6;
+  --cloud-color: #b0bec5;
+}
+
+.weather-icon-rain .rain-cloud {
+  fill: var(--cloud-color);
+  animation: cloud-float 4s ease-in-out infinite;
+}
+
+.weather-icon-rain .rain-drop {
+  fill: var(--rain-color);
+  animation: rain-fall 1s linear infinite;
+}
+
+.weather-icon-rain .rain-drop:nth-child(2) { animation-delay: 0.2s; }
+.weather-icon-rain .rain-drop:nth-child(3) { animation-delay: 0.4s; }
+.weather-icon-rain .rain-drop:nth-child(4) { animation-delay: 0.6s; }
+.weather-icon-rain .rain-drop:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes rain-fall {
+  0% { 
+    transform: translateY(-5px); 
+    opacity: 0; 
+  }
+  20% { 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateY(15px); 
+    opacity: 0; 
+  }
+}
+
+/* =============================================
+   DRIZZLE ICON - Light rain
+   ============================================= */
+.weather-icon-drizzle .drizzle-drop {
+  fill: #90caf9;
+  animation: drizzle-fall 1.5s linear infinite;
+}
+
+.weather-icon-drizzle .drizzle-drop:nth-child(2) { animation-delay: 0.3s; }
+.weather-icon-drizzle .drizzle-drop:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes drizzle-fall {
+  0% { 
+    transform: translateY(-3px); 
+    opacity: 0; 
+  }
+  30% { 
+    opacity: 0.7; 
+  }
+  100% { 
+    transform: translateY(12px); 
+    opacity: 0; 
+  }
+}
+
+/* =============================================
+   STORM / THUNDERSTORM ICON
+   ============================================= */
+.weather-icon-storm {
+  --storm-cloud: #78909c;
+  --lightning-color: #ffeb3b;
+}
+
+.weather-icon-storm .storm-cloud {
+  fill: var(--storm-cloud);
+  animation: cloud-rumble 0.5s ease-in-out infinite;
+}
+
+.weather-icon-storm .lightning {
+  fill: var(--lightning-color);
+  animation: lightning-flash 2s ease-in-out infinite;
+}
+
+.weather-icon-storm .storm-rain {
+  fill: #64b5f6;
+  animation: rain-fall 0.8s linear infinite;
+}
+
+@keyframes cloud-rumble {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-1px); }
+  75% { transform: translateX(1px); }
+}
+
+@keyframes lightning-flash {
+  0%, 45%, 55%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* =============================================
+   SNOW ICON
+   ============================================= */
+.weather-icon-snow {
+  --snow-color: #e3f2fd;
+  --snowflake-color: #bbdefb;
+}
+
+.weather-icon-snow .snow-cloud {
+  fill: #cfd8dc;
+  animation: cloud-float 4s ease-in-out infinite;
+}
+
+.weather-icon-snow .snowflake {
+  fill: var(--snowflake-color);
+  animation: snow-fall 3s linear infinite;
+}
+
+.weather-icon-snow .snowflake:nth-child(2) { animation-delay: 0.5s; animation-duration: 3.5s; }
+.weather-icon-snow .snowflake:nth-child(3) { animation-delay: 1s; animation-duration: 2.8s; }
+.weather-icon-snow .snowflake:nth-child(4) { animation-delay: 1.5s; animation-duration: 3.2s; }
+
+@keyframes snow-fall {
+  0% { 
+    transform: translateY(-5px) rotate(0deg); 
+    opacity: 0; 
+  }
+  20% { 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateY(18px) rotate(180deg); 
+    opacity: 0; 
+  }
+}
+
+/* =============================================
+   FOG / MIST ICON
+   ============================================= */
+.weather-icon-fog .fog-line {
+  fill: #b0bec5;
+  animation: fog-drift 3s ease-in-out infinite;
+}
+
+.weather-icon-fog .fog-line:nth-child(2) { animation-delay: 0.5s; }
+.weather-icon-fog .fog-line:nth-child(3) { animation-delay: 1s; }
+
+@keyframes fog-drift {
+  0%, 100% { 
+    transform: translateX(-3px); 
+    opacity: 0.6; 
+  }
+  50% { 
+    transform: translateX(3px); 
+    opacity: 1; 
+  }
+}
+
+/* =============================================
+   SIZE VARIANTS
+   ============================================= */
+.weather-icon-sm { width: 32px; height: 32px; }
+.weather-icon-md { width: 48px; height: 48px; }
+.weather-icon-lg { width: 64px; height: 64px; }
+.weather-icon-xl { width: 80px; height: 80px; }
+.weather-icon-xxl { width: 100px; height: 100px; }
+
+/* =============================================
+   THEME ADJUSTMENTS
+   ============================================= */
+
+/* Dark theme - brighter icons */
+.weather-theme-dark .weather-icon-animated {
+  filter: brightness(1.1);
+}
+
+/* Light theme - slightly darker */
+.weather-theme-light .weather-icon-animated {
+  filter: brightness(0.95);
+}
+
+/* Small icons in forecast cards */
+.forecast-day-card .weather-icon-animated {
+  width: 40px;
+  height: 40px;
+}
+
+.forecast-day-card .day-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .weather-icon-animated * {
+    animation: none !important;
+  }
+}

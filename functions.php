@@ -292,6 +292,185 @@ function u68_footer_text_shortcode() {
 add_shortcode( 'u68_footer_text', 'u68_footer_text_shortcode' );
 
 /**
+ * Shortcode: Weather Widget with City Selector
+ * Usage: [u68_weather_selector default_city="Rio Branco" default_lat="-9.975" default_lon="-67.824"]
+ */
+function u68_weather_selector_shortcode( $atts ) {
+    $atts = shortcode_atts(
+        array(
+            'default_city' => '',
+            'default_lat'  => '',
+            'default_lon'  => '',
+            'show_forecast' => 'true',
+            'forecast_days' => '5',
+            'units'         => 'c',
+            'theme'         => 'dark', // dark or light
+        ),
+        $atts,
+        'u68_weather_selector'
+    );
+
+    $widget_id = 'weather-selector-' . wp_unique_id();
+    $theme_class = $atts['theme'] === 'dark' ? 'city-selector-dark' : '';
+    
+    // Build initial weather block if default city provided
+    $initial_weather = '';
+    if ( ! empty( $atts['default_lat'] ) && ! empty( $atts['default_lon'] ) ) {
+        $weather_atts = array(
+            'cityName'     => sanitize_text_field( $atts['default_city'] ),
+            'latitude'     => sanitize_text_field( $atts['default_lat'] ),
+            'longitude'    => sanitize_text_field( $atts['default_lon'] ),
+            'units'        => $atts['units'],
+            'showWind'     => true,
+            'showRain'     => true,
+            'showForecast' => $atts['show_forecast'] === 'true',
+            'forecastDays' => intval( $atts['forecast_days'] ),
+        );
+        if ( function_exists( 'u_correio68_render_weather' ) ) {
+            $initial_weather = u_correio68_render_weather( $weather_atts );
+        }
+    }
+
+    ob_start();
+    ?>
+    <div id="<?php echo esc_attr( $widget_id ); ?>" class="weather-selector-widget" 
+         data-units="<?php echo esc_attr( $atts['units'] ); ?>"
+         data-show-forecast="<?php echo esc_attr( $atts['show_forecast'] ); ?>"
+         data-forecast-days="<?php echo esc_attr( $atts['forecast_days'] ); ?>">
+        
+        <div class="weather-city-selector-wrap <?php echo esc_attr( $theme_class ); ?>"></div>
+        
+        <div class="weather-display-area">
+            <?php if ( ! empty( $initial_weather ) ) : ?>
+                <?php echo $initial_weather; ?>
+            <?php else : ?>
+                <div class="weather-placeholder text-center p-4">
+                    <i class="fa fa-cloud fa-3x mb-3" style="opacity:0.5"></i>
+                    <p class="mb-0">Selecione uma cidade para ver a previsão do tempo</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <script>
+    jQuery(function($) {
+        var $widget = $('#<?php echo esc_js( $widget_id ); ?>');
+        var $selector = $widget.find('.weather-city-selector-wrap');
+        var $display = $widget.find('.weather-display-area');
+        var units = $widget.data('units') || 'c';
+        var showForecast = $widget.data('show-forecast') !== false;
+        var forecastDays = parseInt($widget.data('forecast-days')) || 5;
+        
+        // Initialize city selector
+        $selector.citySelector({
+            placeholder: 'Buscar cidade...',
+            language: 'pt',
+            onSelect: function(cityData) {
+                // Show loading
+                $display.html('<div class="text-center p-4"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando clima...</p></div>');
+                
+                // Fetch weather via AJAX
+                $.ajax({
+                    url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'u68_get_weather',
+                        city: cityData.name,
+                        lat: cityData.latitude,
+                        lon: cityData.longitude,
+                        units: units,
+                        show_forecast: showForecast ? 1 : 0,
+                        forecast_days: forecastDays,
+                        nonce: '<?php echo wp_create_nonce( 'u68_weather_nonce' ); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success && response.data.html) {
+                            $display.html(response.data.html);
+                            // Re-init slick if needed
+                            if (typeof $.fn.slick !== 'undefined') {
+                                $display.find('.weather-forecast-slider:not(.slick-initialized)').slick({
+                                    dots: true,
+                                    infinite: false,
+                                    slidesToShow: 4,
+                                    slidesToScroll: 1,
+                                    arrows: false,
+                                    responsive: [
+                                        { breakpoint: 992, settings: { slidesToShow: 3 } },
+                                        { breakpoint: 768, settings: { slidesToShow: 2 } },
+                                        { breakpoint: 480, settings: { slidesToShow: 1 } }
+                                    ]
+                                });
+                            }
+                        } else {
+                            $display.html('<div class="alert alert-warning">Não foi possível obter os dados do clima.</div>');
+                        }
+                    },
+                    error: function() {
+                        $display.html('<div class="alert alert-danger">Erro ao carregar dados do clima.</div>');
+                    }
+                });
+            }
+        });
+        
+        <?php if ( ! empty( $atts['default_city'] ) && ! empty( $atts['default_lat'] ) && ! empty( $atts['default_lon'] ) ) : ?>
+        // Set initial city
+        var citySelector = $selector.data('citySelector');
+        if (citySelector) {
+            citySelector.setCity({
+                name: '<?php echo esc_js( $atts['default_city'] ); ?>',
+                latitude: <?php echo floatval( $atts['default_lat'] ); ?>,
+                longitude: <?php echo floatval( $atts['default_lon'] ); ?>,
+                country: 'Brasil',
+                country_code: 'BR'
+            });
+        }
+        <?php endif; ?>
+    });
+    </script>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'u68_weather_selector', 'u68_weather_selector_shortcode' );
+
+/**
+ * AJAX handler for weather data
+ */
+function u68_ajax_get_weather() {
+    check_ajax_referer( 'u68_weather_nonce', 'nonce' );
+    
+    $city = isset( $_POST['city'] ) ? sanitize_text_field( $_POST['city'] ) : '';
+    $lat = isset( $_POST['lat'] ) ? sanitize_text_field( $_POST['lat'] ) : '';
+    $lon = isset( $_POST['lon'] ) ? sanitize_text_field( $_POST['lon'] ) : '';
+    $units = isset( $_POST['units'] ) ? sanitize_text_field( $_POST['units'] ) : 'c';
+    $show_forecast = ! empty( $_POST['show_forecast'] );
+    $forecast_days = isset( $_POST['forecast_days'] ) ? intval( $_POST['forecast_days'] ) : 5;
+    
+    if ( empty( $lat ) || empty( $lon ) ) {
+        wp_send_json_error( array( 'message' => 'Coordenadas inválidas' ) );
+    }
+    
+    $weather_atts = array(
+        'cityName'     => $city,
+        'latitude'     => $lat,
+        'longitude'    => $lon,
+        'units'        => $units,
+        'showWind'     => true,
+        'showRain'     => true,
+        'showForecast' => $show_forecast,
+        'forecastDays' => $forecast_days,
+    );
+    
+    if ( function_exists( 'u_correio68_render_weather' ) ) {
+        $html = u_correio68_render_weather( $weather_atts );
+        wp_send_json_success( array( 'html' => $html ) );
+    } else {
+        wp_send_json_error( array( 'message' => 'Função de clima não disponível' ) );
+    }
+}
+add_action( 'wp_ajax_u68_get_weather', 'u68_ajax_get_weather' );
+add_action( 'wp_ajax_nopriv_u68_get_weather', 'u68_ajax_get_weather' );
+
+/**
  * Shortcode: Render a widget area with optional condition.
  * Usage: [u68_widget_area id="left-sidebar" class="col-md-4 widget-area" role="complementary" condition="show_left_sidebar"]
  */
@@ -973,6 +1152,10 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
         wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), null, true );
         // Post-load i18n for weekday names (pt-BR)
         wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), null, true );
+        
+        // City Selector for Weather Widget
+        wp_enqueue_style( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/css/city-selector.css', array(), '1.0.0' );
+        wp_enqueue_script( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/js/city-selector.js', array('jquery'), '1.0.0', true );
 
         // Header behavior: categories hide on scroll + mobile search toggle
         $u68_header_js = <<<'JS'

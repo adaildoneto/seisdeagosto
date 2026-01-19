@@ -21,20 +21,9 @@ body {
 }
 
 /* =============================================
-   WEATHER WIDGET - Preserve original styling
-   All text white, no typography changes
+   WEATHER WIDGET - Typography protection
+   Theme colors are handled by .weather-theme-dark/light
    ============================================= */
-.weather-forecast,
-.weather-forecast *,
-.weather-widget,
-.weather-widget *,
-.wp-block-seideagosto-weather,
-.wp-block-seideagosto-weather *,
-[class*="weather"],
-[class*="clima"] {
-  color: #fff !important;
-}
-
 .weather-forecast h1,
 .weather-forecast h2,
 .weather-forecast h3,
@@ -56,7 +45,6 @@ body {
 .wp-block-seideagosto-weather h5,
 .wp-block-seideagosto-weather h6,
 .wp-block-seideagosto-weather p {
-  color: #fff !important;
   border: none !important;
   padding-left: 0 !important;
   margin-top: 0 !important;
@@ -2414,7 +2402,6 @@ body {
   margin: 0;
   opacity: 0.95;
   display: block;
-  color: #ffffff;
 }
 
 /* Emphasized city name below current conditions */
@@ -2427,18 +2414,15 @@ body {
   margin-top: 8px;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ffffff;
 }
 
 .weather-widget .weather-location i {
-  color: #ffffff;
 }
 
 .weather-widget .weather-location .city-name {
-  color: #ffffff;
 }
 
-/* Date centered in dark info */
+/* Date centered in info side */
 .weather-widget .info-side .info-date {
   width: 100%;
   text-align: center;
@@ -2449,25 +2433,21 @@ body {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  color: #a4b0bd;
 }
 
 .weather-widget .info-side .info-date .date-day {
   display: block;
   font-size: 12px;
-  color: #a4b0bd;
 }
 
-/* BOTTOM SIDE: Dark Info */
+/* BOTTOM SIDE: Info */
 .weather-widget .info-side {
   width: 100%;
-  background: #2f3542;
   padding: 12px 10px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  color: #ffffff;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -2503,7 +2483,6 @@ body {
 .weather-widget .info-title {
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -2511,7 +2490,6 @@ body {
 .weather-widget .info-value {
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
 }
 
 /* Week Forecast - Slick Slider */
@@ -2568,14 +2546,12 @@ body {
 
 .weather-widget .day-icon i {
   font-size: 24px;
-  color: white;
 }
 
 .weather-widget .day-name {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
   margin-bottom: 2px;
   text-transform: capitalize;
 }
@@ -2583,7 +2559,6 @@ body {
 .weather-widget .day-date {
   display: block;
   font-size: 10px;
-  color: #ffffff;
   margin-bottom: 8px;
   text-transform: capitalize;
 }
@@ -2597,13 +2572,10 @@ body {
 
 .weather-widget .temp-max {
   font-weight: 700;
-  color: white;
 }
 
 .weather-widget .temp-min {
   font-weight: 600;
-  color: #ffffff;
-  opacity: 0.7;
 }
 
 /* Slick Slider Customization */
@@ -2647,6 +2619,208 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+/* ========================================
+   WEATHER WIDGET THEMES
+   Light / Dark usando variáveis do tema
+   Contraste adequado para tipografia
+   ======================================== */
+
+/* DARK THEME (default) - Fundo cinza escuro */
+.weather-widget.weather-theme-dark {
+  background: #2d3436; /* Cinza escuro */
+}
+
+.weather-widget.weather-theme-dark .weather-side {
+  background: linear-gradient(135deg, var(--wp--preset--color--primary, #0a4579) 0%, #1565c0 100%);
+  color: #ffffff;
+}
+
+.weather-widget.weather-theme-dark .weather-side .date-dayname,
+.weather-widget.weather-theme-dark .weather-side .date-day,
+.weather-widget.weather-theme-dark .weather-side .weather-temp,
+.weather-widget.weather-theme-dark .weather-side .weather-desc,
+.weather-widget.weather-theme-dark .weather-side .weather-location,
+.weather-widget.weather-theme-dark .weather-side .city-name,
+.weather-widget.weather-theme-dark .weather-side i {
+  color: #ffffff !important;
+}
+
+.weather-widget.weather-theme-dark .info-side {
+  background: #2d3436; /* Mesmo cinza escuro */
+}
+
+.weather-widget.weather-theme-dark .forecast-day-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.weather-widget.weather-theme-dark .forecast-day-card:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.weather-widget.weather-theme-dark .forecast-day-card.active {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--wp--preset--color--accent, #ec940d);
+  box-shadow: 0 2px 8px rgba(236,148,13,0.3);
+}
+
+.weather-widget.weather-theme-dark .info-item {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Dark theme - tipografia com alto contraste (branco) */
+.weather-widget.weather-theme-dark .info-title {
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+
+.weather-widget.weather-theme-dark .info-title i {
+  color: rgba(255,255,255,0.7);
+}
+
+.weather-widget.weather-theme-dark .info-value {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.weather-widget.weather-theme-dark .info-date .date-dayname,
+.weather-widget.weather-theme-dark .info-date .date-day {
+  color: rgba(255,255,255,0.7);
+}
+
+.weather-widget.weather-theme-dark .day-name {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.weather-widget.weather-theme-dark .day-date {
+  color: rgba(255,255,255,0.7);
+}
+
+.weather-widget.weather-theme-dark .temp-max {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.weather-widget.weather-theme-dark .temp-min {
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+}
+
+.weather-widget.weather-theme-dark .day-icon i {
+  color: #ffffff;
+}
+
+/* Dark theme slick dots */
+.weather-widget.weather-theme-dark .slick-dots li button:before {
+  color: rgba(255,255,255,0.5);
+}
+
+.weather-widget.weather-theme-dark .slick-dots li.slick-active button:before {
+  color: var(--wp--preset--color--accent, #ec940d);
+}
+
+/* LIGHT THEME - Fundo cinza claro */
+.weather-widget.weather-theme-light {
+  background: #e9ecef; /* Cinza claro */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.weather-widget.weather-theme-light .weather-side {
+  background: linear-gradient(135deg, var(--wp--preset--color--primary, #0a4579) 0%, #2980b9 100%);
+  color: #ffffff;
+}
+
+.weather-widget.weather-theme-light .weather-side .date-dayname,
+.weather-widget.weather-theme-light .weather-side .date-day,
+.weather-widget.weather-theme-light .weather-side .weather-temp,
+.weather-widget.weather-theme-light .weather-side .weather-desc,
+.weather-widget.weather-theme-light .weather-side .weather-location,
+.weather-widget.weather-theme-light .weather-side .city-name,
+.weather-widget.weather-theme-light .weather-side i {
+  color: #ffffff !important;
+}
+
+.weather-widget.weather-theme-light .info-side {
+  background: #e9ecef; /* Mesmo cinza claro */
+}
+
+.weather-widget.weather-theme-light .forecast-day-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.weather-widget.weather-theme-light .forecast-day-card:hover {
+  background: #ffffff;
+  border-color: var(--wp--preset--color--primary, #0a4579);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.weather-widget.weather-theme-light .forecast-day-card.active {
+  background: #ffffff;
+  border-color: var(--wp--preset--color--primary, #0a4579);
+  box-shadow: 0 2px 12px rgba(10,69,121,0.2);
+}
+
+.weather-widget.weather-theme-light .info-item {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Light theme - tipografia com cor primária na parte de baixo */
+.weather-widget.weather-theme-light .info-title {
+  color: var(--wp--preset--color--primary, #0a4579);
+  font-weight: 500;
+}
+
+.weather-widget.weather-theme-light .info-title i {
+  color: var(--wp--preset--color--primary, #0a4579);
+}
+
+.weather-widget.weather-theme-light .info-value {
+  color: var(--wp--preset--color--primary, #0a4579);
+  font-weight: 700;
+}
+
+.weather-widget.weather-theme-light .info-date .date-dayname,
+.weather-widget.weather-theme-light .info-date .date-day {
+  color: var(--wp--preset--color--primary, #0a4579);
+}
+
+.weather-widget.weather-theme-light .day-name {
+  color: var(--wp--preset--color--primary, #0a4579);
+  font-weight: 600;
+}
+
+.weather-widget.weather-theme-light .day-date {
+  color: var(--wp--preset--color--primary, #0a4579);
+  opacity: 0.7;
+}
+
+.weather-widget.weather-theme-light .temp-max {
+  color: var(--wp--preset--color--danger, #dc3545);
+  font-weight: 700;
+}
+
+.weather-widget.weather-theme-light .temp-min {
+  color: var(--wp--preset--color--primary, #0a4579);
+  font-weight: 600;
+}
+
+.weather-widget.weather-theme-light .day-icon i {
+  color: var(--wp--preset--color--primary, #0a4579);
+}
+
+/* Light theme slick dots */
+.weather-widget.weather-theme-light .slick-dots li button:before {
+  color: #adb5bd;
+}
+
+.weather-widget.weather-theme-light .slick-dots li.slick-active button:before {
+  color: var(--wp--preset--color--primary, #0a4579);
 }
 .weather-block .current-wrap .weather-icon {
   margin-bottom: 12px;

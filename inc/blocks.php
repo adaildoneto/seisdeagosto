@@ -297,6 +297,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
             'latitude'      => array( 'type' => 'string', 'default' => '' ),
             'longitude'     => array( 'type' => 'string', 'default' => '' ),
             'units'         => array( 'type' => 'string', 'default' => 'c' ), // 'c' Celsius, 'f' Fahrenheit
+            'theme'         => array( 'type' => 'string', 'default' => 'dark' ), // 'dark' or 'light'
             'showWind'      => array( 'type' => 'boolean', 'default' => true ),
             'showRain'      => array( 'type' => 'boolean', 'default' => true ),
             'forecastDays'  => array( 'type' => 'number', 'default' => 5 ), // 3, 5, or 7 days
@@ -1459,6 +1460,124 @@ function u_correio68_render_top_most_read( $attributes ) {
 }
 
 /**
+ * Generate animated weather icon SVG
+ * @param string $icon_type - clear, cloudy, partly-cloudy, rain, drizzle, storm, snow, fog
+ * @param string $size - sm, md, lg, xl, xxl
+ * @return string SVG HTML
+ */
+function u68_get_animated_weather_icon( $icon_type, $size = 'xl' ) {
+    $svg = '';
+    
+    switch ( $icon_type ) {
+        case 'clear':
+            $svg = '<div class="weather-icon-animated weather-icon-sun weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <g class="sun-rays">
+                        <line x1="32" y1="4" x2="32" y2="12" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="32" y1="52" x2="32" y2="60" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="4" y1="32" x2="12" y2="32" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="52" y1="32" x2="60" y2="32" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="12.2" y1="12.2" x2="17.9" y2="17.9" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="46.1" y1="46.1" x2="51.8" y2="51.8" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="12.2" y1="51.8" x2="17.9" y2="46.1" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="46.1" y1="17.9" x2="51.8" y2="12.2" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+                    <circle class="sun-core" cx="32" cy="32" r="14" fill="#ffd93d"/>
+                </svg>
+            </div>';
+            break;
+            
+        case 'partly-cloudy':
+            $svg = '<div class="weather-icon-animated weather-icon-partly-cloudy weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="sun-behind" cx="22" cy="20" r="10" fill="#ffd93d"/>
+                    <g class="sun-rays" style="transform-origin: 22px 20px;">
+                        <line x1="22" y1="6" x2="22" y2="10" stroke="#ffd93d" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="8" y1="20" x2="12" y2="20" stroke="#ffd93d" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="12" y1="10" x2="15" y2="13" stroke="#ffd93d" stroke-width="2" stroke-linecap="round"/>
+                    </g>
+                    <path class="cloud-front" d="M52,44 c4,0,7-3,7-7 s-3-7-7-7 c-0.5,0-1,0-1.5,0.1 C50,26,46,23,41,23 c-6,0-11,4.5-12,10.5 C25,34,22,37.5,22,42 c0,5,4,9,9,9 h21 c0,0,0,0,0,0z" fill="#e8e8e8"/>
+                </svg>
+            </div>';
+            break;
+            
+        case 'cloudy':
+            $svg = '<div class="weather-icon-animated weather-icon-cloud weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path class="cloud-shadow" d="M48,52 c5,0,9-4,9-9 s-4-9-9-9 c-0.5,0-1,0-1.5,0.1 C45,29,40,25,34,25 c-7,0-13,5-14,12 C15,38,11,42,11,48 c0,6,5,10,11,10 h26z" fill="#d0d0d0" transform="translate(2, 2)"/>
+                    <path class="cloud-main" d="M48,50 c5,0,9-4,9-9 s-4-9-9-9 c-0.5,0-1,0-1.5,0.1 C45,27,40,23,34,23 c-7,0-13,5-14,12 C15,36,11,40,11,46 c0,6,5,10,11,10 h26z" fill="#e8e8e8"/>
+                </svg>
+            </div>';
+            break;
+            
+        case 'rain':
+            $svg = '<div class="weather-icon-animated weather-icon-rain weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path class="rain-cloud" d="M48,36 c4,0,7-3,7-7 s-3-7-7-7 c-0.4,0-0.8,0-1.2,0.1 C45.5,18,41,15,36,15 c-6,0-11,4-12,10 C20,26,17,29,17,34 c0,5,4,9,9,9 h22z" fill="#b0bec5"/>
+                    <line class="rain-drop" x1="24" y1="46" x2="22" y2="56" stroke="#64b5f6" stroke-width="2" stroke-linecap="round"/>
+                    <line class="rain-drop" x1="32" y1="48" x2="30" y2="58" stroke="#64b5f6" stroke-width="2" stroke-linecap="round"/>
+                    <line class="rain-drop" x1="40" y1="46" x2="38" y2="56" stroke="#64b5f6" stroke-width="2" stroke-linecap="round"/>
+                    <line class="rain-drop" x1="28" y1="44" x2="26" y2="52" stroke="#64b5f6" stroke-width="2" stroke-linecap="round"/>
+                    <line class="rain-drop" x1="36" y1="44" x2="34" y2="52" stroke="#64b5f6" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>';
+            break;
+            
+        case 'drizzle':
+            $svg = '<div class="weather-icon-animated weather-icon-drizzle weather-icon-rain weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path class="rain-cloud" d="M48,36 c4,0,7-3,7-7 s-3-7-7-7 c-0.4,0-0.8,0-1.2,0.1 C45.5,18,41,15,36,15 c-6,0-11,4-12,10 C20,26,17,29,17,34 c0,5,4,9,9,9 h22z" fill="#cfd8dc"/>
+                    <circle class="drizzle-drop" cx="26" cy="50" r="1.5" fill="#90caf9"/>
+                    <circle class="drizzle-drop" cx="34" cy="52" r="1.5" fill="#90caf9"/>
+                    <circle class="drizzle-drop" cx="42" cy="50" r="1.5" fill="#90caf9"/>
+                </svg>
+            </div>';
+            break;
+            
+        case 'storm':
+            $svg = '<div class="weather-icon-animated weather-icon-storm weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path class="storm-cloud" d="M48,32 c4,0,7-3,7-7 s-3-7-7-7 c-0.4,0-0.8,0-1.2,0.1 C45.5,14,41,11,36,11 c-6,0-11,4-12,10 C20,22,17,25,17,30 c0,5,4,9,9,9 h22z" fill="#78909c"/>
+                    <polygon class="lightning" points="34,34 28,44 33,44 29,56 40,42 35,42 38,34" fill="#ffeb3b"/>
+                    <line class="storm-rain" x1="20" y1="44" x2="18" y2="52" stroke="#64b5f6" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="storm-rain" x1="46" y1="44" x2="44" y2="52" stroke="#64b5f6" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="storm-rain" x1="50" y1="42" x2="48" y2="50" stroke="#64b5f6" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>';
+            break;
+            
+        case 'snow':
+            $svg = '<div class="weather-icon-animated weather-icon-snow weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path class="snow-cloud" d="M48,36 c4,0,7-3,7-7 s-3-7-7-7 c-0.4,0-0.8,0-1.2,0.1 C45.5,18,41,15,36,15 c-6,0-11,4-12,10 C20,26,17,29,17,34 c0,5,4,9,9,9 h22z" fill="#cfd8dc"/>
+                    <text class="snowflake" x="24" y="52" font-size="10" fill="#bbdefb">❄</text>
+                    <text class="snowflake" x="34" y="56" font-size="8" fill="#bbdefb">❄</text>
+                    <text class="snowflake" x="42" y="50" font-size="10" fill="#bbdefb">❄</text>
+                    <text class="snowflake" x="30" y="48" font-size="6" fill="#bbdefb">❄</text>
+                </svg>
+            </div>';
+            break;
+            
+        case 'fog':
+            $svg = '<div class="weather-icon-animated weather-icon-fog weather-icon-' . esc_attr( $size ) . '">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <rect class="fog-line" x="12" y="24" width="40" height="4" rx="2" fill="#b0bec5"/>
+                    <rect class="fog-line" x="16" y="34" width="32" height="4" rx="2" fill="#b0bec5"/>
+                    <rect class="fog-line" x="12" y="44" width="40" height="4" rx="2" fill="#b0bec5"/>
+                </svg>
+            </div>';
+            break;
+            
+        default:
+            // Fallback to clear
+            $svg = u68_get_animated_weather_icon( 'clear', $size );
+            break;
+    }
+    
+    return $svg;
+}
+
+/**
  * Render Callback: Weather Block (Open-Meteo)
  */
 function u_correio68_render_weather( $attributes ) {
@@ -1466,6 +1585,7 @@ function u_correio68_render_weather( $attributes ) {
     $lat          = isset( $attributes['latitude'] ) ? sanitize_text_field( $attributes['latitude'] ) : '';
     $lon          = isset( $attributes['longitude'] ) ? sanitize_text_field( $attributes['longitude'] ) : '';
     $units        = ( isset( $attributes['units'] ) && $attributes['units'] === 'f' ) ? 'f' : 'c';
+    $theme        = ( isset( $attributes['theme'] ) && $attributes['theme'] === 'light' ) ? 'light' : 'dark';
     $showWind     = ! empty( $attributes['showWind'] );
     $showRain     = ! empty( $attributes['showRain'] );
     $showForecast = ! empty( $attributes['showForecast'] );
@@ -1546,23 +1666,57 @@ function u_correio68_render_weather( $attributes ) {
         set_transient( $cache_key, $data, 10 * MINUTE_IN_SECONDS );
     }
 
-    // Map weathercode to simple descriptor
+    // Map weathercode to simple descriptor and animated icon type
     $code = intval( $data['weathercode'] );
     $desc = 'Clima';
     $icon = 'clear';
-    $fa   = 'fa-sun-o';
-    // Open-Meteo weather codes mapping (simplified)
-    // PASSO 3 - WordPress Compatibility: Icons mapped to CSS classes (clear, cloudy, rain, storm, snow)
-    if ( in_array( $code, array(0) ) ) { $desc = 'Céu limpo'; $icon = 'clear'; $fa = 'fa-sun-o'; }
-    elseif ( in_array( $code, array(1,2) ) ) { $desc = 'Parcialmente nublado'; $icon = 'cloudy'; $fa = 'fa-cloud'; }
-    elseif ( in_array( $code, array(3) ) ) { $desc = 'Nublado'; $icon = 'cloudy'; $fa = 'fa-cloud'; }
-    elseif ( in_array( $code, array(45,48) ) ) { $desc = 'Neblina'; $icon = 'cloudy'; $fa = 'fa-cloud'; } // Mist mapped to cloudy
-    elseif ( in_array( $code, array(51,53,55,56,57) ) ) { $desc = 'Garoa'; $icon = 'rain'; $fa = 'fa-tint'; }
-    elseif ( in_array( $code, array(61,63,65,66,67) ) ) { $desc = 'Chuva'; $icon = 'rain'; $fa = 'fa-umbrella'; }
-    elseif ( in_array( $code, array(71,73,75,77) ) ) { $desc = 'Neve'; $icon = 'snow'; $fa = 'fa-snowflake-o'; }
-    elseif ( in_array( $code, array(80,81,82) ) ) { $desc = 'Aguaceiros'; $icon = 'rain'; $fa = 'fa-umbrella'; }
-    elseif ( in_array( $code, array(95,96,99) ) ) { $desc = 'Trovoadas'; $icon = 'storm'; $fa = 'fa-bolt'; }
-    $icon_color_class_main = in_array( $icon, array('rain','storm'), true ) ? 'accent' : 'primary';
+    $animated_icon = 'clear';
+    // Open-Meteo weather codes mapping
+    if ( in_array( $code, array(0) ) ) { 
+        $desc = 'Céu limpo'; 
+        $icon = 'clear'; 
+        $animated_icon = 'clear'; 
+    }
+    elseif ( in_array( $code, array(1,2) ) ) { 
+        $desc = 'Parcialmente nublado'; 
+        $icon = 'cloudy'; 
+        $animated_icon = 'partly-cloudy'; 
+    }
+    elseif ( in_array( $code, array(3) ) ) { 
+        $desc = 'Nublado'; 
+        $icon = 'cloudy'; 
+        $animated_icon = 'cloudy'; 
+    }
+    elseif ( in_array( $code, array(45,48) ) ) { 
+        $desc = 'Neblina'; 
+        $icon = 'cloudy'; 
+        $animated_icon = 'fog'; 
+    }
+    elseif ( in_array( $code, array(51,53,55,56,57) ) ) { 
+        $desc = 'Garoa'; 
+        $icon = 'rain'; 
+        $animated_icon = 'drizzle'; 
+    }
+    elseif ( in_array( $code, array(61,63,65,66,67) ) ) { 
+        $desc = 'Chuva'; 
+        $icon = 'rain'; 
+        $animated_icon = 'rain'; 
+    }
+    elseif ( in_array( $code, array(71,73,75,77) ) ) { 
+        $desc = 'Neve'; 
+        $icon = 'snow'; 
+        $animated_icon = 'snow'; 
+    }
+    elseif ( in_array( $code, array(80,81,82) ) ) { 
+        $desc = 'Aguaceiros'; 
+        $icon = 'rain'; 
+        $animated_icon = 'rain'; 
+    }
+    elseif ( in_array( $code, array(95,96,99) ) ) { 
+        $desc = 'Trovoadas'; 
+        $icon = 'storm'; 
+        $animated_icon = 'storm'; 
+    }
 
     // Units conversion
     $temp = $data['temperature'];
@@ -1575,6 +1729,9 @@ function u_correio68_render_weather( $attributes ) {
     $wind_unit = 'km/h';
 
     ob_start();
+    
+    // Enqueue animated weather icons CSS
+    wp_enqueue_style( 'u68-weather-icons-animated', get_template_directory_uri() . '/assets/css/weather-icons-animated.css', array(), '1.0.0' );
     
     // Enqueue Slick for forecast slider
     if ( ! is_admin() && ! u_seisbarra8_is_amp() ) {
@@ -1600,7 +1757,7 @@ function u_correio68_render_weather( $attributes ) {
         $header_prsum = floatval( $data['daily']['precipitation_sum'][0] );
     }
     ?>
-    <div class="weather-widget">
+    <div class="weather-widget weather-theme-<?php echo esc_attr( $theme ); ?>">
         <!-- TOP SIDE: Gradient Blue -->
         <div class="weather-side">
             <div class="weather-gradient"></div>
@@ -1612,15 +1769,7 @@ function u_correio68_render_weather( $attributes ) {
             
             <div class="weather-container">
                 <div class="current-top">
-                    <div class="weather-icon-large icon-<?php echo esc_attr( $icon ); ?>" style="position:relative;width:80px;height:80px;margin:0;">
-                        <div class="icon-base" style="position:absolute;inset:0;"></div>
-                        <?php if ( in_array( $icon, array('rain','storm'), true ) ) : ?>
-                            <div class="rain" style="position:absolute;inset:0;"></div>
-                        <?php endif; ?>
-                        <div class="fa-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                            <i class="fa <?php echo esc_attr( $fa ); ?> weather-fa-icon-large" aria-hidden="true"></i>
-                        </div>
-                    </div>
+                    <?php echo u68_get_animated_weather_icon( $animated_icon, 'xl' ); ?>
 
                     <h1 class="weather-temp">
                         <span class="temp-value"><?php echo esc_html( round( $temp ) ); ?></span><span class="temp-unit">°</span>
@@ -1636,7 +1785,7 @@ function u_correio68_render_weather( $attributes ) {
             </div>
         </div>
         
-        <!-- BOTTOM SIDE: Dark Info -->
+        <!-- BOTTOM SIDE: Info -->
         <div class="info-side">
             <div class="today-info-container">
                 <div class="today-info">
@@ -1694,13 +1843,32 @@ function u_correio68_render_weather( $attributes ) {
                                 $tmin = round( ( $tmin * 9/5 ) + 32, 1 );
                             }
                             
-                            // Map weather code to icon
-                            $forecast_icon = 'fa-sun-o';
-                            $forecast_icon_class = 'clear';
-                            if ( in_array( $wcode, array(1,2,3,45,48), true ) ) { $forecast_icon = 'fa-cloud'; $forecast_icon_class = 'cloudy'; }
-                            elseif ( in_array( $wcode, array(51,53,55,56,57,61,63,65,66,67,80,81,82), true ) ) { $forecast_icon = 'fa-umbrella'; $forecast_icon_class = 'rain'; }
-                            elseif ( in_array( $wcode, array(71,73,75,77), true ) ) { $forecast_icon = 'fa-snowflake-o'; $forecast_icon_class = 'snow'; }
-                            elseif ( in_array( $wcode, array(95,96,99), true ) ) { $forecast_icon = 'fa-bolt'; $forecast_icon_class = 'storm'; }
+                            // Map weather code to animated icon
+                            $forecast_animated = 'clear';
+                            if ( in_array( $wcode, array(0), true ) ) { 
+                                $forecast_animated = 'clear'; 
+                            }
+                            elseif ( in_array( $wcode, array(1,2), true ) ) { 
+                                $forecast_animated = 'partly-cloudy'; 
+                            }
+                            elseif ( in_array( $wcode, array(3), true ) ) { 
+                                $forecast_animated = 'cloudy'; 
+                            }
+                            elseif ( in_array( $wcode, array(45,48), true ) ) { 
+                                $forecast_animated = 'fog'; 
+                            }
+                            elseif ( in_array( $wcode, array(51,53,55,56,57), true ) ) { 
+                                $forecast_animated = 'drizzle'; 
+                            }
+                            elseif ( in_array( $wcode, array(61,63,65,66,67,80,81,82), true ) ) { 
+                                $forecast_animated = 'rain'; 
+                            }
+                            elseif ( in_array( $wcode, array(71,73,75,77), true ) ) { 
+                                $forecast_animated = 'snow'; 
+                            }
+                            elseif ( in_array( $wcode, array(95,96,99), true ) ) { 
+                                $forecast_animated = 'storm'; 
+                            }
                             
                             $day_date = new DateTime( $date );
                             $day_short = date_i18n( 'D', $day_date->getTimestamp() );
@@ -1709,8 +1877,8 @@ function u_correio68_render_weather( $attributes ) {
                             ?>
                             <div class="forecast-slide">
                                 <div class="forecast-day-card<?php echo esc_attr( $is_today ); ?>">
-                                    <div class="day-icon icon-<?php echo esc_attr( $forecast_icon_class ); ?>" style="position:relative;width:48px;height:48px;margin:0 auto 12px;">
-                                        <i class="fa <?php echo esc_attr( $forecast_icon ); ?>" aria-hidden="true"></i>
+                                    <div class="day-icon">
+                                        <?php echo u68_get_animated_weather_icon( $forecast_animated, 'md' ); ?>
                                     </div>
                                     <span class="day-name"><?php echo esc_html( $day_short ); ?></span>
                                     <span class="day-date"><?php echo esc_html( $day_full ); ?></span>

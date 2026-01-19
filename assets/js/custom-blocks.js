@@ -722,7 +722,176 @@
         }
     });
 
-    // Weather (Clima/Tempo)
+    // Weather (Clima/Tempo) with City Selector
+    var CitySelectorComponent = function(props) {
+        var attributes = props.attributes;
+        var setAttributes = props.setAttributes;
+        var searchTimeout = wp.element.useRef(null);
+        var useState = wp.element.useState;
+        
+        var _searchState = useState('');
+        var searchQuery = _searchState[0];
+        var setSearchQuery = _searchState[1];
+        
+        var _resultsState = useState([]);
+        var searchResults = _resultsState[0];
+        var setSearchResults = _resultsState[1];
+        
+        var _loadingState = useState(false);
+        var isLoading = _loadingState[0];
+        var setIsLoading = _loadingState[1];
+        
+        var _showResultsState = useState(false);
+        var showResults = _showResultsState[0];
+        var setShowResults = _showResultsState[1];
+
+        var searchCities = function(query) {
+            if (query.length < 3) {
+                setSearchResults([]);
+                setShowResults(false);
+                return;
+            }
+            
+            setIsLoading(true);
+            
+            fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(query) + '&count=8&language=pt&format=json')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    setIsLoading(false);
+                    if (data.results && data.results.length > 0) {
+                        setSearchResults(data.results);
+                        setShowResults(true);
+                    } else {
+                        setSearchResults([]);
+                        setShowResults(true);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('City search error:', error);
+                    setIsLoading(false);
+                    setSearchResults([]);
+                });
+        };
+
+        var handleSearchChange = function(value) {
+            setSearchQuery(value);
+            
+            if (searchTimeout.current) {
+                clearTimeout(searchTimeout.current);
+            }
+            
+            searchTimeout.current = setTimeout(function() {
+                searchCities(value);
+            }, 300);
+        };
+
+        var selectCity = function(city) {
+            setAttributes({
+                cityName: city.name,
+                latitude: String(city.latitude),
+                longitude: String(city.longitude)
+            });
+            setSearchQuery('');
+            setSearchResults([]);
+            setShowResults(false);
+        };
+
+        var getFlagEmoji = function(countryCode) {
+            if (!countryCode || countryCode.length !== 2) return '';
+            var codePoints = countryCode.toUpperCase().split('').map(function(char) {
+                return 127397 + char.charCodeAt(0);
+            });
+            return String.fromCodePoint.apply(null, codePoints);
+        };
+
+        var selectedCityDisplay = attributes.cityName ? 
+            el('div', { 
+                style: { 
+                    padding: '10px', 
+                    background: 'linear-gradient(135deg, #0a4579 0%, #1565c0 100%)', 
+                    borderRadius: '4px', 
+                    color: '#fff',
+                    marginBottom: '12px'
+                } 
+            },
+                el('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+                    el('div', null,
+                        el('strong', null, '📍 ', attributes.cityName),
+                        el('div', { style: { fontSize: '11px', opacity: 0.8, fontFamily: 'monospace' } }, 
+                            'Lat: ' + attributes.latitude + ' | Lon: ' + attributes.longitude
+                        )
+                    ),
+                    el(Button, { 
+                        isSmall: true, 
+                        variant: 'secondary',
+                        onClick: function() {
+                            setAttributes({ cityName: '', latitude: '', longitude: '' });
+                        },
+                        style: { color: '#fff', borderColor: 'rgba(255,255,255,0.5)' }
+                    }, '✕')
+                )
+            ) : null;
+
+        var resultsDropdown = showResults ? el('div', {
+            style: {
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: '#fff',
+                border: '1px solid #ddd',
+                borderTop: 'none',
+                borderRadius: '0 0 4px 4px',
+                maxHeight: '250px',
+                overflowY: 'auto',
+                zIndex: 1000,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }
+        }, 
+            searchResults.length > 0 ? 
+                searchResults.map(function(city, index) {
+                    var location = [city.admin1, city.country].filter(Boolean).join(', ');
+                    return el('div', {
+                        key: index,
+                        onClick: function() { selectCity(city); },
+                        style: {
+                            padding: '10px 12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #eee',
+                            transition: 'background 0.15s'
+                        },
+                        onMouseEnter: function(e) { e.target.style.background = '#f0f8ff'; },
+                        onMouseLeave: function(e) { e.target.style.background = 'transparent'; }
+                    },
+                        el('div', { style: { fontWeight: 500 } }, 
+                            getFlagEmoji(city.country_code), ' ', city.name
+                        ),
+                        el('div', { style: { fontSize: '11px', color: '#666' } }, location),
+                        el('div', { style: { fontSize: '10px', color: '#999', fontFamily: 'monospace' } }, 
+                            city.latitude.toFixed(4) + ', ' + city.longitude.toFixed(4)
+                        )
+                    );
+                }) :
+                el('div', { style: { padding: '12px', textAlign: 'center', color: '#666' } }, 
+                    '🔍 Nenhuma cidade encontrada'
+                )
+        ) : null;
+
+        return el('div', null,
+            selectedCityDisplay,
+            el('div', { style: { position: 'relative' } },
+                el(TextControl, {
+                    label: 'Buscar Cidade',
+                    value: searchQuery,
+                    onChange: handleSearchChange,
+                    placeholder: 'Digite o nome da cidade...',
+                    help: isLoading ? '🔄 Buscando...' : 'Mínimo 3 caracteres para buscar'
+                }),
+                resultsDropdown
+            )
+        );
+    };
+
     registerBlockType('seideagosto/weather', {
         title: 'Clima / Tempo',
         icon: 'cloud',
@@ -732,6 +901,7 @@
             latitude: { type: 'string', default: '' },
             longitude: { type: 'string', default: '' },
             units: { type: 'string', default: 'c' }, // c or f
+            theme: { type: 'string', default: 'dark' }, // dark or light
             showWind: { type: 'boolean', default: true },
             showRain: { type: 'boolean', default: true },
             forecastDays: { type: 'number', default: 5 }, // 3, 5, or 7 days
@@ -749,29 +919,42 @@
                     null,
                     el(
                         PanelBody,
-                        { title: 'Localização' },
-                        el(TextControl, {
-                            label: 'Cidade',
-                            value: attributes.cityName,
-                            onChange: function(val) { setAttributes({ cityName: val }); },
-                            help: 'Ex.: Salvador, Lisboa, Madrid'
-                        }),
+                        { title: '🌍 Localização', initialOpen: true },
+                        el(CitySelectorComponent, { attributes: attributes, setAttributes: setAttributes }),
+                        el('hr', { style: { margin: '16px 0', borderColor: '#eee' } }),
+                        el('p', { style: { fontSize: '11px', color: '#666', marginBottom: '8px' } }, 
+                            'Ou insira coordenadas manualmente:'
+                        ),
                         el(TextControl, {
                             label: 'Latitude',
                             value: attributes.latitude,
                             onChange: function(val) { setAttributes({ latitude: val }); },
-                            help: 'Opcional (sobrepõe cidade)'
+                            placeholder: 'Ex: -9.975'
                         }),
                         el(TextControl, {
                             label: 'Longitude',
                             value: attributes.longitude,
                             onChange: function(val) { setAttributes({ longitude: val }); },
-                            help: 'Opcional (sobrepõe cidade)'
+                            placeholder: 'Ex: -67.824'
                         })
                     ),
                     el(
                         PanelBody,
-                        { title: 'Exibição' },
+                        { title: '🎨 Aparência', initialOpen: true },
+                        el(SelectControl, {
+                            label: 'Tema',
+                            value: attributes.theme || 'dark',
+                            options: [
+                                { label: '🌙 Escuro (Dark)', value: 'dark' },
+                                { label: '☀️ Claro (Light)', value: 'light' }
+                            ],
+                            onChange: function(val) { setAttributes({ theme: val }); },
+                            help: 'Escolha o esquema de cores do widget'
+                        })
+                    ),
+                    el(
+                        PanelBody,
+                        { title: '⚙️ Exibição', initialOpen: false },
                         el(SelectControl, {
                             label: 'Unidades',
                             value: attributes.units,
@@ -781,32 +964,20 @@
                             ],
                             onChange: function(val) { setAttributes({ units: val }); }
                         }),
-                        el(SelectControl, {
+                        el(ToggleControl, {
                             label: 'Mostrar Vento',
-                            value: attributes.showWind ? 'yes' : 'no',
-                            options: [
-                                { label: 'Sim', value: 'yes' },
-                                { label: 'Não', value: 'no' }
-                            ],
-                            onChange: function(val) { setAttributes({ showWind: val === 'yes' }); }
+                            checked: attributes.showWind,
+                            onChange: function(val) { setAttributes({ showWind: val }); }
                         }),
-                        el(SelectControl, {
+                        el(ToggleControl, {
                             label: 'Mostrar Chuva',
-                            value: attributes.showRain ? 'yes' : 'no',
-                            options: [
-                                { label: 'Sim', value: 'yes' },
-                                { label: 'Não', value: 'no' }
-                            ],
-                            onChange: function(val) { setAttributes({ showRain: val === 'yes' }); }
+                            checked: attributes.showRain,
+                            onChange: function(val) { setAttributes({ showRain: val }); }
                         }),
-                        el(SelectControl, {
+                        el(ToggleControl, {
                             label: 'Mostrar Previsão',
-                            value: attributes.showForecast ? 'yes' : 'no',
-                            options: [
-                                { label: 'Sim', value: 'yes' },
-                                { label: 'Não', value: 'no' }
-                            ],
-                            onChange: function(val) { setAttributes({ showForecast: val === 'yes' }); }
+                            checked: attributes.showForecast,
+                            onChange: function(val) { setAttributes({ showForecast: val }); }
                         }),
                         attributes.showForecast ? el(SelectControl, {
                             label: 'Dias de Previsão',
@@ -831,14 +1002,30 @@
                     }
                 },
                     el('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '☀️ Clima / Tempo'),
-                    el('div', { style: { fontSize: '12px', color: '#666', marginBottom: '8px' } }, 
-                        (attributes.cityName || 'Localização não configurada') + ' • ' + (attributes.units === 'f' ? '°F' : '°C')
-                    ),
+                    attributes.cityName ? 
+                        el('div', { 
+                            style: { 
+                                padding: '8px', 
+                                background: 'linear-gradient(135deg, #0a4579 0%, #1565c0 100%)', 
+                                borderRadius: '4px', 
+                                color: '#fff',
+                                marginBottom: '8px'
+                            } 
+                        },
+                            el('strong', null, '📍 ', attributes.cityName),
+                            el('div', { style: { fontSize: '10px', opacity: 0.9, fontFamily: 'monospace' } }, 
+                                attributes.latitude + ', ' + attributes.longitude
+                            )
+                        ) :
+                        el('div', { style: { fontSize: '12px', color: '#e67e22', marginBottom: '8px' } }, 
+                            '⚠️ Selecione uma cidade no painel lateral'
+                        ),
                     el('div', { style: { fontSize: '11px', color: '#999', lineHeight: '1.4' } },
+                        'Tema: ' + (attributes.theme === 'light' ? '☀️' : '🌙') + ' | ',
+                        'Unidade: ' + (attributes.units === 'f' ? '°F' : '°C') + ' | ',
                         'Vento: ' + (attributes.showWind ? '✓' : '✗') + ' | ',
                         'Chuva: ' + (attributes.showRain ? '✓' : '✗') + ' | ',
-                        'Previsão: ' + (attributes.showForecast ? (attributes.forecastDays + 'd') : '✗'),
-                        el('div', { style: { marginTop: '8px' } }, '(Preview - ver no frontend)')
+                        'Previsão: ' + (attributes.showForecast ? (attributes.forecastDays + 'd') : '✗')
                     )
                 )
             );
