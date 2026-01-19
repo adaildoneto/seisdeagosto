@@ -91,7 +91,7 @@
                                         <?php
                                         wp_nav_menu( array(
                                             'theme_location' => 'categorias',
-                                            'menu_class'     => 'navbar-nav flex-row flex-wrap gap-2 mb-0 w-100',
+                                            'menu_class'     => 'navbar-nav gap-2 mb-0 w-100',
                                             'container'      => '',
                                             'depth'          => 2,
                                             'fallback_cb'    => false,

@@ -550,6 +550,50 @@ function u68_nav_menu_shortcode( $atts ) {
         $walker = new WP_Bootstrap4_Navwalker();
     }
 
+    // Se for menu de categorias, gera HTML customizado com <div>
+    if ( $location === 'categorias' ) {
+        $menu_items = wp_get_nav_menu_items( $menu ? $menu : get_nav_menu_locations()['categorias'] ?? '' );
+        if ( ! $menu_items ) {
+            $menu_obj = wp_get_nav_menu_object( get_nav_menu_locations()['categorias'] ?? '' );
+            if ( $menu_obj ) {
+                $menu_items = wp_get_nav_menu_items( $menu_obj->term_id );
+            }
+        }
+        if ( $menu_items ) {
+            // Organiza itens por parent
+            $items_by_parent = array();
+            foreach ( $menu_items as $item ) {
+                $parent = $item->menu_item_parent ? $item->menu_item_parent : 0;
+                if ( ! isset( $items_by_parent[ $parent ] ) ) $items_by_parent[ $parent ] = array();
+                $items_by_parent[ $parent ][] = $item;
+            }
+            // Função recursiva para renderizar menu
+            $render_menu = function( $parent = 0 ) use ( &$render_menu, $items_by_parent ) {
+                $html = '';
+                if ( ! empty( $items_by_parent[ $parent ] ) ) {
+                    foreach ( $items_by_parent[ $parent ] as $item ) {
+                        $has_children = ! empty( $items_by_parent[ $item->ID ] );
+                        $dropdown_class = $has_children ? ' dropdown' : '';
+                        $toggle_attr = $has_children ? ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"' : '';
+                        $html .= '<div class="nav-item' . $dropdown_class . '">';
+                        $html .= '<a class="nav-link' . ( $has_children ? ' dropdown-toggle' : '' ) . '" href="' . esc_url( $item->url ) . '"' . $toggle_attr . '>' . esc_html( $item->title ) . '</a>';
+                        if ( $has_children ) {
+                            $html .= '<div class="dropdown-menu">' . $render_menu( $item->ID ) . '</div>';
+                        }
+                        $html .= '</div>';
+                    }
+                }
+                return $html;
+            };
+            $menu_html = '<div class="' . esc_attr( $class ) . '">' . $render_menu( 0 ) . '</div>';
+            if ( $slider === 'mobile' ) {
+                $menu_html = '<div class="categories-slider-wrapper">' . $menu_html . '</div>';
+            }
+            return $menu_html;
+        }
+        return '';
+    }
+    // Menu padrão para outros locations
     $args = array(
         'menu'           => $menu,
         'theme_location' => $location,
@@ -559,18 +603,13 @@ function u68_nav_menu_shortcode( $atts ) {
         'echo'           => false,
         'fallback_cb'    => false,
     );
-
     if ( $walker ) {
         $args['walker'] = $walker;
     }
-
     $html = wp_nav_menu( $args );
-    
-    // Envolver em wrapper para Slick slider mobile se slider='mobile' e location='categorias'
     if ( $html && $slider === 'mobile' && $location === 'categorias' ) {
         $html = '<div class="categories-slider-wrapper">' . $html . '</div>';
     }
-    
     return $html ? $html : '';
 }
 add_shortcode( 'u68_nav_menu', 'u68_nav_menu_shortcode' );
@@ -629,10 +668,26 @@ function u68_header_brand_shortcode( $atts ) {
 add_shortcode( 'u68_header_brand', 'u68_header_brand_shortcode' );
 
 /**
- * Shortcode: header search form.
+ * Shortcode: header search form with mobile toggle.
  */
 function u68_header_search_shortcode() {
-    return get_search_form( false );
+    $search_form = get_search_form( false );
+    
+    // Output desktop search + mobile toggle + mobile search wrapper
+    $output = '';
+    
+    // Desktop: show search form directly
+    $output .= '<div class="d-none d-lg-flex align-items-center">' . $search_form . '</div>';
+    
+    // Mobile: toggle button + expandable search
+    $output .= '<button id="searchToggleMobile" class="btn btn-link text-white d-lg-none p-0 ms-2" type="button" aria-label="' . esc_attr__( 'Abrir busca', 'u_correio68' ) . '">';
+    $output .= '<i class="fa fa-search fa-lg"></i>';
+    $output .= '</button>';
+    $output .= '<div id="mobileSearchWrapper" class="d-lg-none position-absolute start-0 end-0 bg-primary px-3 py-2" style="top: 100%; z-index: 1030;">';
+    $output .= $search_form;
+    $output .= '</div>';
+    
+    return $output;
 }
 add_shortcode( 'u68_header_search', 'u68_header_search_shortcode' );
 
@@ -1142,8 +1197,6 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     // jQuery is enqueued early by u_seisbarra8_ensure_jquery_first().
 
     if ( ! $is_amp ) {
-        wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap'), null, true );
-
         wp_enqueue_script( 'u_seisbarra8-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), null, true );
 
         wp_enqueue_script( 'u_seisbarra8-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), null, true );
@@ -1166,6 +1219,10 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
         if ( ! wp_script_is( 'u_seisbarra8-slick', 'enqueued' ) ) {
             wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
         }
+        
+        // Carousel init - must load after slick
+        wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap', 'u_seisbarra8-slick'), null, true );
+        
         if ( apply_filters( 'u_seisbarra8_enable_colunistas_slick', false ) ) {
             wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
         }
@@ -1177,76 +1234,6 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
         // City Selector for Weather Widget
         wp_enqueue_style( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/css/city-selector.css', array(), '1.0.0' );
         wp_enqueue_script( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/js/city-selector.js', array('jquery'), '1.0.0', true );
-
-        // Header behavior: categories hide on scroll + mobile search toggle
-        $u68_header_js = <<<'JS'
-(function() {
-    var categoriesNav = document.getElementById('categoriesNav');
-    var header = document.querySelector('.site-header');
-    var contentWrapper = document.getElementById('content');
-    var searchToggle = document.getElementById('searchToggleMobile');
-    var mobileSearchWrapper = document.getElementById('mobileSearchWrapper');
-    var scrollThreshold = 50;
-    var ticking = false;
-
-    function updateScrollState() {
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        if (scrollTop > scrollThreshold) {
-            if (header) header.classList.add('scrolled', 'fixed-header');
-            if (categoriesNav) categoriesNav.classList.add('hidden');
-            if (contentWrapper) contentWrapper.classList.add('header-fixed');
-            if (mobileSearchWrapper && searchToggle) {
-                mobileSearchWrapper.classList.remove('active');
-                searchToggle.classList.remove('active');
-            }
-        } else {
-            if (header) header.classList.remove('scrolled', 'fixed-header');
-            if (categoriesNav) categoriesNav.classList.remove('hidden');
-            if (contentWrapper) contentWrapper.classList.remove('header-fixed');
-        }
-        ticking = false;
-    }
-
-    window.addEventListener('scroll', function() {
-        if (!ticking) {
-            window.requestAnimationFrame(updateScrollState);
-            ticking = true;
-        }
-    }, { passive: true });
-
-    if (searchToggle) {
-        searchToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (mobileSearchWrapper) mobileSearchWrapper.classList.toggle('active');
-            searchToggle.classList.toggle('active');
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!searchToggle.contains(e.target) && mobileSearchWrapper && !mobileSearchWrapper.contains(e.target)) {
-                mobileSearchWrapper.classList.remove('active');
-                searchToggle.classList.remove('active');
-            }
-        });
-
-        if (mobileSearchWrapper) {
-            var searchInput = mobileSearchWrapper.querySelector('input[type="search"]');
-            if (searchInput) {
-                searchInput.addEventListener('blur', function() {
-                    setTimeout(function() {
-                        if (!document.activeElement || !document.activeElement.closest('.navbar-search')) {
-                            mobileSearchWrapper.classList.remove('active');
-                            searchToggle.classList.remove('active');
-                        }
-                    }, 200);
-                });
-            }
-        }
-    }
-})();
-JS;
-        wp_add_inline_script( 'u_seisbarra8-bootstrap', $u68_header_js );
     }
 
     /* Pinegrow generated Enqueue Scripts End */
@@ -1321,13 +1308,13 @@ JS;
     wp_deregister_style( 'u_seisbarra8-style' );
     wp_deregister_style( 'u_seisbarra8-style-1' );
 
-    // Prefer local Font Awesome 4.7 if present; otherwise fallback to hiding icons to avoid broken glyphs
+    // Load Font Awesome 4.7 + override @font-face with modern formats only
     if ( ! wp_style_is( 'u_seisbarra8-fontawesome', 'enqueued' ) ) {
         $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
         if ( file_exists( $fa_vendor_css ) ) {
             wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', false, '4.7.0', 'all');
-        } else {
-            wp_enqueue_style( 'u_seisbarra8-fontawesome', get_template_directory_uri() . '/css/local-fa-fallback.css', false, null, 'all');
+            // Override @font-face with modern formats (removes .eot/.svg preload warnings)
+            wp_enqueue_style( 'u_seisbarra8-fontawesome-modern', get_template_directory_uri() . '/css/local-fa-fallback.css', array('u_seisbarra8-fontawesome'), '1.1', 'all');
         }
     }
 
@@ -1466,11 +1453,22 @@ JS;
     /* Pinegrow generated Enqueue Styles End */
 
     }
+
+    // Garante o carregamento do main.js customizado para o menu categorias
+    add_action( 'wp_enqueue_scripts', function() {
+        wp_enqueue_script(
+            'u_seisbarra8-main',
+            get_template_directory_uri() . '/assets/js/main.js',
+            array(),
+            filemtime( get_template_directory() . '/assets/js/main.js' ),
+            true
+        );
+    }, 99 );
     add_action( 'wp_enqueue_scripts', 'u_seisbarra8_enqueue_scripts' );
 endif;
 
 /**
- * Ensure Font Awesome is always enqueued (frontend + admin/editor).
+ * Ensure Font Awesome is always enqueued (frontend + admin/editor) with modern font formats.
  */
 function u_seisbarra8_ensure_fontawesome() {
     $handle = 'u_seisbarra8-fontawesome';
@@ -1478,15 +1476,15 @@ function u_seisbarra8_ensure_fontawesome() {
     if ( file_exists( $fa_vendor_css ) ) {
         $src = get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
         $ver = '4.7.0';
-    } else {
-        $src = get_template_directory_uri() . '/css/local-fa-fallback.css';
-        $ver = file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null;
+        
+        if ( ! wp_style_is( $handle, 'registered' ) ) {
+            wp_register_style( $handle, $src, array(), $ver );
+        }
+        wp_enqueue_style( $handle );
+        
+        // Override @font-face with modern formats (removes .eot/.svg preload warnings)
+        wp_enqueue_style( 'u_seisbarra8-fontawesome-modern', get_template_directory_uri() . '/css/local-fa-fallback.css', array( $handle ), '1.1' );
     }
-
-    if ( ! wp_style_is( $handle, 'registered' ) ) {
-        wp_register_style( $handle, $src, array(), $ver );
-    }
-    wp_enqueue_style( $handle );
 }
 add_action( 'wp_enqueue_scripts', 'u_seisbarra8_ensure_fontawesome', 1 );
 add_action( 'admin_enqueue_scripts', 'u_seisbarra8_ensure_fontawesome', 1 );
@@ -1500,6 +1498,8 @@ function u_seisbarra8_enqueue_block_assets() {
     wp_enqueue_style( 'u_seisbarra8-main', $theme_uri . '/css/main.css', array( 'u_seisbarra8-bootstrap' ), null );
     wp_enqueue_style( 'u_seisbarra8-theme', $theme_uri . '/css/theme.css', array( 'u_seisbarra8-bootstrap', 'u_seisbarra8-main' ), null );
     wp_enqueue_style( 'u_seisbarra8-fontawesome', $theme_uri . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', array(), '4.7.0' );
+    // Override @font-face with modern formats (removes .eot/.svg preload warnings)
+    wp_enqueue_style( 'u_seisbarra8-fontawesome-modern', $theme_uri . '/css/local-fa-fallback.css', array( 'u_seisbarra8-fontawesome' ), '1.1' );
     wp_enqueue_style( 'u_seisbarra8-blocks', $theme_uri . '/components/pg.blocks.wp/css/blocks.css', array( 'u_seisbarra8-theme' ), null );
     wp_enqueue_style( 'u_seisbarra8-plugins', $theme_uri . '/components/pg.blocks.wp/css/plugins.css', array( 'u_seisbarra8-theme' ), null );
     wp_enqueue_style( 'u_seisbarra8-stylelibrary', $theme_uri . '/components/pg.blocks.wp/css/style-library-1.css', array( 'u_seisbarra8-theme' ), null );
@@ -1533,6 +1533,9 @@ function u_seisbarra8_enqueue_block_assets() {
         wp_register_script( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.min.js', array( 'jquery' ), null, true );
     }
     wp_enqueue_script( 'u_seisbarra8-slick' );
+
+    // Header JS (scroll behavior, mobile search toggle, categories)
+    wp_enqueue_script( 'u_seisbarra8-header', $theme_uri . '/assets/js/header.js', array(), '1.0.0', true );
 }
 add_action( 'enqueue_block_assets', 'u_seisbarra8_enqueue_block_assets' );
 

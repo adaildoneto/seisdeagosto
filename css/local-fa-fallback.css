@@ -1,4 +1,13 @@
-/* Local fallback to avoid external Font Awesome CDN.
-   This hides FA icons to prevent missing-glyph squares when FA fonts are not present.
-   To restore icons locally, replace this file with a self-hosted Font Awesome build. */
-.fa { display: none !important; }
+/* Local Font Awesome - Modern font formats only (removes .eot and .svg)
+   This overrides the @font-face from font-awesome.min.css to use only modern formats,
+   preventing preload warnings for unused legacy font formats. */
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('../assets/vendor/font-awesome-4.7/fonts/fontawesome-webfont.woff2') format('woff2'),
+       url('../assets/vendor/font-awesome-4.7/fonts/fontawesome-webfont.woff') format('woff'),
+       url('../assets/vendor/font-awesome-4.7/fonts/fontawesome-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

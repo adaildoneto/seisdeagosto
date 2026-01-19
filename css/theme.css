@@ -1,3 +1,25 @@
+/* Fix: Forçar scroll horizontal do menu categorias no mobile */
+@media (max-width: 768px) {
+  .categories-slider-wrapper {
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    overscroll-behavior-x: contain !important;
+  }
+  .categories-slider-wrapper::-webkit-scrollbar {
+    display: none !important;
+  }
+  .categories-slider-wrapper .navbar-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    min-width: 100vw !important;
+    width: max-content !important;
+    gap: 8px !important;
+  }
+  .categories-slider-wrapper .navbar-nav > .nav-item {
+    flex-shrink: 0 !important;
+  }
+}
 /* Global box-sizing to prevent overflow */
 * {
   box-sizing: border-box;
@@ -831,17 +853,10 @@ ol li::before {
   font-size: 0.9rem;
 }
 
-#mobileSearchWrapper {
-  position: static;
-}
-
-#mobileSearchWrapper.active {
-  position: relative;
-}
-
 /* Header layout adjustments - logo and search on same line */
 #headnev {
   padding: 0.5rem 0 !important;
+  position: relative;
 }
 
 #headnev .navbar-brand {
@@ -1099,82 +1114,106 @@ body.admin-bar {
 }
 
 /* =============================================
-   CATEGORIES SLIDER - MOBILE
+   CATEGORIES SLIDER - MOBILE (Native Scroll)
    ============================================= */
 .categories-slider-wrapper {
   width: 100%;
-  overflow: hidden;
 }
 
-/* No mobile: slider horizontal */
+/* Mobile: horizontal scroll */
 @media (max-width: 767px) {
+  #categoriesNav .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
   .categories-slider-wrapper {
-    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 12px;
+  }
+  
+  .categories-slider-wrapper::-webkit-scrollbar {
+    display: none;
   }
   
   .categories-slider-wrapper .navbar-nav {
+    display: flex !important;
     flex-wrap: nowrap !important;
-    gap: 0 !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    width: max-content;
+    min-width: 100%;
+    padding-right: 20px;
   }
   
-  .categories-slider-wrapper .navbar-nav .nav-item {
+  .categories-slider-wrapper .navbar-nav > .nav-item {
     flex-shrink: 0;
   }
   
-  /* Quando Slick estiver ativo */
-  .categories-slider-wrapper .navbar-nav.slick-initialized {
-    display: flex !important;
-  }
-  
-  .categories-slider-wrapper .slick-list {
-    overflow: visible;
-    padding: 0 10px;
-  }
-  
-  .categories-slider-wrapper .slick-track {
-    display: flex;
-    align-items: center;
-  }
-  
-  .categories-slider-wrapper .slick-slide {
-    float: none;
-    margin: 0 2px;
-  }
-  
-  /* Indicador visual de que pode deslizar */
-  .categories-slider-wrapper::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 30px;
-    background: linear-gradient(to right, transparent, var(--u68-primary-color, #0a4579));
-    pointer-events: none;
-    z-index: 2;
-  }
-  
-  .categories-slider-wrapper::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 30px;
-    background: linear-gradient(to left, transparent, var(--u68-primary-color, #0a4579));
-    pointer-events: none;
-    z-index: 2;
+  .categories-slider-wrapper .navbar-nav .nav-link {
+    white-space: nowrap;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
   }
 }
 
-/* No desktop: comportamento normal */
+/* Desktop: normal layout */
 @media (min-width: 768px) {
-  .categories-slider-wrapper .navbar-nav.slick-initialized {
+  .categories-slider-wrapper .navbar-nav {
     display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+}
+
+/* =============================================
+   MOBILE SEARCH TOGGLE
+   ============================================= */
+#searchToggleMobile {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  #searchToggleMobile {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
   }
   
-  .categories-slider-wrapper .navbar-nav {
-    flex-wrap: wrap !important;
+  #searchToggleMobile:focus {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
+  
+  #searchToggleMobile .fa {
+    font-size: 1.2rem;
+  }
+  
+  #mobileSearchWrapper {
+    display: none !important;
+  }
+  
+  #mobileSearchWrapper.active {
+    display: block !important;
+  }
+  
+  #mobileSearchWrapper .navbar-search {
+    display: flex !important;
+    width: 100%;
+  }
+  
+  #mobileSearchWrapper .navbar-search input[type="search"] {
+    flex: 1;
   }
 }
 
@@ -1265,24 +1304,6 @@ body.admin-bar {
   .btn-search-toggle {
     margin-left: auto !important;
     margin-right: 0;
-  }
-  
-  /* Hide old search elements */
-  #headnev .ml-auto {
-    display: none;
-  }
-  
-  #headnev .navbar-search {
-    display: none !important;
-  }
-  
-  /* Mobile search wrapper should always be available */
-  #mobileSearchWrapper {
-    display: none !important;
-  }
-  
-  #mobileSearchWrapper.active {
-    display: block !important;
   }
   
   .site-header.scrolled #headnev {
@@ -2619,11 +2640,9 @@ body {
   font-weight: 700;
 }
 
-.weather-widget .weather-location i {
-}
+/* Removed empty ruleset for .weather-widget .weather-location i */
 
-.weather-widget .weather-location .city-name {
-}
+/* Removed empty ruleset for .weather-widget .weather-location .city-name */
 
 /* Date centered in info side */
 .weather-widget .info-side .info-date {
