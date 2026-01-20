@@ -728,9 +728,9 @@ function u_correio68_render_destaques_home( $attributes ) {
                                 ?>
                                 <div class="card-img-overlay gradiente space d-flex flex-column justify-content-end">
                                 <?php 
-                                        $cor = get_field( 'cor', $post->ID );
-                                        $icones = get_field( 'icones', $post->ID );
-                                        $chamada = get_field( 'chamada', $post->ID );
+                                        $cor = function_exists('get_field') ? get_field( 'cor', $post->ID ) : '';
+                                        $icones = function_exists('get_field') ? get_field( 'icones', $post->ID ) : '';
+                                        $chamada = function_exists('get_field') ? get_field( 'chamada', $post->ID ) : '';
                                         if ( $chamada ) : ?>
                                             <span class="badge badge-light text-white bg-orange badge-pill" style="background-color:<?php echo esc_attr($cor); ?> !important;"> 
                                                 <i class="<?php echo esc_attr($icones); ?>"></i> 
