@@ -335,9 +335,7 @@ add_action('wp_enqueue_scripts', 'st2_comment_reply');
 
 //* FUNCTIONALITY PLUGIN FEATURES
 
-//* Remove 'Editor' from 'Appearance' Menu.
-//* This stops users and hackers from being able to edit files from within WordPress.
-define('DISALLOW_FILE_EDIT', false);
+
 
 
 //* Add the ability to use shortcodes in widgets
