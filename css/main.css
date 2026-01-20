@@ -1,3 +1,11 @@
+/* Limita imagens dentro do post ao tamanho da coluna */
+.entry-content img,
+.post-content img,
+.wp-block-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
 html {
   line-height: 1.15;
   /* 1 */
