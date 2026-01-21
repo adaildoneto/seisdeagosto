@@ -70,55 +70,46 @@
     }
 
     function TypographyPanel(props, defaultColor) {
-        edit: function NewsGridEdit(props) {
-            var attributes = props.attributes;
-            var setAttributes = props.setAttributes;
-            var React = wp.element;
-            var postTypes = React.useState([]);
-            var setPostTypes = postTypes[1];
-            var categories = React.useState([]);
-            var setCategories = categories[1];
-            var postTypesVal = postTypes[0];
-            var categoriesVal = categories[0];
+        edit: function(props) {
+            const { attributes, setAttributes } = props;
+            const React = wp.element;
+            const [postTypes, setPostTypes] = React.useState([]);
+            const [categories, setCategories] = React.useState([]);
 
-            React.useEffect(function() {
+            React.useEffect(() => {
                 let mounted = true;
-                wp.apiFetch({ path: '/wp/v2/types' }).then(function(types) {
+                wp.apiFetch({ path: '/wp/v2/types' }).then(types => {
                     if (!mounted) return;
-                    var options = Object.keys(types)
-                        .filter(function(key) { return types[key].viewable && types[key].slug !== 'attachment'; })
-                        .map(function(key) {
-                            return { label: types[key].name, value: types[key].slug };
-                        });
+                    const options = Object.keys(types)
+                        .filter(key => types[key].viewable && types[key].slug !== 'attachment')
+                        .map(key => ({ label: types[key].name, value: types[key].slug }));
                     setPostTypes(options);
                 });
-                return function() { mounted = false; };
+                return () => { mounted = false; };
             }, []);
 
-            React.useEffect(function() {
+            React.useEffect(() => {
                 if (!attributes.postType) return;
                 let mounted = true;
-                wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(function(type) {
+                wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(type => {
                     if (!mounted) return;
                     if (!type.taxonomies || !type.taxonomies.length) {
                         setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
                         return;
                     }
-                    var tax = type.taxonomies[0];
-                    wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(function(terms) {
+                    const tax = type.taxonomies[0];
+                    wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(terms => {
                         if (!mounted) return;
-                        var options = [{ label: 'Todas', value: '0' }];
+                        let options = [{ label: 'Todas', value: '0' }];
                         if (Array.isArray(terms)) {
-                            options = options.concat(terms.map(function(term) {
-                                return { label: term.name, value: String(term.id) };
-                            }));
+                            options = options.concat(terms.map(term => ({ label: term.name, value: String(term.id) })));
                         }
                         setCategories(options);
-                    }).catch(function() {
+                    }).catch(() => {
                         setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
                     });
                 });
-                return function() { mounted = false; };
+                return () => { mounted = false; };
             }, [attributes.postType]);
 
             return React.createElement(
@@ -133,33 +124,33 @@
                         React.createElement(SelectControl, {
                             label: 'Tipo de Post',
                             value: attributes.postType || 'post',
-                            options: postTypesVal.length ? postTypesVal : [ { label: 'Carregando...', value: '' } ],
-                            onChange: function(val) { setAttributes({ postType: val, categoryId: '0' }); }
+                            options: postTypes.length ? postTypes : [ { label: 'Carregando...', value: '' } ],
+                            onChange: val => setAttributes({ postType: val, categoryId: '0' })
                         }),
                         React.createElement(SelectControl, {
                             label: 'Categoria',
                             value: attributes.categoryId,
-                            options: categoriesVal.length ? categoriesVal : [ { label: 'Carregando...', value: '' } ],
-                            onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
+                            options: categories.length ? categories : [ { label: 'Carregando...', value: '' } ],
+                            onChange: val => setAttributes({ categoryId: String(val || '0') })
                         }),
                         React.createElement(RangeControl, {
                             label: 'Número de Posts',
                             value: attributes.numberOfPosts,
-                            onChange: function(val) { setAttributes({ numberOfPosts: parseInt(val) }); },
+                            onChange: val => setAttributes({ numberOfPosts: parseInt(val) }),
                             min: 1,
                             max: 50
                         }),
                         React.createElement(RangeControl, {
                             label: 'Colunas',
                             value: attributes.columns,
-                            onChange: function(val) { setAttributes({ columns: parseInt(val) }); },
+                            onChange: val => setAttributes({ columns: parseInt(val) }),
                             min: 2,
                             max: 6
                         }),
                         React.createElement(ToggleControl, {
                             label: 'Mostrar paginação',
                             checked: !!attributes.paginate,
-                            onChange: function(val) { setAttributes({ paginate: !!val }); }
+                            onChange: val => setAttributes({ paginate: !!val })
                         })
                     ),
                     QueryFiltersPanel(props),
