@@ -1,12 +1,14 @@
 <?php
 function u_correio68_render_lista_noticias($attributes) {
+
     $number  = isset($attributes['numberOfPosts']) ? intval($attributes['numberOfPosts']) : 9;
     $offset  = isset($attributes['offset']) ? intval($attributes['offset']) : 3;
     $columns = isset($attributes['columns']) ? intval($attributes['columns']) : 3;
-    
+    $postType = isset($attributes['postType']) && in_array($attributes['postType'], ['post', 'edital']) ? $attributes['postType'] : 'post';
+
     // Validar e limitar colunas entre 2 e 6
     $columns = max(2, min(6, $columns));
-    
+
     // Mapear número de colunas para classes Bootstrap
     $col_class = 'col-md-4'; // padrão para 3 colunas
     if ($columns === 2) {
@@ -16,10 +18,10 @@ function u_correio68_render_lista_noticias($attributes) {
     } elseif ($columns === 6) {
         $col_class = 'col-lg-2 col-md-3';
     }
-    
+
     $args = array(
         'post__not_in'        => get_option('sticky_posts'),
-        'post_type'           => 'post',
+        'post_type'           => $postType,
         'posts_per_page'      => max(1, $number),
         'ignore_sticky_posts' => true,
         'order'               => 'DESC',
@@ -28,7 +30,7 @@ function u_correio68_render_lista_noticias($attributes) {
         'post_status'         => 'publish'
     );
 
-    if (!empty($attributes['category'])) {
+    if (!empty($attributes['category']) && $postType === 'post') {
         $args['category_name'] = sanitize_text_field($attributes['category']);
     }
 
