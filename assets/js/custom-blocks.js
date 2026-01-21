@@ -413,6 +413,7 @@
         icon: 'grid-view',
         category: 'seisdeagosto',
         attributes: Object.assign({
+            postType: { type: 'string', default: 'post' },
             categoryId: { type: 'string', default: '0' },
             categoryIds: { type: 'array', default: [] },
             excludeCategories: { type: 'string', default: '' },
@@ -426,6 +427,47 @@
         edit: function(props) {
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
+            var useState = wp.element.useState;
+            var useEffect = wp.element.useEffect;
+            var _useState = useState([]), postTypes = _useState[0], setPostTypes = _useState[1];
+            var _useState2 = useState([]), categories = _useState2[0], setCategories = _useState2[1];
+
+            // Buscar post types
+            useEffect(function() {
+                wp.apiFetch({ path: '/wp/v2/types' }).then(function(types) {
+                    var options = Object.keys(types)
+                        .filter(function(key) { return types[key].viewable && types[key].slug !== 'attachment'; })
+                        .map(function(key) {
+                            return { label: types[key].name, value: types[key].slug };
+                        });
+                    setPostTypes(options);
+                });
+            }, []);
+
+            // Buscar taxonomias/categorias do post type selecionado
+            useEffect(function() {
+                if (!attributes.postType) return;
+                // Buscar taxonomias do post type
+                wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(function(type) {
+                    if (!type.taxonomies || !type.taxonomies.length) {
+                        setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
+                        return;
+                    }
+                    // Buscar termos da primeira taxonomia (ex: category, ou custom)
+                    var tax = type.taxonomies[0];
+                    wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(function(terms) {
+                        var options = [{ label: 'Todas', value: '0' }];
+                        if (Array.isArray(terms)) {
+                            options = options.concat(terms.map(function(term) {
+                                return { label: term.name, value: String(term.id) };
+                            }));
+                        }
+                        setCategories(options);
+                    }).catch(function() {
+                        setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
+                    });
+                });
+            }, [attributes.postType]);
 
             return el(
                 wp.element.Fragment,
@@ -437,9 +479,15 @@
                         PanelBody,
                         { title: 'Configurações' },
                         el(SelectControl, {
+                            label: 'Tipo de Post',
+                            value: attributes.postType || 'post',
+                            options: postTypes.length ? postTypes : [ { label: 'Carregando...', value: '' } ],
+                            onChange: function(val) { setAttributes({ postType: val, categoryId: '0' }); }
+                        }),
+                        el(SelectControl, {
                             label: 'Categoria',
                             value: attributes.categoryId,
-                            options: seideagostoBlocks.categories,
+                            options: categories.length ? categories : [ { label: 'Carregando...', value: '' } ],
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
                         }),
                         el(RangeControl, {
@@ -1771,13 +1819,15 @@
         }
     });
 
-    // Adiciona painel de seleção de tipo de post para o bloco lista-noticias
+    // Adiciona painel dinâmico de seleção de tipo de post para o bloco lista-noticias
     (function(wp) {
         var addFilter = wp.hooks.addFilter;
         var el = wp.element.createElement;
         var InspectorControls = wp.blockEditor.InspectorControls;
         var PanelBody = wp.components.PanelBody;
         var SelectControl = wp.components.SelectControl;
+        var useState = wp.element.useState;
+        var useEffect = wp.element.useEffect;
 
         addFilter(
             'editor.BlockEdit',
@@ -1787,6 +1837,21 @@
                     if (props.name !== 'u-correio68/lista-noticias') {
                         return el(BlockEdit, props);
                     }
+
+                    // Hook para armazenar post types
+                    var _useState = useState([]), postTypes = _useState[0], setPostTypes = _useState[1];
+                    // Carregar post types públicos via REST API
+                    useEffect(function() {
+                        wp.apiFetch({ path: '/wp/v2/types' }).then(function(types) {
+                            var options = Object.keys(types)
+                                .filter(function(key) { return types[key].viewable && types[key].slug !== 'attachment'; })
+                                .map(function(key) {
+                                    return { label: types[key].name, value: types[key].slug };
+                                });
+                            setPostTypes(options);
+                        });
+                    }, []);
+
                     return el(
                         wp.element.Fragment,
                         {},
@@ -1800,10 +1865,7 @@
                                 el(SelectControl, {
                                     label: 'Tipo de Post',
                                     value: props.attributes.postType || 'post',
-                                    options: [
-                                        { label: 'Notícias (post)', value: 'post' },
-                                        { label: 'Editais', value: 'edital' }
-                                    ],
+                                    options: postTypes.length ? postTypes : [ { label: 'Carregando...', value: '' } ],
                                     onChange: function(val) {
                                         props.setAttributes({ postType: val });
                                     }
