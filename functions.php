@@ -1,3 +1,4 @@
+<?php
 // Custom Post Type: Edital
 function seisdeagosto_register_cpt_edital() {
     $labels = array(
@@ -28,7 +29,7 @@ function seisdeagosto_register_cpt_edital() {
 }
 add_action('init', 'seisdeagosto_register_cpt_edital');
 
-<?php
+
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
 function u_seisbarra8_setup() {
