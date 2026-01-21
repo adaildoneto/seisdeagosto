@@ -70,114 +70,118 @@
     }
 
     function TypographyPanel(props, defaultColor) {
-        var attributes = props.attributes;
-        var setAttributes = props.setAttributes;
-
-        var resolvedFontSize = typeof attributes.fontSize === 'number' ? attributes.fontSize : TYPOGRAPHY_DEFAULTS.fontSize;
-        var resolvedFontFamily = attributes.fontFamily || TYPOGRAPHY_DEFAULTS.fontFamily;
-        var resolvedFontWeight = attributes.fontWeight || TYPOGRAPHY_DEFAULTS.fontWeight;
-        var resolvedColor = attributes.titleColor || defaultColor || TYPOGRAPHY_DEFAULTS.titleColor;
-
-        return el(
-            PanelBody,
-            { title: 'Estilo dos Títulos', initialOpen: false },
-            el(RangeControl, {
-                label: 'Tamanho da Fonte (px)',
-                value: resolvedFontSize,
-                onChange: function(val) { setAttributes({ fontSize: val }); },
-                min: 12,
-                max: 48
-            }),
-            el(TextControl, {
-                label: 'Familia da Fonte',
-                value: resolvedFontFamily,
-                onChange: function(val) { setAttributes({ fontFamily: val }); },
-                help: 'Ex: Arial, sans-serif ou "Open Sans", sans-serif'
-            }),
-            el(SelectControl, {
-                label: 'Peso da Fonte',
-                value: resolvedFontWeight,
-                options: [
-                    { label: 'Normal', value: 'normal' },
-                    { label: 'Bold', value: 'bold' },
-                    { label: '300 (Light)', value: '300' },
-                    { label: '400 (Regular)', value: '400' },
-                    { label: '600 (Semibold)', value: '600' },
-                    { label: '700 (Bold)', value: '700' },
-                    { label: '900 (Black)', value: '900' }
-                ],
-                onChange: function(val) { setAttributes({ fontWeight: val }); }
-            }),
-            el(ColorPalette, {
-                label: 'Cor do Título',
-                value: resolvedColor,
-                onChange: function(val) { setAttributes({ titleColor: val || resolvedColor }); }
-            })
-        );
-    }
-
-    /**
-     * Advanced Query Filters Panel - Reusable component for blocks with post queries
-     * Includes: offset, excludeCategories, tags, keyword
-     */
-    function QueryFiltersPanel(props) {
-        var attributes = props.attributes;
-        var setAttributes = props.setAttributes;
-
-        return el(
-            PanelBody,
-            { title: 'Filtros Avançados de Query', initialOpen: false },
-            el(RangeControl, {
-                label: 'Offset (Pular posts)',
-                help: 'Quantos posts pular antes de começar a exibir',
-                value: attributes.offset || 0,
-                onChange: function(val) { setAttributes({ offset: parseInt(val) || 0 }); },
-                min: 0,
-                max: 50
-            }),
-            el(TextControl, {
-                label: 'Excluir Categorias (IDs)',
-                help: 'IDs de categorias separados por vírgula. Ex: 5,12,18',
-                value: attributes.excludeCategories || '',
-                onChange: function(val) { setAttributes({ excludeCategories: String(val || '') }); }
-            }),
-            el(TextControl, {
-                label: 'Tags (slugs)',
-                help: 'Slugs de tags separados por vírgula. Ex: destaque,urgente',
-                value: attributes.tags || '',
-                onChange: function(val) { setAttributes({ tags: String(val || '') }); }
-            }),
-            el(TextControl, {
-                label: 'Palavra-chave (busca)',
-                help: 'Buscar posts que contenham este termo',
-                value: attributes.keyword || '',
-                onChange: function(val) { setAttributes({ keyword: String(val || '') }); }
-            })
-        );
-    }
-
-    // Destaques Home
-    registerBlockType('seideagosto/destaques-home', {
-        title: 'Destaques Home (1 Grande + 2 Pequenos)',
-        icon: 'layout',
-        category: 'seisdeagosto',
-        attributes: {
-            categoryId: { type: 'string', default: '0' },
-            categoryIds: { type: 'array', default: [] },
-            excludeCategories: { type: 'string', default: '' },
-            layoutType: { type: 'string', default: 'default' },
-            offset: { type: 'number', default: 0 },
-            tags: { type: 'string', default: '' },
-            keyword: { type: 'string', default: '' }
-        },
-        edit: function(props) {
+        edit: function NewsGridEdit(props) {
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
+            var React = wp.element;
+            var postTypes = React.useState([]);
+            var setPostTypes = postTypes[1];
+            var categories = React.useState([]);
+            var setCategories = categories[1];
+            var postTypesVal = postTypes[0];
+            var categoriesVal = categories[0];
 
-            return el(
-                wp.element.Fragment,
+            React.useEffect(function() {
+                let mounted = true;
+                wp.apiFetch({ path: '/wp/v2/types' }).then(function(types) {
+                    if (!mounted) return;
+                    var options = Object.keys(types)
+                        .filter(function(key) { return types[key].viewable && types[key].slug !== 'attachment'; })
+                        .map(function(key) {
+                            return { label: types[key].name, value: types[key].slug };
+                        });
+                    setPostTypes(options);
+                });
+                return function() { mounted = false; };
+            }, []);
+
+            React.useEffect(function() {
+                if (!attributes.postType) return;
+                let mounted = true;
+                wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(function(type) {
+                    if (!mounted) return;
+                    if (!type.taxonomies || !type.taxonomies.length) {
+                        setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
+                        return;
+                    }
+                    var tax = type.taxonomies[0];
+                    wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(function(terms) {
+                        if (!mounted) return;
+                        var options = [{ label: 'Todas', value: '0' }];
+                        if (Array.isArray(terms)) {
+                            options = options.concat(terms.map(function(term) {
+                                return { label: term.name, value: String(term.id) };
+                            }));
+                        }
+                        setCategories(options);
+                    }).catch(function() {
+                        setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
+                    });
+                });
+                return function() { mounted = false; };
+            }, [attributes.postType]);
+
+            return React.createElement(
+                React.Fragment,
                 null,
-                el(
+                React.createElement(
+                    InspectorControls,
+                    null,
+                    React.createElement(
+                        PanelBody,
+                        { title: 'Configurações' },
+                        React.createElement(SelectControl, {
+                            label: 'Tipo de Post',
+                            value: attributes.postType || 'post',
+                            options: postTypesVal.length ? postTypesVal : [ { label: 'Carregando...', value: '' } ],
+                            onChange: function(val) { setAttributes({ postType: val, categoryId: '0' }); }
+                        }),
+                        React.createElement(SelectControl, {
+                            label: 'Categoria',
+                            value: attributes.categoryId,
+                            options: categoriesVal.length ? categoriesVal : [ { label: 'Carregando...', value: '' } ],
+                            onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
+                        }),
+                        React.createElement(RangeControl, {
+                            label: 'Número de Posts',
+                            value: attributes.numberOfPosts,
+                            onChange: function(val) { setAttributes({ numberOfPosts: parseInt(val) }); },
+                            min: 1,
+                            max: 50
+                        }),
+                        React.createElement(RangeControl, {
+                            label: 'Colunas',
+                            value: attributes.columns,
+                            onChange: function(val) { setAttributes({ columns: parseInt(val) }); },
+                            min: 2,
+                            max: 6
+                        }),
+                        React.createElement(ToggleControl, {
+                            label: 'Mostrar paginação',
+                            checked: !!attributes.paginate,
+                            onChange: function(val) { setAttributes({ paginate: !!val }); }
+                        })
+                    ),
+                    QueryFiltersPanel(props),
+                    TypographyPanel(props)
+                ),
+                React.createElement('div', {
+                    style: {
+                        border: '2px dashed #6f42c1',
+                        borderRadius: '4px',
+                        padding: '12px',
+                        background: '#f8f5ff',
+                        color: '#555',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }
+                },
+                    React.createElement('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '📰 Grid de Notícias'),
+                    React.createElement('div', { style: { fontSize: '12px', color: '#666', marginBottom: '6px' } }, attributes.numberOfPosts + ' posts • ' + attributes.columns + ' colunas'),
+                    React.createElement('div', { style: { fontSize: '11px', color: '#999' } }, attributes.paginate ? '✓ Com paginação' : 'Sem paginação'),
+                    React.createElement('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview - ver no frontend)')
+                )
+            );
+        },
                     InspectorControls,
                     null,
                     el(
