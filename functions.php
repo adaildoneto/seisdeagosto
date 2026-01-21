@@ -2296,11 +2296,4 @@ function cptui_register_my_cpts_edital() {
 	register_post_type( "edital", $args );
 }
 
-add_action( 'init', 'cptui_register_my_cpts_edital' );</textarea>
-			
-	<h2>Todas as taxonomias do Custom Post Types UI</h2>
-
-		<p>
-		<label for="cptui_tax_get_code">Copie/Cole o código abaixo no seu arquivo functions.php.</label>
-	</p>
-	<textarea name="cptui_tax_get_code" id="cptui_tax_get_code" class="large-text cptui_tax_get_code" onclick="this.focus();this.select()" onfocus="this.focus();this.select();" readonly="readonly" aria-readonly="true">Nenhuma taxonomia para mostrar nesse momento
+add_action( 'init', 'cptui_register_my_cpts_edital' );
