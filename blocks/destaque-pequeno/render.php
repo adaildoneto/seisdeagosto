@@ -2,8 +2,9 @@
 function u_correio68_render_destaque_pequeno($attributes) {
     $number = isset($attributes['numberOfPosts']) ? intval($attributes['numberOfPosts']) : 2;
     $offset = isset($attributes['offset']) ? intval($attributes['offset']) : 1;
+    $postType = isset($attributes['postType']) && in_array($attributes['postType'], ['post', 'edital']) ? $attributes['postType'] : 'post';
     $args = array(
-        'post_type'      => 'post',
+        'post_type'      => $postType,
         'posts_per_page' => max(1, $number),
         'offset'         => max(0, $offset),
         'order'          => 'DESC',

@@ -21,6 +21,10 @@
         "keyword": {
             "type": "string",
             "default": ""
+        },
+        "postType": {
+            "type": "string",
+            "default": "post"
         }
     },
     "example": {

@@ -1771,4 +1771,136 @@
         }
     });
 
+    // Adiciona painel de seleção de tipo de post para o bloco lista-noticias
+    (function(wp) {
+        var addFilter = wp.hooks.addFilter;
+        var el = wp.element.createElement;
+        var InspectorControls = wp.blockEditor.InspectorControls;
+        var PanelBody = wp.components.PanelBody;
+        var SelectControl = wp.components.SelectControl;
+
+        addFilter(
+            'editor.BlockEdit',
+            'seisdeagosto/lista-noticias-posttype',
+            function(BlockEdit) {
+                return function(props) {
+                    if (props.name !== 'u-correio68/lista-noticias') {
+                        return el(BlockEdit, props);
+                    }
+                    return el(
+                        wp.element.Fragment,
+                        {},
+                        el(BlockEdit, props),
+                        el(
+                            InspectorControls,
+                            {},
+                            el(
+                                PanelBody,
+                                { title: 'Tipo de Post', initialOpen: true },
+                                el(SelectControl, {
+                                    label: 'Tipo de Post',
+                                    value: props.attributes.postType || 'post',
+                                    options: [
+                                        { label: 'Notícias (post)', value: 'post' },
+                                        { label: 'Editais', value: 'edital' }
+                                    ],
+                                    onChange: function(val) {
+                                        props.setAttributes({ postType: val });
+                                    }
+                                })
+                            )
+                        )
+                    );
+                };
+            }
+        );
+    })(window.wp);
+    // Adiciona painel de seleção de tipo de post para o bloco destaque-grande
+    (function(wp) {
+        var addFilter = wp.hooks.addFilter;
+        var el = wp.element.createElement;
+        var InspectorControls = wp.blockEditor.InspectorControls;
+        var PanelBody = wp.components.PanelBody;
+        var SelectControl = wp.components.SelectControl;
+
+        addFilter(
+            'editor.BlockEdit',
+            'seisdeagosto/destaque-grande-posttype',
+            function(BlockEdit) {
+                return function(props) {
+                    if (props.name !== 'u-correio68/destaque-grande') {
+                        return el(BlockEdit, props);
+                    }
+                    return el(
+                        wp.element.Fragment,
+                        {},
+                        el(BlockEdit, props),
+                        el(
+                            InspectorControls,
+                            {},
+                            el(
+                                PanelBody,
+                                { title: 'Tipo de Post', initialOpen: true },
+                                el(SelectControl, {
+                                    label: 'Tipo de Post',
+                                    value: props.attributes.postType || 'post',
+                                    options: [
+                                        { label: 'Notícias (post)', value: 'post' },
+                                        { label: 'Editais', value: 'edital' }
+                                    ],
+                                    onChange: function(val) {
+                                        props.setAttributes({ postType: val });
+                                    }
+                                })
+                            )
+                        )
+                    );
+                };
+            }
+        );
+    })(window.wp);
+    // Adiciona painel de seleção de tipo de post para o bloco destaque-pequeno
+    (function(wp) {
+        var addFilter = wp.hooks.addFilter;
+        var el = wp.element.createElement;
+        var InspectorControls = wp.blockEditor.InspectorControls;
+        var PanelBody = wp.components.PanelBody;
+        var SelectControl = wp.components.SelectControl;
+
+        addFilter(
+            'editor.BlockEdit',
+            'seisdeagosto/destaque-pequeno-posttype',
+            function(BlockEdit) {
+                return function(props) {
+                    if (props.name !== 'u-correio68/destaque-pequeno') {
+                        return el(BlockEdit, props);
+                    }
+                    return el(
+                        wp.element.Fragment,
+                        {},
+                        el(BlockEdit, props),
+                        el(
+                            InspectorControls,
+                            {},
+                            el(
+                                PanelBody,
+                                { title: 'Tipo de Post', initialOpen: true },
+                                el(SelectControl, {
+                                    label: 'Tipo de Post',
+                                    value: props.attributes.postType || 'post',
+                                    options: [
+                                        { label: 'Notícias (post)', value: 'post' },
+                                        { label: 'Editais', value: 'edital' }
+                                    ],
+                                    onChange: function(val) {
+                                        props.setAttributes({ postType: val });
+                                    }
+                                })
+                            )
+                        )
+                    );
+                };
+            }
+        );
+    })(window.wp);
 })(window.wp);

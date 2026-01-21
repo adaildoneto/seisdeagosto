@@ -1,8 +1,9 @@
 <?php
 function u_correio68_render_destaque_grande($attributes) {
     $number = isset($attributes['numberOfPosts']) ? intval($attributes['numberOfPosts']) : 1;
+    $postType = isset($attributes['postType']) && in_array($attributes['postType'], ['post', 'edital']) ? $attributes['postType'] : 'post';
     $args = array(
-        'post_type'      => 'post',
+        'post_type'      => $postType,
         'posts_per_page' => max(1, $number),
         'order'          => 'DESC',
         'orderby'        => 'date',
