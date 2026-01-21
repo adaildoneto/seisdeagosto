@@ -425,16 +425,16 @@
             keyword: { type: 'string', default: '' }
         }, getTypographyAttributes()),
         edit: function(props) {
-            var attributes = props.attributes;
-            var setAttributes = props.setAttributes;
-            var useState = wp.element.useState;
-            var useEffect = wp.element.useEffect;
-            var _useState = useState([]), postTypes = _useState[0], setPostTypes = _useState[1];
-            var _useState2 = useState([]), categories = _useState2[0], setCategories = _useState2[1];
 
-            // Buscar post types
-            useEffect(function() {
+            // Use React hooks directly to avoid re-creating hooks on every render
+            var React = wp.element;
+            var _useState = React.useState([]), postTypes = _useState[0], setPostTypes = _useState[1];
+            var _useState2 = React.useState([]), categories = _useState2[0], setCategories = _useState2[1];
+
+            React.useEffect(function() {
+                let mounted = true;
                 wp.apiFetch({ path: '/wp/v2/types' }).then(function(types) {
+                    if (!mounted) return;
                     var options = Object.keys(types)
                         .filter(function(key) { return types[key].viewable && types[key].slug !== 'attachment'; })
                         .map(function(key) {
@@ -442,20 +442,21 @@
                         });
                     setPostTypes(options);
                 });
+                return function() { mounted = false; };
             }, []);
 
-            // Buscar taxonomias/categorias do post type selecionado
-            useEffect(function() {
+            React.useEffect(function() {
                 if (!attributes.postType) return;
-                // Buscar taxonomias do post type
+                let mounted = true;
                 wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(function(type) {
+                    if (!mounted) return;
                     if (!type.taxonomies || !type.taxonomies.length) {
                         setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
                         return;
                     }
-                    // Buscar termos da primeira taxonomia (ex: category, ou custom)
                     var tax = type.taxonomies[0];
                     wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(function(terms) {
+                        if (!mounted) return;
                         var options = [{ label: 'Todas', value: '0' }];
                         if (Array.isArray(terms)) {
                             options = options.concat(terms.map(function(term) {
@@ -467,6 +468,7 @@
                         setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
                     });
                 });
+                return function() { mounted = false; };
             }, [attributes.postType]);
 
             return el(
