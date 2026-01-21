@@ -1,34 +1,4 @@
 <?php
-// Custom Post Type: Edital
-function seisdeagosto_register_cpt_edital() {
-    $labels = array(
-        'name' => 'Editais',
-        'singular_name' => 'Edital',
-        'menu_name' => 'Editais',
-        'name_admin_bar' => 'Edital',
-        'add_new' => 'Adicionar Novo',
-        'add_new_item' => 'Adicionar Novo Edital',
-        'new_item' => 'Novo Edital',
-        'edit_item' => 'Editar Edital',
-        'view_item' => 'Ver Edital',
-        'all_items' => 'Todos os Editais',
-        'search_items' => 'Buscar Editais',
-        'not_found' => 'Nenhum edital encontrado.',
-        'not_found_in_trash' => 'Nenhum edital encontrado na lixeira.'
-    );
-    $args = array(
-        'labels' => $labels,
-        'public' => true,
-        'has_archive' => true,
-        'rewrite' => array('slug' => 'editais'),
-        'show_in_rest' => true,
-        'supports' => array('title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'),
-        'menu_icon' => 'dashicons-media-document',
-    );
-    register_post_type('edital', $args);
-}
-add_action('init', 'seisdeagosto_register_cpt_edital');
-
 
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
@@ -2183,3 +2153,154 @@ function u68_header_search_mobile_shortcode() {
     return $output;
 }
 add_shortcode( 'u68_header_search_mobile', 'u68_header_search_mobile_shortcode' );
+
+function cptui_register_my_cpts() {
+
+	/**
+	 * Post Type: editais.
+	 */
+
+	$labels = [
+		"name" => esc_html__( "editais", "u_correio68" ),
+		"singular_name" => esc_html__( "Edital", "u_correio68" ),
+		"menu_name" => esc_html__( "Publicações Legais", "u_correio68" ),
+		"all_items" => esc_html__( "Todos os editais", "u_correio68" ),
+		"add_new" => esc_html__( "Adicionar novo", "u_correio68" ),
+		"add_new_item" => esc_html__( "Adicionar novo Edital", "u_correio68" ),
+		"edit_item" => esc_html__( "Editar Edital", "u_correio68" ),
+		"new_item" => esc_html__( "Novo Edital", "u_correio68" ),
+		"view_item" => esc_html__( "Ver Edital", "u_correio68" ),
+		"view_items" => esc_html__( "Ver editais", "u_correio68" ),
+		"search_items" => esc_html__( "Pesquisar editais", "u_correio68" ),
+		"not_found" => esc_html__( "Nenhum editais encontrado", "u_correio68" ),
+		"not_found_in_trash" => esc_html__( "Nenhum editais encontrado na lixeira", "u_correio68" ),
+		"parent" => esc_html__( "Edital ascendente:", "u_correio68" ),
+		"featured_image" => esc_html__( "Imagem em destaque para este Edital", "u_correio68" ),
+		"set_featured_image" => esc_html__( "Definir imagem em destaque para este Edital", "u_correio68" ),
+		"remove_featured_image" => esc_html__( "Remover imagem em destaque para este Edital", "u_correio68" ),
+		"use_featured_image" => esc_html__( "Usar como imagem em destaque para este Edital", "u_correio68" ),
+		"archives" => esc_html__( "Arquivos de Edital", "u_correio68" ),
+		"insert_into_item" => esc_html__( "Inserir no Edital", "u_correio68" ),
+		"uploaded_to_this_item" => esc_html__( "Enviar para esse Edital", "u_correio68" ),
+		"filter_items_list" => esc_html__( "Filtrar lista de editais", "u_correio68" ),
+		"items_list_navigation" => esc_html__( "Navegação na lista de editais", "u_correio68" ),
+		"items_list" => esc_html__( "Lista de editais", "u_correio68" ),
+		"attributes" => esc_html__( "Atributos de editais", "u_correio68" ),
+		"name_admin_bar" => esc_html__( "Edital", "u_correio68" ),
+		"item_published" => esc_html__( "Edital publicado", "u_correio68" ),
+		"item_published_privately" => esc_html__( "Edital publicado de forma privada.", "u_correio68" ),
+		"item_reverted_to_draft" => esc_html__( "Edital revertido para rascunho.", "u_correio68" ),
+		"item_scheduled" => esc_html__( "Edital agendado.", "u_correio68" ),
+		"item_updated" => esc_html__( "Edital atualizado.", "u_correio68" ),
+		"parent_item_colon" => esc_html__( "Edital ascendente:", "u_correio68" ),
+	];
+
+	$args = [
+		"label" => esc_html__( "editais", "u_correio68" ),
+		"labels" => $labels,
+		"description" => "",
+		"public" => true,
+		"publicly_queryable" => true,
+		"show_ui" => true,
+		"show_in_rest" => true,
+		"rest_base" => "",
+		"rest_controller_class" => "WP_REST_Posts_Controller",
+		"rest_namespace" => "wp/v2",
+		"has_archive" => false,
+		"show_in_menu" => true,
+		"show_in_nav_menus" => true,
+		"delete_with_user" => false,
+		"exclude_from_search" => false,
+		"capability_type" => "post",
+		"map_meta_cap" => true,
+		"hierarchical" => false,
+		"can_export" => false,
+		"rewrite" => [ "slug" => "edital", "with_front" => true ],
+		"query_var" => true,
+		"supports" => [ "title", "editor", "thumbnail" ],
+		"show_in_graphql" => false,
+	];
+
+	register_post_type( "edital", $args );
+}
+
+add_action( 'init', 'cptui_register_my_cpts' );
+
+function cptui_register_my_cpts_edital() {
+
+	/**
+	 * Post Type: editais.
+	 */
+
+	$labels = [
+		"name" => esc_html__( "editais", "u_correio68" ),
+		"singular_name" => esc_html__( "Edital", "u_correio68" ),
+		"menu_name" => esc_html__( "Publicações Legais", "u_correio68" ),
+		"all_items" => esc_html__( "Todos os editais", "u_correio68" ),
+		"add_new" => esc_html__( "Adicionar novo", "u_correio68" ),
+		"add_new_item" => esc_html__( "Adicionar novo Edital", "u_correio68" ),
+		"edit_item" => esc_html__( "Editar Edital", "u_correio68" ),
+		"new_item" => esc_html__( "Novo Edital", "u_correio68" ),
+		"view_item" => esc_html__( "Ver Edital", "u_correio68" ),
+		"view_items" => esc_html__( "Ver editais", "u_correio68" ),
+		"search_items" => esc_html__( "Pesquisar editais", "u_correio68" ),
+		"not_found" => esc_html__( "Nenhum editais encontrado", "u_correio68" ),
+		"not_found_in_trash" => esc_html__( "Nenhum editais encontrado na lixeira", "u_correio68" ),
+		"parent" => esc_html__( "Edital ascendente:", "u_correio68" ),
+		"featured_image" => esc_html__( "Imagem em destaque para este Edital", "u_correio68" ),
+		"set_featured_image" => esc_html__( "Definir imagem em destaque para este Edital", "u_correio68" ),
+		"remove_featured_image" => esc_html__( "Remover imagem em destaque para este Edital", "u_correio68" ),
+		"use_featured_image" => esc_html__( "Usar como imagem em destaque para este Edital", "u_correio68" ),
+		"archives" => esc_html__( "Arquivos de Edital", "u_correio68" ),
+		"insert_into_item" => esc_html__( "Inserir no Edital", "u_correio68" ),
+		"uploaded_to_this_item" => esc_html__( "Enviar para esse Edital", "u_correio68" ),
+		"filter_items_list" => esc_html__( "Filtrar lista de editais", "u_correio68" ),
+		"items_list_navigation" => esc_html__( "Navegação na lista de editais", "u_correio68" ),
+		"items_list" => esc_html__( "Lista de editais", "u_correio68" ),
+		"attributes" => esc_html__( "Atributos de editais", "u_correio68" ),
+		"name_admin_bar" => esc_html__( "Edital", "u_correio68" ),
+		"item_published" => esc_html__( "Edital publicado", "u_correio68" ),
+		"item_published_privately" => esc_html__( "Edital publicado de forma privada.", "u_correio68" ),
+		"item_reverted_to_draft" => esc_html__( "Edital revertido para rascunho.", "u_correio68" ),
+		"item_scheduled" => esc_html__( "Edital agendado.", "u_correio68" ),
+		"item_updated" => esc_html__( "Edital atualizado.", "u_correio68" ),
+		"parent_item_colon" => esc_html__( "Edital ascendente:", "u_correio68" ),
+	];
+
+	$args = [
+		"label" => esc_html__( "editais", "u_correio68" ),
+		"labels" => $labels,
+		"description" => "",
+		"public" => true,
+		"publicly_queryable" => true,
+		"show_ui" => true,
+		"show_in_rest" => true,
+		"rest_base" => "",
+		"rest_controller_class" => "WP_REST_Posts_Controller",
+		"rest_namespace" => "wp/v2",
+		"has_archive" => false,
+		"show_in_menu" => true,
+		"show_in_nav_menus" => true,
+		"delete_with_user" => false,
+		"exclude_from_search" => false,
+		"capability_type" => "post",
+		"map_meta_cap" => true,
+		"hierarchical" => false,
+		"can_export" => false,
+		"rewrite" => [ "slug" => "edital", "with_front" => true ],
+		"query_var" => true,
+		"supports" => [ "title", "editor", "thumbnail" ],
+		"show_in_graphql" => false,
+	];
+
+	register_post_type( "edital", $args );
+}
+
+add_action( 'init', 'cptui_register_my_cpts_edital' );</textarea>
+			
+	<h2>Todas as taxonomias do Custom Post Types UI</h2>
+
+		<p>
+		<label for="cptui_tax_get_code">Copie/Cole o código abaixo no seu arquivo functions.php.</label>
+	</p>
+	<textarea name="cptui_tax_get_code" id="cptui_tax_get_code" class="large-text cptui_tax_get_code" onclick="this.focus();this.select()" onfocus="this.focus();this.select();" readonly="readonly" aria-readonly="true">Nenhuma taxonomia para mostrar nesse momento
