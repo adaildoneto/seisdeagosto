@@ -1,3 +1,32 @@
+// Custom Post Type: Edital
+function seisdeagosto_register_cpt_edital() {
+    $labels = array(
+        'name' => 'Editais',
+        'singular_name' => 'Edital',
+        'menu_name' => 'Editais',
+        'name_admin_bar' => 'Edital',
+        'add_new' => 'Adicionar Novo',
+        'add_new_item' => 'Adicionar Novo Edital',
+        'new_item' => 'Novo Edital',
+        'edit_item' => 'Editar Edital',
+        'view_item' => 'Ver Edital',
+        'all_items' => 'Todos os Editais',
+        'search_items' => 'Buscar Editais',
+        'not_found' => 'Nenhum edital encontrado.',
+        'not_found_in_trash' => 'Nenhum edital encontrado na lixeira.'
+    );
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => true,
+        'rewrite' => array('slug' => 'editais'),
+        'show_in_rest' => true,
+        'supports' => array('title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'),
+        'menu_icon' => 'dashicons-media-document',
+    );
+    register_post_type('edital', $args);
+}
+add_action('init', 'seisdeagosto_register_cpt_edital');
 
 <?php
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
