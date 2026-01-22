@@ -9,7 +9,6 @@ function seisdeagosto_enqueue_block_editor_assets() {
     );
 }
 add_action('enqueue_block_editor_assets', 'seisdeagosto_enqueue_block_editor_assets');
-<?php
 
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
