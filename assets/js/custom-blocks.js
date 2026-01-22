@@ -1,3 +1,26 @@
+// Debug system for custom blocks
+console.group('[seisdeagosto-blocks] Debug');
+try {
+    if (!window.wp) {
+        console.error('window.wp não está disponível. O WordPress scripts não foram carregados.');
+    } else {
+        console.info('window.wp está disponível.');
+        if (!wp.blocks || !wp.blocks.registerBlockType) {
+            console.error('wp.blocks.registerBlockType não está disponível.');
+        } else {
+            console.info('wp.blocks.registerBlockType está disponível.');
+        }
+    }
+    if (!window.seideagostoBlocks) {
+        console.warn('window.seideagostoBlocks não está definido.');
+    } else {
+        console.info('window.seideagostoBlocks:', window.seideagostoBlocks);
+    }
+} catch (e) {
+    console.error('Erro ao inicializar debug:', e);
+}
+console.groupEnd();
+
 (function(wp) {
     // Ensure seideagostoBlocks exists with default values
     window.seideagostoBlocks = window.seideagostoBlocks || {
