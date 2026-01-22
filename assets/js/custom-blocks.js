@@ -81,7 +81,7 @@
                     }).catch(() => {
                         setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
                     });
-                });
+            });
                 return () => { mounted = false; };
             }, [attributes.postType]);
 
