@@ -1,3 +1,5 @@
+<?php
+
 // Enfileira JS dos blocos personalizados no editor
 function seisdeagosto_enqueue_block_editor_assets() {
     wp_enqueue_script(
