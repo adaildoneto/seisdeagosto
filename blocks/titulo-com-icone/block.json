@@ -56,5 +56,6 @@
         "spacing": { "margin": true, "padding": true },
         "typography": { "fontSize": true, "fontWeight": true }
     },
+    "editorScript": "seisdeagosto-custom-blocks",
     "renderCallback": "u_correio68_render_titulo_com_icone"
 }

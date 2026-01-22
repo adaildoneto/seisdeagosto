@@ -49,7 +49,7 @@
         },
         "border": { "color": true, "style": true, "width": true, "radius": true }
     },
-    "editorScript": "u-correio68-custom-blocks",
+    "editorScript": "seisdeagosto-custom-blocks",
     "editorStyle": "file:./editor.css",
     "renderCallback": "u_correio68_render_destaque_pequeno"
 }
