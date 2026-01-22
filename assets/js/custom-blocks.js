@@ -70,34 +70,7 @@
     }
 
     function TypographyPanel(props, defaultColor) {
-        edit: function(props) {
-            const { attributes, setAttributes } = props;
-            const React = wp.element;
-            const [postTypes, setPostTypes] = React.useState([]);
-            const [categories, setCategories] = React.useState([]);
-
-            React.useEffect(() => {
-                let mounted = true;
-                wp.apiFetch({ path: '/wp/v2/types' }).then(types => {
-                    if (!mounted) return;
-                    const options = Object.keys(types)
-                        .filter(key => types[key].viewable && types[key].slug !== 'attachment')
-                        .map(key => ({ label: types[key].name, value: types[key].slug }));
-                    setPostTypes(options);
-                });
-                return () => { mounted = false; };
-            }, []);
-
-            React.useEffect(() => {
-                if (!attributes.postType) return;
-                let mounted = true;
-                wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(type => {
-                    if (!mounted) return;
-                    if (!type.taxonomies || !type.taxonomies.length) {
-                        setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
-                        return;
-                    }
-                    const tax = type.taxonomies[0];
+        // ...existing code...
                     wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(terms => {
                         if (!mounted) return;
                         let options = [{ label: 'Todas', value: '0' }];
