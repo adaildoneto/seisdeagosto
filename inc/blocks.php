@@ -546,20 +546,13 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
             $block_config = json_decode( file_get_contents( $path . '/block.json' ), true );
             if ( $block_config ) {
                 $block_config['render_callback'] = isset( $block_config['renderCallback'] ) ? $block_config['renderCallback'] : '';
+                $register_args = array('editor_script' => 'seisdeagosto-custom-blocks');
                 if ( ! empty( $block_config['render_callback'] ) && function_exists( $block_config['render_callback'] ) ) {
-                    register_block_type( $path, array(
-                        'render_callback' => $block_config['render_callback'],
-                    ) );
-                } else {
-                    // Special handling for titulo-com-icone block
-                    if ( $slug === 'titulo-com-icone' && function_exists( 'u_correio68_render_titulo_com_icone' ) ) {
-                        register_block_type( $path, array(
-                            'render_callback' => 'u_correio68_render_titulo_com_icone',
-                        ) );
-                    } else {
-                        register_block_type( $path );
-                    }
+                    $register_args['render_callback'] = $block_config['render_callback'];
+                } elseif ( $slug === 'titulo-com-icone' && function_exists( 'u_correio68_render_titulo_com_icone' ) ) {
+                    $register_args['render_callback'] = 'u_correio68_render_titulo_com_icone';
                 }
+                register_block_type( $path, $register_args );
             }
         }
     }
