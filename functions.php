@@ -1,3 +1,14 @@
+// Enfileira JS dos blocos personalizados no editor
+function seisdeagosto_enqueue_block_editor_assets() {
+    wp_enqueue_script(
+        'seisdeagosto-custom-blocks',
+        get_template_directory_uri() . '/assets/js/custom-blocks.js',
+        array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-api-fetch'),
+        filemtime(get_template_directory() . '/assets/js/custom-blocks.js'),
+        true
+    );
+}
+add_action('enqueue_block_editor_assets', 'seisdeagosto_enqueue_block_editor_assets');
 <?php
 
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
