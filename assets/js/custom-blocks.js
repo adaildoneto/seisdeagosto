@@ -70,6 +70,7 @@ console.groupEnd();
     var PanelBody = wp.components.PanelBody;
     var RangeControl = wp.components.RangeControl;
     var ColorPalette = wp.components.ColorPalette;
+    var BaseControl = wp.components.BaseControl;
     var Button = wp.components.Button;
     var ToggleControl = wp.components.ToggleControl;
     var ServerSideRender = wp.serverSideRender;
@@ -93,123 +94,73 @@ console.groupEnd();
     }
 
     function TypographyPanel(props, defaultColor) {
-        // ...existing code...
-                    wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(terms => {
-                        if (!mounted) return;
-                        let options = [{ label: 'Todas', value: '0' }];
-                        if (Array.isArray(terms)) {
-                            options = options.concat(terms.map(term => ({ label: term.name, value: String(term.id) })));
-                        }
-                        setCategories(options);
-                    }).catch(() => {
-                        setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
-                    });
-            });
-                return () => { mounted = false; };
-            }, [attributes.postType]);
+        return null; // Simplified - typography controls can be added later if needed
+    }
 
-            return React.createElement(
-                React.Fragment,
+    function QueryFiltersPanel(props) {
+        return null; // Simplified - query filters can be added later if needed  
+    }
+
+    // Destaques Home - Simple Editor Block
+    function createDestaquesHomeEdit(props) {
+        var attributes = props.attributes || {};
+        var setAttributes = props.setAttributes;
+
+        return React.createElement(
+            React.Fragment,
+            null,
+            React.createElement(
+                InspectorControls,
                 null,
                 React.createElement(
-                    InspectorControls,
-                    null,
-                    React.createElement(
-                        PanelBody,
-                        { title: 'Configurações' },
-                        React.createElement(SelectControl, {
-                            label: 'Tipo de Post',
-                            value: attributes.postType || 'post',
-                            options: postTypes.length ? postTypes : [ { label: 'Carregando...', value: '' } ],
-                            onChange: val => setAttributes({ postType: val, categoryId: '0' })
-                        }),
-                        React.createElement(SelectControl, {
-                            label: 'Categoria',
-                            value: attributes.categoryId,
-                            options: categories.length ? categories : [ { label: 'Carregando...', value: '' } ],
-                            onChange: val => setAttributes({ categoryId: String(val || '0') })
-                        }),
-                        React.createElement(RangeControl, {
-                            label: 'Número de Posts',
-                            value: attributes.numberOfPosts,
-                            onChange: val => setAttributes({ numberOfPosts: parseInt(val) }),
-                            min: 1,
-                            max: 50
-                        }),
-                        React.createElement(RangeControl, {
-                            label: 'Colunas',
-                            value: attributes.columns,
-                            onChange: val => setAttributes({ columns: parseInt(val) }),
-                            min: 2,
-                            max: 6
-                        }),
-                        React.createElement(ToggleControl, {
-                            label: 'Mostrar paginação',
-                            checked: !!attributes.paginate,
-                            onChange: val => setAttributes({ paginate: !!val })
-                        })
-                    ),
-                    QueryFiltersPanel(props),
-                    TypographyPanel(props)
-                ),
-                React.createElement('div', {
-                    style: {
-                        border: '2px dashed #6f42c1',
-                        borderRadius: '4px',
-                        padding: '12px',
-                        background: '#f8f5ff',
-                        color: '#555',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }
-                },
-                    React.createElement('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '📰 Grid de Notícias'),
-                    React.createElement('div', { style: { fontSize: '12px', color: '#666', marginBottom: '6px' } }, attributes.numberOfPosts + ' posts • ' + attributes.columns + ' colunas'),
-                    React.createElement('div', { style: { fontSize: '11px', color: '#999' } }, attributes.paginate ? '✓ Com paginação' : 'Sem paginação'),
-                    React.createElement('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview - ver no frontend)')
+                    PanelBody,
+                    { title: 'Configurações' },
+                    React.createElement(SelectControl, {
+                        label: 'Layout',
+                        value: attributes.layoutType || 'default',
+                        options: [
+                            { label: '1 Grande + 2 Pequenos', value: 'default' },
+                            { label: 'Somente 1 Grande', value: 'single' }
+                        ],
+                        onChange: function(val) { setAttributes({ layoutType: String(val || 'default') }); }
+                    }),
+                    React.createElement(SelectControl, {
+                        label: 'Categoria',
+                        value: attributes.categoryId || '0',
+                        options: (window.seideagostoBlocks && window.seideagostoBlocks.categories) || [{label: 'Todas', value: '0'}],
+                        onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
+                    })
                 )
-            );
+            ),
+            React.createElement('div', {
+                style: {
+                    border: '2px dashed #fd7e14',
+                    borderRadius: '4px',
+                    padding: '12px',
+                    background: '#fff8f3',
+                    color: '#555',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }
+            },
+                React.createElement('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '🎨 Destaques Home'),
+                React.createElement('div', { style: { fontSize: '12px', color: '#666' } }, '1 Grande + 2 Pequenos'),
+                React.createElement('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview - ver no frontend)')
+            )
+        );
+    }
+
+    // Register Destaques Home Block
+    registerBlockType('seideagosto/destaques-home', {
+        title: 'Destaques Home',
+        icon: 'star-filled',
+        category: 'seisdeagosto',
+        attributes: {
+            categoryId: { type: 'string', default: '0' },
+            layoutType: { type: 'string', default: 'default' }
         },
-                    InspectorControls,
-                    null,
-                    el(
-                        PanelBody,
-                        { title: 'Configurações' },
-                        el(SelectControl, {
-                            label: 'Layout',
-                            value: attributes.layoutType || 'default',
-                            options: [
-                                { label: '1 Grande + 2 Pequenos', value: 'default' },
-                                { label: 'Somente 1 Grande', value: 'single' }
-                            ],
-                            onChange: function(val) { setAttributes({ layoutType: String(val || 'default') }); }
-                        }),
-                        el(SelectControl, {
-                            label: 'Categoria',
-                            value: attributes.categoryId,
-                            options: seideagostoBlocks.categories,
-                            onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
-                        })
-                    ),
-                    QueryFiltersPanel(props)
-                ),
-                el('div', {
-                    style: {
-                        border: '2px dashed #fd7e14',
-                        borderRadius: '4px',
-                        padding: '12px',
-                        background: '#fff8f3',
-                        color: '#555',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }
-                },
-                    el('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, '🎨 Destaques Home'),
-                    el('div', { style: { fontSize: '12px', color: '#666' } }, '1 Grande + 2 Pequenos'),
-                    el('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview - ver no frontend)')
-                )
-            );
-        },
+        edit: createDestaquesHomeEdit,
         save: function() {
-            return null; // Dynamic block
+            return null;
         }
     });
 
@@ -1766,16 +1717,18 @@ console.groupEnd();
                                     onChange: function(val) { setAttributes({ espessuraLinha: val }); },
                                     min: 1, max: 10
                                 }),
-                                attributes.mostrarIcone ? el(ColorPalette, {
-                                    label: 'Cor do Ícone',
+                                attributes.mostrarIcone ? el(BaseControl, {
+                                    label: 'Cor do Ícone'
+                                }, el(ColorPalette, {
                                     value: attributes.corIcone,
                                     onChange: function(val) { setAttributes({ corIcone: val }); }
-                                }) : null,
-                                el(ColorPalette, {
-                                    label: 'Cor da Linha',
+                                })) : null,
+                                el(BaseControl, {
+                                    label: 'Cor da Linha'
+                                }, el(ColorPalette, {
                                     value: attributes.corLinha,
                                     onChange: function(val) { setAttributes({ corLinha: val }); }
-                                })
+                                }))
                             )
                         ),
                         el('div', blockProps, 
@@ -1956,4 +1909,5 @@ console.groupEnd();
             }
         );
     })(window.wp);
+    
 })(window.wp);

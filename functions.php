@@ -912,21 +912,21 @@ endif; // u_seisbarra8_setup
 add_action( 'init', 'u_seisbarra8_init' );
 
 // Register custom block category for theme blocks
+/**
+ * Register custom block category for Seis de Agosto theme blocks
+ * 
+ * @link https://developer.wordpress.org/reference/hooks/block_categories_all/
+ */
 add_filter( 'block_categories_all', function( $categories ) {
-    foreach ( $categories as $category ) {
-        if ( isset( $category['slug'] ) && $category['slug'] === 'seisdeagosto' ) {
-            return $categories;
-        }
-    }
-
-    $categories[] = array(
+    // Add custom category at the beginning of the array for better visibility
+    array_unshift( $categories, array(
         'slug'  => 'seisdeagosto',
-        'title' => __( 'Seis de Agosto', 'u_seisbarra8' ),
+        'title' => __( 'Seis de Agosto', 'seideagosto' ),
         'icon'  => null,
-    );
+    ) );
 
     return $categories;
-} );
+}, 10, 1 );
 
 
 if ( ! function_exists( 'u_seisbarra8_custom_image_sizes_names' ) ) :

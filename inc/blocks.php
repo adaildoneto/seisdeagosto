@@ -140,87 +140,96 @@ function u_correio68_apply_tag_keyword_filters( array $args, $attributes ) {
     return $args;
 }
 
-function u_correio68_register_custom_blocks() {
-$blocks_js_path = get_template_directory() . '/assets/js/custom-blocks.js';
-$blocks_js_url  = get_template_directory_uri() . '/assets/js/custom-blocks.js';
-if ( file_exists( $blocks_js_path ) && ! wp_script_is( 'seideagosto-blocks', 'registered' ) ) {
-    wp_register_script(
-        'seideagosto-blocks',
-        $blocks_js_url,
-        array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render', 'wp-hooks', 'wp-i18n' ),
-        filemtime( $blocks_js_path ),
-        true
-    );
-}
+/**
+ * Register and enqueue block editor assets
+ */
+function u_correio68_enqueue_block_editor_assets() {
+    $blocks_js_path = get_template_directory() . '/assets/js/custom-blocks.js';
+    $blocks_js_url  = get_template_directory_uri() . '/assets/js/custom-blocks.js';
+    
+    if ( file_exists( $blocks_js_path ) ) {
+        wp_enqueue_script(
+            'seideagosto-blocks',
+            $blocks_js_url,
+            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render', 'wp-hooks', 'wp-i18n' ),
+            filemtime( $blocks_js_path ),
+            true
+        );
+    }
 
-$fa_handle = 'u_seisbarra8-fontawesome';
-$fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
-if ( file_exists( $fa_vendor_css ) ) {
-    $fa_fallback = get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
-    $fa_version  = '4.7.0';
-} else {
-    $fa_fallback = get_template_directory_uri() . '/css/local-fa-fallback.css';
-    $fa_version  = file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null;
-}
+    $fa_handle = 'u_seisbarra8-fontawesome';
+    $fa_vendor_css = get_template_directory() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+    if ( file_exists( $fa_vendor_css ) ) {
+        $fa_fallback = get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css';
+        $fa_version  = '4.7.0';
+    } else {
+        $fa_fallback = get_template_directory_uri() . '/css/local-fa-fallback.css';
+        $fa_version  = file_exists( get_template_directory() . '/css/local-fa-fallback.css' ) ? filemtime( get_template_directory() . '/css/local-fa-fallback.css' ) : null;
+    }
 
-if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
-    wp_register_style( $fa_handle, $fa_fallback, array(), $fa_version );
-}
+    if ( $fa_version ) {
+        wp_enqueue_style( $fa_handle, $fa_fallback, array(), $fa_version );
+    }
 
-    // Enqueue block editor assets
-    add_action( 'enqueue_block_editor_assets', function() use ( $fa_handle ) {
-        wp_enqueue_script( 'seideagosto-blocks' );
-        if ( wp_style_is( $fa_handle, 'registered' ) ) {
-            wp_enqueue_style( $fa_handle );
-        }
+    // Get categories for the dropdown
+    $categories = get_categories( array( 'hide_empty' => false ) );
+    $cat_options = array( array( 'value' => 0, 'label' => 'Todas as Categorias' ) );
+    foreach ( $categories as $cat ) {
+        $cat_options[] = array(
+            'value' => $cat->term_id,
+            'label' => $cat->name
+        );
+    }
 
-        // Get categories for the dropdown
-        $categories = get_categories( array( 'hide_empty' => false ) );
-        $cat_options = array( array( 'value' => 0, 'label' => 'Todas as Categorias' ) );
-        foreach ( $categories as $cat ) {
-            $cat_options[] = array(
-                'value' => $cat->term_id,
-                'label' => $cat->name
+    // Get registered sidebars for sidebar selector block
+    $sidebar_options = array();
+    global $wp_registered_sidebars;
+    if ( is_array( $wp_registered_sidebars ) ) {
+        foreach ( $wp_registered_sidebars as $id => $sb ) {
+            $sidebar_options[] = array(
+                'value' => $id,
+                'label' => isset( $sb['name'] ) ? $sb['name'] . " (" . $id . ")" : $id
             );
         }
+    }
 
-        // Get registered sidebars for sidebar selector block
-        $sidebar_options = array();
-        global $wp_registered_sidebars;
-        if ( is_array( $wp_registered_sidebars ) ) {
-            foreach ( $wp_registered_sidebars as $id => $sb ) {
-                $sidebar_options[] = array(
-                    'value' => $id,
-                    'label' => isset( $sb['name'] ) ? $sb['name'] . " (" . $id . ")" : $id
-                );
-            }
-        }
+    // Pass data to JS (editor only)
+    wp_localize_script(
+        'seideagosto-blocks',
+        'seideagostoBlocks',
+        array(
+            'categories' => $cat_options,
+            'sidebars'   => $sidebar_options
+        )
+    );
+    // Backward compatibility - also expose as old name
+    wp_localize_script(
+        'seideagosto-blocks',
+        'uCorreio68Blocks',
+        array(
+            'categories' => $cat_options,
+            'sidebars'   => $sidebar_options
+        )
+    );
+}
+add_action( 'enqueue_block_editor_assets', 'u_correio68_enqueue_block_editor_assets' );
 
-        // Pass data to JS (editor only)
-        wp_localize_script(
-            'seideagosto-blocks',
-            'seideagostoBlocks',
-            array(
-                'categories' => $cat_options,
-                'sidebars'   => $sidebar_options
-            )
-        );
-        // Backward compatibility - also expose as old name
-        wp_localize_script(
-            'seideagosto-blocks',
-            'uCorreio68Blocks',
-            array(
-                'categories' => $cat_options,
-                'sidebars'   => $sidebar_options
-            )
-        );
-    });
+/**
+ * Register custom blocks
+ */
+function u_correio68_register_custom_blocks() {
+    // Force clear WordPress block cache
+    if ( function_exists( 'wp_cache_delete' ) ) {
+        wp_cache_delete( 'block_types', 'core' );
+    }
 
     $typography_default = u_correio68_typography_attribute_schema();
     $typography_light   = u_correio68_typography_attribute_schema( '#FFFFFF' );
 
-    // Register Destaques Home Block
+    // Register Destaques Home Block  
+    // JavaScript handles the editor UI via registerBlockType
     register_block_type( 'seideagosto/destaques-home', array(
+        'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaques_home',
         'attributes' => array(
@@ -249,12 +258,14 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Colunistas Grid Block
     register_block_type( 'seideagosto/colunistas-grid', array(
+        'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_colunistas_grid',
     ) );
 
     // Register Colunista Item Block
     register_block_type( 'seideagosto/colunista-item', array(
+        'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_colunista_item',
         'attributes' => array(
@@ -268,6 +279,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register News Grid Block
     register_block_type( 'seideagosto/news-grid', array(
+        'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_news_grid',
         'attributes' => array_merge(
@@ -288,6 +300,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Category Highlight Block (1 Big + 3 List)
     register_block_type( 'seideagosto/category-highlight', array(
+        'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_category_highlight',
         'attributes' => array_merge(
@@ -309,6 +322,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Destaque Misto (2 Big + List + 1 Column)
     register_block_type( 'seideagosto/destaque-misto', array(
+        'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaque_misto',
         'attributes' => array_merge(
@@ -330,6 +344,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Top Most Read (Top 5) Block
     register_block_type( 'seideagosto/top-most-read', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_top_most_read',
         'attributes'      => array(
@@ -343,6 +358,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Weather Block
     register_block_type( 'seideagosto/weather', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_weather',
         'attributes'      => array(
@@ -360,6 +376,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Currency Monitor Block
     register_block_type( 'seideagosto/currency-monitor', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_currency_monitor',
         'attributes'      => array(
@@ -389,6 +406,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
 
     // Register Sidebar Area Block (render a selected widget area)
     register_block_type( 'seideagosto/sidebar-area', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_sidebar_area',
         'attributes'      => array(
@@ -401,22 +419,55 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
     // BACKWARD COMPATIBILITY: Register old blocks ONLY for rendering frontend
     // (These will be auto-migrated in editor to seideagosto/ namespace)
     // ============================================================================
+    
+    // Register u-correio68/ namespace blocks for backward compatibility
+    $old_blocks = array(
+        'u-correio68/destaques-home' => 'u_correio68_render_destaques_home',
+        'u-correio68/colunistas-grid' => 'u_correio68_render_colunistas_grid',
+        'u-correio68/colunista-item' => 'u_correio68_render_colunista_item',
+        'u-correio68/news-grid' => 'u_correio68_render_news_grid',
+        'u-correio68/category-highlight' => 'u_correio68_render_category_highlight',
+        'u-correio68/destaque-misto' => 'u_correio68_render_destaque_misto',
+        'u-correio68/top-most-read' => 'u_correio68_render_top_most_read',
+        'u-correio68/weather' => 'u_correio68_render_weather',
+        'u-correio68/currency-monitor' => 'u_correio68_render_currency_monitor',
+        'u-correio68/sidebar-area' => 'u_correio68_render_sidebar_area',
+        'u-correio68/titulo-com-icone' => 'u_correio68_render_titulo_com_icone',
+        'u-correio68/destaque-grande' => 'u_correio68_render_destaque_grande',
+        'u-correio68/destaque-pequeno' => 'u_correio68_render_destaque_pequeno',
+        'u-correio68/lista-noticias' => 'u_correio68_render_lista_noticias',
+    );
+    
+    foreach ( $old_blocks as $block_name => $callback ) {
+        if ( function_exists( $callback ) ) {
+            register_block_type( $block_name, array(
+                'category' => 'seisdeagosto',
+                'editor_script' => 'seideagosto-blocks',
+                'render_callback' => $callback,
+            ) );
+        }
+    }
+    
     register_block_type( 'correio68/destaques-home', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaques_home',
         'attributes'      => array( 'categoryId' => array( 'type' => 'string', 'default' => '0' ) ),
     ) );
     register_block_type( 'correio68/colunistas-grid', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_colunistas_grid',
         'attributes'      => array(),
     ) );
     register_block_type( 'correio68/colunista-item', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_colunista_item',
         'attributes'      => array( 'authorId' => array( 'type' => 'number', 'default' => 0 ) ),
     ) );
     register_block_type( 'correio68/news-grid', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_news_grid',
         'attributes'      => array(
@@ -427,6 +478,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ) + u_correio68_typography_attribute_schema(),
     ) );
     register_block_type( 'correio68/category-highlight', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_category_highlight',
         'attributes'      => array(
@@ -438,6 +490,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ) + u_correio68_typography_attribute_schema(),
     ) );
     register_block_type( 'correio68/destaque-misto', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaque_misto',
         'attributes'      => array(
@@ -453,6 +506,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ) + u_correio68_typography_attribute_schema(),
     ) );
     register_block_type( 'correio68/top-most-read', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_top_most_read',
         'attributes'      => array(
@@ -461,6 +515,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ),
     ) );
     register_block_type( 'correio68/weather', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_weather',
         'attributes'      => array(
@@ -475,6 +530,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ),
     ) );
     register_block_type( 'correio68/currency-monitor', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_currency_monitor',
         'attributes'      => array(
@@ -502,6 +558,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ),
     ) );
     register_block_type( 'correio68/sidebar-area', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_sidebar_area',
         'attributes'      => array(
@@ -510,6 +567,7 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
         ),
     ) );
     register_block_type( 'seideagosto/image-slider', array(
+        'category'        => 'seisdeagosto',
         'editor_script'   => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_image_slider',
         'attributes'      => array(
@@ -548,15 +606,61 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
     foreach ( $metadata_blocks as $slug => $callback ) {
         $path = $blocks_dir . '/' . $slug;
         if ( file_exists( $path . '/block.json' ) ) {
-            $args = array();
+            // Only pass render_callback if the function exists
             if ( function_exists( $callback ) ) {
-                $args['render_callback'] = $callback;
+                $result = register_block_type( $path, array(
+                    'render_callback' => $callback
+                ) );
+                // Debug: Log successful registration
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( sprintf( 'Block registered: seideagosto/%s with callback %s', $slug, $callback ) );
+                }
+            } else {
+                $result = register_block_type( $path );
+                // Debug: Log registration without callback
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( sprintf( 'Block registered: seideagosto/%s (no callback found for %s)', $slug, $callback ) );
+                }
             }
-            register_block_type( $path, $args );
+        } else {
+            // Debug: Log missing block.json
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( sprintf( 'Block JSON not found: %s/block.json', $path ) );
+            }
         }
     }
 }
 add_action( 'init', 'u_correio68_register_custom_blocks' );
+
+/**
+ * Debug: List registered blocks in admin footer (only for administrators)
+ * Remove this after confirming blocks are registered
+ */
+add_action( 'admin_footer', function() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    
+    $registered_blocks = WP_Block_Type_Registry::get_instance()->get_all_registered();
+    $our_blocks = array_filter( $registered_blocks, function( $block ) {
+        return strpos( $block->name, 'seideagosto/' ) === 0;
+    } );
+    
+    if ( ! empty( $our_blocks ) ) {
+        echo '<script>console.log("Blocos Seis de Agosto registrados:", ' . wp_json_encode( array_keys( $our_blocks ) ) . ');</script>';
+    } else {
+        echo '<script>console.warn("Nenhum bloco Seis de Agosto encontrado!");</script>';
+    }
+    
+    // Check if category exists
+    echo '<script>';
+    echo 'wp.data.select("core/blocks").getCategories().forEach(function(cat) {';
+    echo '  if (cat.slug === "seisdeagosto") {';
+    echo '    console.log("Categoria encontrada:", cat);';
+    echo '  }';
+    echo '});';
+    echo '</script>';
+} );
 
 /**
  * Inject common design supports to our custom blocks so the Design tab controls appear.
