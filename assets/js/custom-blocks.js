@@ -385,6 +385,9 @@ console.groupEnd();
                             return { label: types[key].name, value: types[key].slug };
                         });
                     setPostTypes(options);
+                }).catch(function() {
+                    if (!mounted) return;
+                    setPostTypes([{ label: 'Erro ao carregar tipos de post', value: 'post' }]);
                 });
                 return function() { mounted = false; };
             }, []);
@@ -411,6 +414,9 @@ console.groupEnd();
                     }).catch(function() {
                         setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
                     });
+                }).catch(function() {
+                    if (!mounted) return;
+                    setCategories([{ label: 'Tipo de post não encontrado', value: '' }]);
                 });
                 return function() { mounted = false; };
             }, [attributes.postType]);
