@@ -1496,14 +1496,14 @@ function u_correio68_render_destaque_misto( $attributes ) {
                                             <div class="list-thumb">
                                               <?php 
                                               if ( class_exists('PG_Image') ) {
-                                                  echo PG_Image::getPostImage(get_the_ID(), 'thumbnail', array('class' => 'img-fluid rounded w-100 h-100', 'style' => 'object-fit: cover;'), null, null);
+                                                  echo PG_Image::getPostImage(get_the_ID(), 'medium', array('class' => 'img-fluid rounded', 'style' => 'object-fit: cover; width: 100%; height: 100%;'), null, null);
                                               } else {
-                                                  echo get_the_post_thumbnail(get_the_ID(), 'thumbnail', array('class' => 'img-fluid rounded w-100 h-100', 'style' => 'object-fit: cover;'));
+                                                  echo get_the_post_thumbnail(get_the_ID(), 'medium', array('class' => 'img-fluid rounded', 'style' => 'object-fit: cover; width: 100%; height: 100%;'));
                                               }
                                               ?>
-                                        </div>
-                                        <?php endif; ?>
-                                        <div class="media-body list-content">
+                                            </div>
+                                            <?php endif; ?>
+                                            <div class="media-body list-content">
                                             <?php if ( $showBadges ) :
                                                 $cor = function_exists('get_field') ? get_field( 'cor' ) : '';
                                                 $icones = function_exists('get_field') ? get_field( 'icones' ) : '';
