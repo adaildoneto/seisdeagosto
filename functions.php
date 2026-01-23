@@ -2384,3 +2384,34 @@ add_action( 'acf/include_fields', function() {
 ) );
 } );
 
+<?php
+// Shortcode para exibir dados do edital
+function exibir_dados_edital_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'id' => get_the_ID()
+    ), $atts);
+    
+    $data_publicacao = get_field('data_da_publicacao_', $atts['id']);
+    $arquivo_pdf = get_field('arquivo_pdf', $atts['id']);
+    
+    ob_start();
+    ?>
+    <div class="edital-dados">
+        <?php if ($data_publicacao): ?>
+            <p><strong>Publicado em:</strong> <?php echo esc_html($data_publicacao); ?></p>
+        <?php endif; ?>
+        
+        <?php if ($arquivo_pdf): ?>
+            <p>
+                <a href="<?php echo esc_url($arquivo_pdf); ?>" 
+                   class="btn btn-primary" 
+                   target="_blank">
+                    <i class="fa fa-download"></i> Download do PDF
+                </a>
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('edital_dados', 'exibir_dados_edital_shortcode');
