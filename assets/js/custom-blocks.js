@@ -408,25 +408,38 @@ console.groupEnd();
                         setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
                         return;
                     }
-                    var tax = type.taxonomies[0];
-                    // WordPress REST API endpoint para taxonomias padrão usa plural
-                    var taxEndpoint = tax === 'category' ? 'categories' : tax === 'post_tag' ? 'tags' : tax;
                     
-                    console.log('[News Grid] Buscando taxonomia:', taxEndpoint);
+                    // Pega a primeira taxonomia associada ao tipo de post
+                    var taxonomySlug = type.taxonomies[0];
+                    console.log('[News Grid] Taxonomia encontrada:', taxonomySlug);
                     
-                    wp.apiFetch({ path: '/wp/v2/' + taxEndpoint + '?per_page=100' }).then(function(terms) {
+                    // Busca informações da taxonomia para obter o rest_base correto
+                    wp.apiFetch({ path: '/wp/v2/taxonomies/' + taxonomySlug }).then(function(taxonomy) {
                         if (!mounted) return;
-                        console.log('[News Grid] Termos carregados:', terms);
-                        var options = [{ label: 'Todas', value: '0' }];
-                        if (Array.isArray(terms)) {
-                            options = options.concat(terms.map(function(term) {
-                                return { label: term.name, value: String(term.id) };
-                            }));
-                        }
-                        setCategories(options);
+                        
+                        console.log('[News Grid] Dados da taxonomia:', taxonomy);
+                        
+                        // Usa o rest_base da taxonomia (o correto segundo a documentação)
+                        var restBase = taxonomy.rest_base || taxonomySlug;
+                        console.log('[News Grid] Buscando termos em:', restBase);
+                        
+                        wp.apiFetch({ path: '/wp/v2/' + restBase + '?per_page=100' }).then(function(terms) {
+                            if (!mounted) return;
+                            console.log('[News Grid] Termos carregados:', terms);
+                            var options = [{ label: 'Todas', value: '0' }];
+                            if (Array.isArray(terms)) {
+                                options = options.concat(terms.map(function(term) {
+                                    return { label: term.name, value: String(term.id) };
+                                }));
+                            }
+                            setCategories(options);
+                        }).catch(function(error) {
+                            console.error('[News Grid] Erro ao carregar termos:', error);
+                            setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
+                        });
                     }).catch(function(error) {
-                        console.error('[News Grid] Erro ao carregar termos:', error);
-                        setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
+                        console.error('[News Grid] Erro ao carregar dados da taxonomia:', error);
+                        setCategories([{ label: 'Erro ao carregar taxonomia', value: '' }]);
                     });
                 }).catch(function(error) {
                     if (!mounted) return;
