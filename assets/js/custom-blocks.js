@@ -130,7 +130,9 @@ console.groupEnd();
                         options: (window.seideagostoBlocks && window.seideagostoBlocks.categories) || [{label: 'Todas', value: '0'}],
                         onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
                     })
-                )
+                ),
+                QueryFiltersPanel(props),
+                TypographyPanel(props)
             ),
             React.createElement('div', {
                 style: {
@@ -154,10 +156,15 @@ console.groupEnd();
         title: 'Destaques Home',
         icon: 'star-filled',
         category: 'seisdeagosto',
-        attributes: {
+        attributes: Object.assign({
             categoryId: { type: 'string', default: '0' },
-            layoutType: { type: 'string', default: 'default' }
-        },
+            categoryIds: { type: 'array', default: [] },
+            excludeCategories: { type: 'string', default: '' },
+            layoutType: { type: 'string', default: 'default' },
+            offset: { type: 'number', default: 0 },
+            tags: { type: 'string', default: '' },
+            keyword: { type: 'string', default: '' }
+        }, getTypographyAttributes()),
         edit: createDestaquesHomeEdit,
         save: function() {
             return null;
@@ -676,13 +683,18 @@ console.groupEnd();
         title: 'Top Mais Lidas',
         icon: 'chart-area',
         category: 'seisdeagosto',
-        attributes: {
+        attributes: Object.assign({
             title: { type: 'string', default: 'Mais lidas' },
             count: { type: 'number', default: 5 },
             metaKey: { type: 'string', default: 'post_views_count' },
             categoryId: { type: 'string', default: '0' },
-            period: { type: 'string', default: 'year' }
-        },
+            categoryIds: { type: 'array', default: [] },
+            excludeCategories: { type: 'string', default: '' },
+            period: { type: 'string', default: 'year' },
+            offset: { type: 'number', default: 0 },
+            tags: { type: 'string', default: '' },
+            keyword: { type: 'string', default: '' }
+        }, getTypographyAttributes()),
         edit: function(props) {
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
@@ -731,7 +743,9 @@ console.groupEnd();
                             onChange: function(val) { setAttributes({ metaKey: val || 'post_views_count' }); },
                             help: 'Ex.: post_views_count (ajuste conforme seu plugin)'
                         })
-                    )
+                    ),
+                    QueryFiltersPanel(props),
+                    TypographyPanel(props)
                 ),
                 el('div', {
                     style: {
