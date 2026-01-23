@@ -934,7 +934,7 @@ body.admin-bar {
 }
 
 #content.header-fixed {
-  padding-top: 60px;
+  padding-top: 20px;
 }
 
 /* Categories navbar - show at top, hide on scroll with smooth animation */
@@ -1263,7 +1263,7 @@ body.admin-bar {
   }
   
   #content.header-fixed {
-    padding-top: 50px;
+    padding-top: 15px;
   }
   
   /* Improved mobile layout */
