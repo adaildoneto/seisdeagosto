@@ -1745,6 +1745,7 @@ require_once "inc/bootstrap/wp_bootstrap4_navwalker.php";
 require_once "inc/blocks.php";
 require_once "inc/widgets.php";
 require_once "inc/customizer.php";
+require_once "inc/icon-picker.php";
 
     /* Pinegrow generated Include Resources End */
     

@@ -151,7 +151,7 @@ function u_correio68_enqueue_block_editor_assets() {
         wp_enqueue_script(
             'seideagosto-blocks',
             $blocks_js_url,
-            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render', 'wp-hooks', 'wp-i18n' ),
+            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-server-side-render', 'wp-hooks', 'wp-i18n', 'wp-api-fetch' ),
             filemtime( $blocks_js_path ),
             true
         );
@@ -169,6 +169,39 @@ function u_correio68_enqueue_block_editor_assets() {
 
     if ( $fa_version ) {
         wp_enqueue_style( $fa_handle, $fa_fallback, array(), $fa_version );
+    }
+
+    // Enqueue titulo-com-icone editor script
+    $titulo_icone_editor_js = get_template_directory() . '/blocks/titulo-com-icone/editor.js';
+    if ( file_exists( $titulo_icone_editor_js ) ) {
+        wp_enqueue_script(
+            'titulo-com-icone-editor',
+            get_template_directory_uri() . '/blocks/titulo-com-icone/editor.js',
+            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'wp-hooks', 'wp-compose', 'jquery' ),
+            filemtime( $titulo_icone_editor_js ),
+            true
+        );
+        
+        // Pass AJAX data to titulo-com-icone editor
+        wp_localize_script(
+            'titulo-com-icone-editor',
+            'seideagostoBlocks',
+            array(
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'seisdeagosto_blocks' )
+            )
+        );
+    }
+
+    // Enqueue titulo-com-icone editor CSS
+    $titulo_icone_editor_css = get_template_directory() . '/blocks/titulo-com-icone/editor.css';
+    if ( file_exists( $titulo_icone_editor_css ) ) {
+        wp_enqueue_style(
+            'titulo-com-icone-editor',
+            get_template_directory_uri() . '/blocks/titulo-com-icone/editor.css',
+            array(),
+            filemtime( $titulo_icone_editor_css )
+        );
     }
 
     // Get categories for the dropdown
@@ -199,7 +232,9 @@ function u_correio68_enqueue_block_editor_assets() {
         'seideagostoBlocks',
         array(
             'categories' => $cat_options,
-            'sidebars'   => $sidebar_options
+            'sidebars'   => $sidebar_options,
+            'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+            'nonce'      => wp_create_nonce( 'seisdeagosto_blocks' )
         )
     );
     // Backward compatibility - also expose as old name
@@ -208,7 +243,9 @@ function u_correio68_enqueue_block_editor_assets() {
         'uCorreio68Blocks',
         array(
             'categories' => $cat_options,
-            'sidebars'   => $sidebar_options
+            'sidebars'   => $sidebar_options,
+            'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+            'nonce'      => wp_create_nonce( 'seisdeagosto_blocks' )
         )
     );
 }
@@ -430,10 +467,10 @@ function u_correio68_register_custom_blocks() {
         'u-correio68/weather' => 'u_correio68_render_weather',
         'u-correio68/currency-monitor' => 'u_correio68_render_currency_monitor',
         'u-correio68/sidebar-area' => 'u_correio68_render_sidebar_area',
-        'u-correio68/titulo-com-icone' => 'u_correio68_render_titulo_com_icone',
-        'u-correio68/destaque-grande' => 'u_correio68_render_destaque_grande',
-        'u-correio68/destaque-pequeno' => 'u_correio68_render_destaque_pequeno',
-        'u-correio68/lista-noticias' => 'u_correio68_render_lista_noticias',
+        // 'u-correio68/titulo-com-icone' => 'u_correio68_render_titulo_com_icone', // Removido - usar seisdeagosto/titulo-com-icone
+        // 'u-correio68/destaque-grande' => 'u_correio68_render_destaque_grande', // Removido - usar seisdeagosto/destaque-grande
+        // 'u-correio68/destaque-pequeno' => 'u_correio68_render_destaque_pequeno', // Removido - usar seisdeagosto/destaque-pequeno
+        // 'u-correio68/lista-noticias' => 'u_correio68_render_lista_noticias', // Removido - usar seisdeagosto/lista-noticias
     );
     
     foreach ( $old_blocks as $block_name => $callback ) {
@@ -610,8 +647,8 @@ function u_correio68_register_custom_blocks() {
                     'render_callback' => $callback
                 ) );
                 // Debug: Log successful registration
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                    error_log( sprintf( 'Block registered: seideagosto/%s with callback %s', $slug, $callback ) );
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $result ) {
+                    error_log( sprintf( 'Block registered: %s with callback %s', $result->name, $callback ) );
                 }
             } else {
                 $result = register_block_type( $path );

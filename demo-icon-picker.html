@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seletor de Ícones Font Awesome - Demonstração</title>
+    
+    <!-- Font Awesome 4.7 -->
+    <link rel="stylesheet" href="assets/vendor/font-awesome-4.7/css/font-awesome.min.css">
+    
+    <!-- Icon Picker CSS -->
+    <link rel="stylesheet" href="assets/css/icon-picker.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .demo-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .result-preview {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .result-preview h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .preview-icon {
+            font-size: 64px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .preview-code {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #495057;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #0073aa;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box h4 {
+            color: #0073aa;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .info-box p {
+            color: #333;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .info-box code {
+            background: rgba(0, 115, 170, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="demo-card">
+            <h1>🎨 Seletor de Ícones Font Awesome</h1>
+            <p class="subtitle">Demonstração do sistema de seleção de ícones com AJAX</p>
+            
+            <div class="form-group">
+                <label for="icon-input">Escolha um ícone:</label>
+                <input type="text" id="icon-input" class="icon-picker-input" value="fa-star" data-icon-picker>
+            </div>
+            
+            <div class="result-preview">
+                <h3>Preview do Ícone Selecionado</h3>
+                <div class="preview-icon">
+                    <i id="preview-icon" class="fa fa-star"></i>
+                </div>
+                <div class="preview-code" id="preview-code">
+                    &lt;i class="fa fa-star"&gt;&lt;/i&gt;
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h4>📋 Como Usar</h4>
+                <p>
+                    Clique no botão "Escolher Ícone" para abrir o seletor. 
+                    Você pode pesquisar por nome ou navegar pela galeria. 
+                    O sistema carrega os ícones via AJAX do WordPress.
+                </p>
+            </div>
+        </div>
+        
+        <div class="demo-card">
+            <h2 style="margin-bottom: 20px; color: #333;">✨ Recursos</h2>
+            <ul class="feature-list">
+                <li>Carregamento dinâmico via AJAX</li>
+                <li>Pesquisa em tempo real de ícones</li>
+                <li>Interface responsiva e moderna</li>
+                <li>Preview instantâneo do ícone selecionado</li>
+                <li>Suporte a Font Awesome 4.7.0</li>
+                <li>Fácil integração com WordPress</li>
+                <li>Mais de 200 ícones disponíveis</li>
+            </ul>
+            
+            <div class="info-box" style="margin-top: 30px;">
+                <h4>💻 Integração no WordPress</h4>
+                <p>
+                    Para usar no admin do WordPress, basta adicionar o atributo 
+                    <code>data-icon-picker</code> em qualquer campo de input:
+                </p>
+                <div class="preview-code" style="margin-top: 10px;">
+                    &lt;input type="text" name="icone" data-icon-picker /&gt;
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Icon Picker JS -->
+    <script src="assets/js/icon-picker.js"></script>
+    
+    <!-- Demo Script -->
+    <script>
+        // Simular o objeto do WordPress para a demo
+        window.seisdeagostoIconPicker = {
+            ajax_url: 'demo-ajax-handler.php',
+            nonce: 'demo-nonce-12345'
+        };
+        
+        // Mock AJAX para a demonstração (simula resposta do servidor)
+        (function($) {
+            const originalAjax = $.ajax;
+            $.ajax = function(settings) {
+                if (settings.data && settings.data.action === 'get_fontawesome_icons') {
+                    // Simular delay de rede
+                    setTimeout(function() {
+                        const mockIcons = generateMockIcons();
+                        settings.success({
+                            success: true,
+                            data: { icons: mockIcons }
+                        });
+                    }, 500);
+                    return;
+                }
+                return originalAjax.call(this, settings);
+            };
+        })(jQuery);
+        
+        // Gerar ícones mock para demonstração
+        function generateMockIcons() {
+            const icons = [
+                { name: 'fa-home', label: 'Home' },
+                { name: 'fa-star', label: 'Star' },
+                { name: 'fa-heart', label: 'Heart' },
+                { name: 'fa-user', label: 'User' },
+                { name: 'fa-search', label: 'Search' },
+                { name: 'fa-cog', label: 'Cog' },
+                { name: 'fa-calendar', label: 'Calendar' },
+                { name: 'fa-camera', label: 'Camera' },
+                { name: 'fa-music', label: 'Music' },
+                { name: 'fa-video-camera', label: 'Video' },
+                { name: 'fa-envelope', label: 'Envelope' },
+                { name: 'fa-phone', label: 'Phone' },
+                { name: 'fa-map-marker', label: 'Map Marker' },
+                { name: 'fa-shopping-cart', label: 'Cart' },
+                { name: 'fa-facebook', label: 'Facebook' },
+                { name: 'fa-twitter', label: 'Twitter' },
+                { name: 'fa-instagram', label: 'Instagram' },
+                { name: 'fa-youtube', label: 'YouTube' },
+                { name: 'fa-cloud', label: 'Cloud' },
+                { name: 'fa-download', label: 'Download' },
+                { name: 'fa-upload', label: 'Upload' },
+                { name: 'fa-bookmark', label: 'Bookmark' },
+                { name: 'fa-thumbs-up', label: 'Thumbs Up' },
+                { name: 'fa-gift', label: 'Gift' },
+                { name: 'fa-coffee', label: 'Coffee' },
+                { name: 'fa-fire', label: 'Fire' },
+                { name: 'fa-trophy', label: 'Trophy' },
+                { name: 'fa-bell', label: 'Bell' },
+                { name: 'fa-check', label: 'Check' },
+                { name: 'fa-times', label: 'Times' },
+                { name: 'fa-arrow-right', label: 'Arrow Right' },
+                { name: 'fa-arrow-left', label: 'Arrow Left' },
+                { name: 'fa-newspaper-o', label: 'Newspaper' },
+                { name: 'fa-comment', label: 'Comment' },
+                { name: 'fa-bullhorn', label: 'Bullhorn' },
+                { name: 'fa-globe', label: 'Globe' },
+                { name: 'fa-lightbulb-o', label: 'Lightbulb' },
+                { name: 'fa-book', label: 'Book' },
+                { name: 'fa-graduation-cap', label: 'Graduation' },
+                { name: 'fa-rocket', label: 'Rocket' },
+            ];
+            return icons;
+        }
+        
+        // Atualizar preview quando o ícone mudar
+        jQuery(document).ready(function($) {
+            $('#icon-input').on('change', function() {
+                const iconClass = $(this).val();
+                $('#preview-icon').attr('class', 'fa ' + iconClass);
+                $('#preview-code').html('&lt;i class="fa ' + iconClass + '"&gt;&lt;/i&gt;');
+            });
+        });
+    </script>
+</body>
+</html>

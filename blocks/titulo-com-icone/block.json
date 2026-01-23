@@ -1,6 +1,6 @@
 {
     "apiVersion": 2,
-    "name": "seideagosto/titulo-com-icone",
+    "name": "seisdeagosto/titulo-com-icone",
     "title": "Título com Ícone",
     "category": "seisdeagosto",
     "icon": "heading",
@@ -55,6 +55,5 @@
         "color": { "text": true, "background": true },
         "spacing": { "margin": true, "padding": true },
         "typography": { "fontSize": true, "fontWeight": true }
-    },
-    "editorScript": "seideagosto-blocks"
+    }
 }

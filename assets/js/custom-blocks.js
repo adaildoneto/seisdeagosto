@@ -1423,11 +1423,95 @@ console.groupEnd();
     // Lightweight previews for metadata-registered blocks (no ServerSideRender)
     function lightPreview(name, props) {
         var a = props.attributes || {};
+        var setAttributes = props.setAttributes;
         var header = '📰 Bloco do Tema';
+        var controls = null;
+        
         if (name === 'seideagosto/destaque-grande') header = '⭐ Destaque Grande';
         if (name === 'seideagosto/destaque-pequeno') header = '⭐ Destaque Pequeno';
         if (name === 'seideagosto/lista-noticias') header = '🗂️ Lista de Notícias';
-        if (name === 'seideagosto/titulo-com-icone') header = '📝 Título com Ícone';
+        
+        if (name === 'seideagosto/titulo-com-icone') {
+            header = '📝 Título com Ícone';
+            controls = React.createElement(
+                InspectorControls,
+                null,
+                React.createElement(
+                    PanelBody,
+                    { title: 'Configurações do Título' },
+                    React.createElement(TextControl, {
+                        label: 'Título',
+                        value: a.titulo || 'CTA',
+                        onChange: function(val) { setAttributes({ titulo: val }); }
+                    }),
+                    React.createElement(TextControl, {
+                        label: 'Ícone (classe Font Awesome)',
+                        value: a.icone || 'fa-star',
+                        help: 'Ex: fa-star, fa-home, fa-heart',
+                        onChange: function(val) { setAttributes({ icone: val }); }
+                    }),
+                    React.createElement(ToggleControl, {
+                        label: 'Mostrar Ícone',
+                        checked: typeof a.mostrarIcone !== 'undefined' ? a.mostrarIcone : true,
+                        onChange: function(val) { setAttributes({ mostrarIcone: val }); }
+                    }),
+                    React.createElement(SelectControl, {
+                        label: 'Alinhamento',
+                        value: a.alinhamento || 'left',
+                        options: [
+                            { label: 'Esquerda', value: 'left' },
+                            { label: 'Centro', value: 'center' },
+                            { label: 'Direita', value: 'right' }
+                        ],
+                        onChange: function(val) { setAttributes({ alinhamento: val }); }
+                    })
+                ),
+                React.createElement(
+                    PanelBody,
+                    { title: 'Estilo e Cores', initialOpen: false },
+                    React.createElement('div', { style: { marginBottom: '12px' } },
+                        React.createElement('label', { style: { display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '500' } }, 'Cor do Ícone'),
+                        React.createElement('input', {
+                            type: 'color',
+                            value: a.corIcone || '#fd7e14',
+                            onChange: function(e) { setAttributes({ corIcone: e.target.value }); },
+                            style: { width: '100%', height: '30px', border: '1px solid #ddd', borderRadius: '2px' }
+                        })
+                    ),
+                    React.createElement('div', { style: { marginBottom: '12px' } },
+                        React.createElement('label', { style: { display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '500' } }, 'Cor da Linha'),
+                        React.createElement('input', {
+                            type: 'color',
+                            value: a.corLinha || '#fd7e14',
+                            onChange: function(e) { setAttributes({ corLinha: e.target.value }); },
+                            style: { width: '100%', height: '30px', border: '1px solid #ddd', borderRadius: '2px' }
+                        })
+                    ),
+                    React.createElement(RangeControl, {
+                        label: 'Tamanho do Ícone',
+                        value: a.tamanhoIcone || 24,
+                        onChange: function(val) { setAttributes({ tamanhoIcone: val }); },
+                        min: 16,
+                        max: 64
+                    }),
+                    React.createElement(RangeControl, {
+                        label: 'Tamanho do Título',
+                        value: a.tamanhoTitulo || 28,
+                        onChange: function(val) { setAttributes({ tamanhoTitulo: val }); },
+                        min: 16,
+                        max: 72
+                    }),
+                    React.createElement(RangeControl, {
+                        label: 'Espessura da Linha',
+                        value: a.espessuraLinha || 3,
+                        onChange: function(val) { setAttributes({ espessuraLinha: val }); },
+                        min: 1,
+                        max: 10
+                    })
+                )
+            );
+        }
+        
         var lines = [];
         if (typeof a.numberOfPosts !== 'undefined') lines.push('Posts: ' + a.numberOfPosts);
         if (typeof a.offset !== 'undefined') lines.push('Offset: ' + a.offset);
@@ -1435,20 +1519,26 @@ console.groupEnd();
         if (typeof a.category !== 'undefined' && a.category) lines.push('Categoria: ' + a.category);
         if (typeof a.titulo !== 'undefined' && a.titulo) lines.push('Título: ' + a.titulo);
         if (typeof a.icone !== 'undefined' && a.icone) lines.push('Ícone: ' + a.icone);
-        return el('div', {
-            style: {
-                border: '2px dashed #17a2b8',
-                borderRadius: '4px',
-                padding: '12px',
-                background: '#f0fcff',
-                color: '#444',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }
-        },[
-            el('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, header),
-            lines.length ? el('div', { style: { fontSize: '12px', color: '#555' } }, lines.join(' · ')) : null,
-            el('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview leve - ver no frontend)')
-        ]);
+        
+        return React.createElement(
+            React.Fragment,
+            null,
+            controls,
+            el('div', {
+                style: {
+                    border: '2px dashed #17a2b8',
+                    borderRadius: '4px',
+                    padding: '12px',
+                    background: '#f0fcff',
+                    color: '#444',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }
+            },[
+                el('div', { style: { fontWeight: 600, marginBottom: '8px', fontSize: '14px' } }, header),
+                lines.length ? el('div', { style: { fontSize: '12px', color: '#555' } }, lines.join(' · ')) : null,
+                el('div', { style: { fontSize: '11px', color: '#999', marginTop: '8px' } }, '(Preview leve - ver no frontend)')
+            ])
+        );
     }
 
     try {

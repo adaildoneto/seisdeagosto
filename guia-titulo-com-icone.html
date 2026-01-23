@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloco Título com Ícone - Guia de Uso</title>
+    <link rel="stylesheet" href="assets/vendor/font-awesome-4.7/css/font-awesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card h2 i {
+            font-size: 28px;
+        }
+        
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            background: #e7f3ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .step h3 {
+            color: #0073aa;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .step p {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .demo-block {
+            background: #fff;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        /* Estilos do bloco (simulação) */
+        .titulo-com-icone-wrapper {
+            display: flex;
+            gap: 12px;
+            padding: 16px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .titulo-com-icone-wrapper:hover .titulo-com-icone-line {
+            transform: scaleX(1) !important;
+            opacity: 1 !important;
+        }
+        
+        .titulo-com-icone-icon {
+            flex-shrink: 0;
+        }
+        
+        .titulo-com-icone-content {
+            flex: 1;
+        }
+        
+        .titulo-com-icone-line-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .titulo-com-icone-titulo {
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .titulo-com-icone-line {
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 80%;
+            transform: scaleX(0);
+            transform-origin: left center;
+            opacity: 0.7;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #e83e8c;
+        }
+        
+        .screenshot {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .screenshot img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Título com Ícone</h1>
+            <p>Bloco WordPress com Seletor de Ícones Font Awesome Integrado</p>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2><i class="fa fa-rocket"></i> Começando</h2>
+                
+                <div class="step">
+                    <h3>1. Adicionar o Bloco</h3>
+                    <p>No editor Gutenberg, clique no botão <strong>+</strong> e procure por "Título com Ícone".</p>
+                </div>
+                
+                <div class="step">
+                    <h3>2. Escolher Ícone</h3>
+                    <p>No painel lateral direito, clique no botão <strong>Escolher</strong> para abrir o seletor de ícones.</p>
+                </div>
+                
+                <div class="step">
+                    <h3>3. Personalizar</h3>
+                    <p>Ajuste cores, tamanhos e alinhamento conforme necessário.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fa fa-star"></i> Recursos</h2>
+                <ul class="feature-list">
+                    <li>Seletor visual de ícones</li>
+                    <li>Pesquisa em tempo real</li>
+                    <li>Preview instantâneo</li>
+                    <li>Linha animada no hover</li>
+                    <li>Cores personalizáveis</li>
+                    <li>Tamanhos ajustáveis</li>
+                    <li>Alinhamento flexível</li>
+                    <li>200+ ícones disponíveis</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fa fa-cog"></i> Opções de Personalização</h2>
+                
+                <div class="example">
+                    <strong>Painel de Conteúdo:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Título do bloco</li>
+                        <li>Mostrar/ocultar ícone</li>
+                        <li>Seletor de ícone</li>
+                        <li>Alinhamento (esquerda/centro/direita)</li>
+                    </ul>
+                </div>
+                
+                <div class="example">
+                    <strong>Painel de Estilo:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Tamanho do título (14-72px)</li>
+                        <li>Tamanho do ícone (14-64px)</li>
+                        <li>Cor do ícone</li>
+                        <li>Espessura da linha (1-10px)</li>
+                        <li>Cor da linha</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fa fa-eye"></i> Exemplos de Uso</h2>
+            
+            <div class="demo-block">
+                <h3 style="margin-bottom: 30px; color: #666;">Exemplos ao Vivo (passe o mouse)</h3>
+                
+                <!-- Exemplo 1 -->
+                <div class="titulo-com-icone-wrapper" style="align-items: flex-start;">
+                    <div class="titulo-com-icone-icon">
+                        <i class="fa fa-star" style="font-size: 24px; color: #fd7e14;"></i>
+                    </div>
+                    <div class="titulo-com-icone-content">
+                        <div class="titulo-com-icone-line-wrapper">
+                            <h3 class="titulo-com-icone-titulo" style="font-size: 28px;">
+                                Destaque Principal
+                            </h3>
+                            <div class="titulo-com-icone-line" style="height: 3px; background-color: #fd7e14;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Exemplo 2 -->
+                <div class="titulo-com-icone-wrapper" style="align-items: center; justify-content: center; margin-top: 40px;">
+                    <div class="titulo-com-icone-icon">
+                        <i class="fa fa-newspaper-o" style="font-size: 32px; color: #0073aa;"></i>
+                    </div>
+                    <div class="titulo-com-icone-content">
+                        <div class="titulo-com-icone-line-wrapper">
+                            <h3 class="titulo-com-icone-titulo" style="font-size: 32px;">
+                                Últimas Notícias
+                            </h3>
+                            <div class="titulo-com-icone-line" style="height: 4px; background-color: #0073aa;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Exemplo 3 -->
+                <div class="titulo-com-icone-wrapper" style="align-items: flex-start; margin-top: 40px;">
+                    <div class="titulo-com-icone-icon">
+                        <i class="fa fa-heart" style="font-size: 20px; color: #e74c3c;"></i>
+                    </div>
+                    <div class="titulo-com-icone-content">
+                        <div class="titulo-com-icone-line-wrapper">
+                            <h3 class="titulo-com-icone-titulo" style="font-size: 24px;">
+                                Mais Lidas
+                            </h3>
+                            <div class="titulo-com-icone-line" style="height: 2px; background-color: #e74c3c;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Exemplo 4 -->
+                <div class="titulo-com-icone-wrapper" style="align-items: flex-start; margin-top: 40px;">
+                    <div class="titulo-com-icone-icon">
+                        <i class="fa fa-video-camera" style="font-size: 28px; color: #9b59b6;"></i>
+                    </div>
+                    <div class="titulo-com-icone-content">
+                        <div class="titulo-com-icone-line-wrapper">
+                            <h3 class="titulo-com-icone-titulo" style="font-size: 30px;">
+                                Vídeos em Destaque
+                            </h3>
+                            <div class="titulo-com-icone-line" style="height: 5px; background-color: #9b59b6;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2><i class="fa fa-search"></i> Seletor de Ícones</h2>
+                <p style="margin-bottom: 20px; color: #666;">
+                    O seletor oferece mais de 200 ícones organizados e pesquisáveis.
+                </p>
+                
+                <div class="example">
+                    <strong>Como Usar:</strong><br>
+                    1. Clique em "Escolher" ao lado do campo de ícone<br>
+                    2. Digite na barra de pesquisa (ex: "star", "heart")<br>
+                    3. Clique no ícone desejado<br>
+                    4. O ícone será aplicado automaticamente
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <strong>Categorias Disponíveis:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px;">
+                        <li>Web Application</li>
+                        <li>Direcional</li>
+                        <li>Redes Sociais</li>
+                        <li>Editor de Texto</li>
+                        <li>Notícias/Mídia</li>
+                        <li>E muito mais...</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fa fa-code"></i> Uso Manual</h2>
+                <p style="margin-bottom: 20px; color: #666;">
+                    Você também pode digitar a classe do ícone manualmente.
+                </p>
+                
+                <div class="example">
+                    <strong>Exemplos de classes válidas:</strong><br><br>
+                    <code>fa-star</code> - Estrela<br>
+                    <code>fa-heart</code> - Coração<br>
+                    <code>fa-home</code> - Casa<br>
+                    <code>fa-user</code> - Usuário<br>
+                    <code>fa-newspaper-o</code> - Jornal<br>
+                    <code>fa-camera</code> - Câmera
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                    <strong>⚠️ Importante:</strong><br>
+                    <span style="font-size: 14px;">Use apenas classes do Font Awesome 4.7. Sempre comece com <code>fa-</code></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fa fa-magic"></i> Animação da Linha</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                A linha decorativa tem uma animação suave quando você passa o mouse sobre o título.
+            </p>
+            
+            <div class="example">
+                <strong>Comportamento:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Linha começa invisível (escala 0)</li>
+                    <li>Expande suavemente ao passar o mouse</li>
+                    <li>Transição de 0.35 segundos</li>
+                    <li>Efeito de fade simultâneo</li>
+                </ul>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 4px;">
+                <strong>💡 Dica:</strong><br>
+                <span style="font-size: 14px;">Ajuste a espessura e a cor da linha para criar diferentes efeitos visuais!</span>
+            </div>
+        </div>
+        
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
+            <h2 style="color: #fff;"><i class="fa fa-check-circle"></i> Tudo Pronto!</h2>
+            <p style="font-size: 16px; line-height: 1.8;">
+                O bloco "Título com Ícone" está totalmente integrado ao seu WordPress.
+                Abra o editor Gutenberg e comece a criar títulos incríveis com ícones personalizados!
+            </p>
+            
+            <div style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 8px;">
+                <strong style="font-size: 18px;">📚 Documentação Completa:</strong><br>
+                <span style="font-size: 14px;">
+                    Veja o arquivo <code style="background: rgba(255, 255, 255, 0.2); color: #fff;">blocks/titulo-com-icone/README.md</code> 
+                    para documentação detalhada.
+                </span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
