@@ -372,8 +372,8 @@ console.groupEnd();
 
             // Use React hooks directly to avoid re-creating hooks on every render
             var React = wp.element;
-            var _useState = React.useState([]), postTypes = _useState[0], setPostTypes = _useState[1];
-            var _useState2 = React.useState([]), categories = _useState2[0], setCategories = _useState2[1];
+            var _useState = React.useState([{ label: 'Carregando...', value: 'post' }]), postTypes = _useState[0], setPostTypes = _useState[1];
+            var _useState2 = React.useState([{ label: 'Carregando...', value: '0' }]), categories = _useState2[0], setCategories = _useState2[1];
 
             React.useEffect(function() {
                 let mounted = true;
@@ -397,12 +397,8 @@ console.groupEnd();
                 var currentPostType = attributes.postType || 'post';
                 let mounted = true;
                 
-                console.log('[News Grid] Carregando categorias para tipo:', currentPostType);
-                
                 wp.apiFetch({ path: '/wp/v2/types/' + currentPostType }).then(function(type) {
                     if (!mounted) return;
-                    
-                    console.log('[News Grid] Tipo de post carregado:', type);
                     
                     if (!type.taxonomies || !type.taxonomies.length) {
                         setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
@@ -411,21 +407,16 @@ console.groupEnd();
                     
                     // Pega a primeira taxonomia associada ao tipo de post
                     var taxonomySlug = type.taxonomies[0];
-                    console.log('[News Grid] Taxonomia encontrada:', taxonomySlug);
                     
                     // Busca informações da taxonomia para obter o rest_base correto
                     wp.apiFetch({ path: '/wp/v2/taxonomies/' + taxonomySlug }).then(function(taxonomy) {
                         if (!mounted) return;
                         
-                        console.log('[News Grid] Dados da taxonomia:', taxonomy);
-                        
                         // Usa o rest_base da taxonomia (o correto segundo a documentação)
                         var restBase = taxonomy.rest_base || taxonomySlug;
-                        console.log('[News Grid] Buscando termos em:', restBase);
                         
                         wp.apiFetch({ path: '/wp/v2/' + restBase + '?per_page=100' }).then(function(terms) {
                             if (!mounted) return;
-                            console.log('[News Grid] Termos carregados:', terms);
                             var options = [{ label: 'Todas', value: '0' }];
                             if (Array.isArray(terms)) {
                                 options = options.concat(terms.map(function(term) {
@@ -433,17 +424,14 @@ console.groupEnd();
                                 }));
                             }
                             setCategories(options);
-                        }).catch(function(error) {
-                            console.error('[News Grid] Erro ao carregar termos:', error);
+                        }).catch(function() {
                             setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
                         });
-                    }).catch(function(error) {
-                        console.error('[News Grid] Erro ao carregar dados da taxonomia:', error);
+                    }).catch(function() {
                         setCategories([{ label: 'Erro ao carregar taxonomia', value: '' }]);
                     });
-                }).catch(function(error) {
+                }).catch(function() {
                     if (!mounted) return;
-                    console.error('[News Grid] Erro ao carregar tipo de post:', error);
                     setCategories([{ label: 'Tipo de post não encontrado', value: '' }]);
                 });
                 return function() { mounted = false; };
@@ -461,13 +449,13 @@ console.groupEnd();
                         el(SelectControl, {
                             label: 'Tipo de Post',
                             value: attributes.postType || 'post',
-                            options: postTypes.length ? postTypes : [ { label: 'Carregando...', value: '' } ],
+                            options: postTypes,
                             onChange: function(val) { setAttributes({ postType: val, categoryId: '0' }); }
                         }),
                         el(SelectControl, {
                             label: 'Categoria',
-                            value: attributes.categoryId,
-                            options: categories.length ? categories : [ { label: 'Carregando...', value: '' } ],
+                            value: attributes.categoryId || '0',
+                            options: categories,
                             onChange: function(val) { setAttributes({ categoryId: String(val || '0') }); }
                         }),
                         el(RangeControl, {
