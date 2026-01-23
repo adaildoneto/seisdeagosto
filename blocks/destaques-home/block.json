@@ -1,0 +1,86 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "seideagosto/destaques-home",
+	"version": "1.0.0",
+	"title": "Destaques Home",
+	"category": "seisdeagosto",
+	"icon": "star-filled",
+	"description": "Exibe posts em destaque na página inicial com layout customizado",
+	"keywords": ["destaques", "home", "posts", "featured"],
+	"textdomain": "seisdeagosto",
+	"attributes": {
+		"categoryId": {
+			"type": "string",
+			"default": "0"
+		},
+		"categoryIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "number"
+			}
+		},
+		"excludeCategories": {
+			"type": "string",
+			"default": ""
+		},
+		"layoutType": {
+			"type": "string",
+			"default": "default",
+			"enum": ["default", "grid", "list"]
+		},
+		"offset": {
+			"type": "number",
+			"default": 0
+		},
+		"tags": {
+			"type": "string",
+			"default": ""
+		},
+		"keyword": {
+			"type": "string",
+			"default": ""
+		},
+		"fontSize": {
+			"type": "number",
+			"default": 16
+		},
+		"fontFamily": {
+			"type": "string",
+			"default": "Arial, sans-serif"
+		},
+		"fontWeight": {
+			"type": "string",
+			"default": "normal"
+		},
+		"titleColor": {
+			"type": "string",
+			"default": "#000000"
+		}
+	},
+	"example": {
+		"attributes": {
+			"categoryId": "1",
+			"layoutType": "default"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": true,
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"link": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		}
+	}
+}

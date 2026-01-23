@@ -1,0 +1,94 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "seideagosto/news-grid",
+	"version": "1.0.0",
+	"title": "Grid de Notícias",
+	"category": "seisdeagosto",
+	"icon": "grid-view",
+	"description": "Exibe notícias em formato de grade com filtros avançados",
+	"keywords": ["notícias", "grid", "posts", "news"],
+	"textdomain": "seisdeagosto",
+	"attributes": {
+		"categoryId": {
+			"type": "string",
+			"default": "0"
+		},
+		"categoryIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "number"
+			}
+		},
+		"excludeCategories": {
+			"type": "string",
+			"default": ""
+		},
+		"numberOfPosts": {
+			"type": "number",
+			"default": 9
+		},
+		"columns": {
+			"type": "number",
+			"default": 3,
+			"enum": [1, 2, 3, 4, 6]
+		},
+		"offset": {
+			"type": "number",
+			"default": 0
+		},
+		"paginate": {
+			"type": "boolean",
+			"default": false
+		},
+		"tags": {
+			"type": "string",
+			"default": ""
+		},
+		"keyword": {
+			"type": "string",
+			"default": ""
+		},
+		"fontSize": {
+			"type": "number",
+			"default": 16
+		},
+		"fontFamily": {
+			"type": "string",
+			"default": "Arial, sans-serif"
+		},
+		"fontWeight": {
+			"type": "string",
+			"default": "normal"
+		},
+		"titleColor": {
+			"type": "string",
+			"default": "#000000"
+		}
+	},
+	"example": {
+		"attributes": {
+			"numberOfPosts": 6,
+			"columns": 3
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": ["wide", "full"],
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"link": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		}
+	}
+}

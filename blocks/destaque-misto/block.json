@@ -1,0 +1,92 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "seideagosto/destaque-misto",
+	"version": "1.0.0",
+	"title": "Destaque Misto",
+	"category": "seisdeagosto",
+	"icon": "layout",
+	"description": "Layout misto com destaque principal e lista lateral de posts",
+	"keywords": ["destaque", "misto", "posts", "mixed"],
+	"textdomain": "seisdeagosto",
+	"attributes": {
+		"categoryId": {
+			"type": "string",
+			"default": "0"
+		},
+		"categoryIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "number"
+			}
+		},
+		"excludeCategories": {
+			"type": "string",
+			"default": ""
+		},
+		"offset": {
+			"type": "number",
+			"default": 0
+		},
+		"showHighlights": {
+			"type": "boolean",
+			"default": true
+		},
+		"showList": {
+			"type": "boolean",
+			"default": true
+		},
+		"showListThumbs": {
+			"type": "boolean",
+			"default": true
+		},
+		"showBadges": {
+			"type": "boolean",
+			"default": true
+		},
+		"tags": {
+			"type": "string",
+			"default": ""
+		},
+		"keyword": {
+			"type": "string",
+			"default": ""
+		},
+		"fontSize": {
+			"type": "number",
+			"default": 16
+		},
+		"fontFamily": {
+			"type": "string",
+			"default": "Arial, sans-serif"
+		},
+		"fontWeight": {
+			"type": "string",
+			"default": "normal"
+		},
+		"titleColor": {
+			"type": "string",
+			"default": "#FFFFFF"
+		}
+	},
+	"example": {
+		"attributes": {
+			"numberOfPosts": 5
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": true,
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"link": true
+		}
+	}
+}

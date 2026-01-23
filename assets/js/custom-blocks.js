@@ -94,11 +94,98 @@ console.groupEnd();
     }
 
     function TypographyPanel(props, defaultColor) {
-        return null; // Simplified - typography controls can be added later if needed
+        var attributes = props.attributes;
+        var setAttributes = props.setAttributes;
+        defaultColor = defaultColor || '#000000';
+
+        return React.createElement(
+            PanelBody,
+            { title: 'Tipografia', initialOpen: false },
+            React.createElement(RangeControl, {
+                label: 'Tamanho da Fonte',
+                value: attributes.fontSize || 16,
+                onChange: function(val) { setAttributes({ fontSize: val }); },
+                min: 12,
+                max: 48
+            }),
+            React.createElement(TextControl, {
+                label: 'Família da Fonte',
+                value: attributes.fontFamily || 'Arial, sans-serif',
+                onChange: function(val) { setAttributes({ fontFamily: val }); }
+            }),
+            React.createElement(SelectControl, {
+                label: 'Peso da Fonte',
+                value: attributes.fontWeight || 'normal',
+                options: [
+                    { label: 'Normal', value: 'normal' },
+                    { label: 'Bold', value: 'bold' },
+                    { label: '300', value: '300' },
+                    { label: '400', value: '400' },
+                    { label: '500', value: '500' },
+                    { label: '600', value: '600' },
+                    { label: '700', value: '700' }
+                ],
+                onChange: function(val) { setAttributes({ fontWeight: val }); }
+            }),
+            React.createElement('div', { style: { marginTop: '12px' } },
+                React.createElement('label', { style: { display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '500' } }, 'Cor do Título'),
+                React.createElement('input', {
+                    type: 'color',
+                    value: attributes.titleColor || defaultColor,
+                    onChange: function(e) { setAttributes({ titleColor: e.target.value }); },
+                    style: { width: '100%', height: '30px', border: '1px solid #ddd', borderRadius: '2px' }
+                })
+            )
+        );
     }
 
     function QueryFiltersPanel(props) {
-        return null; // Simplified - query filters can be added later if needed  
+        var attributes = props.attributes;
+        var setAttributes = props.setAttributes;
+
+        return React.createElement(
+            PanelBody,
+            { title: 'Filtros Avançados', initialOpen: false },
+            React.createElement(TextControl, {
+                label: 'IDs de Categorias (separados por vírgula)',
+                value: (attributes.categoryIds && attributes.categoryIds.join(',')) || '',
+                help: 'Ex: 1,5,8 - Deixe vazio para usar categoria única',
+                onChange: function(val) {
+                    if (val) {
+                        var ids = val.split(',').map(function(id) { return parseInt(id.trim(), 10); }).filter(function(id) { return !isNaN(id); });
+                        setAttributes({ categoryIds: ids });
+                    } else {
+                        setAttributes({ categoryIds: [] });
+                    }
+                }
+            }),
+            React.createElement(TextControl, {
+                label: 'Excluir Categorias (IDs separados por vírgula)',
+                value: attributes.excludeCategories || '',
+                help: 'Ex: 2,3,7 - Posts dessas categorias serão excluídos',
+                onChange: function(val) { setAttributes({ excludeCategories: val }); }
+            }),
+            React.createElement(RangeControl, {
+                label: 'Offset (pular posts)',
+                value: attributes.offset || 0,
+                onChange: function(val) { setAttributes({ offset: val }); },
+                min: 0,
+                max: 50,
+                help: 'Quantidade de posts a pular no início'
+            }),
+            React.createElement(TextControl, {
+                label: 'Tags (slugs separados por vírgula)',
+                value: attributes.tags || '',
+                help: 'Ex: esporte,politica,economia',
+                onChange: function(val) { setAttributes({ tags: val }); }
+            }),
+            React.createElement(TextControl, {
+                label: 'Palavra-chave (busca)',
+                value: attributes.keyword || '',
+                help: 'Buscar por palavra no título ou conteúdo',
+                onChange: function(val) { setAttributes({ keyword: val }); }
+            })
+        );
     }
 
     // Destaques Home - Simple Editor Block

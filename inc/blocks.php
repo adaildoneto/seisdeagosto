@@ -226,30 +226,19 @@ function u_correio68_register_custom_blocks() {
     $typography_default = u_correio68_typography_attribute_schema();
     $typography_light   = u_correio68_typography_attribute_schema( '#FFFFFF' );
 
-    // Register Destaques Home Block  
-    // JavaScript handles the editor UI via registerBlockType
+    // Register blocks (using traditional PHP registration)
+    // JavaScript handles editor UI via registerBlockType in custom-blocks.js
+    
+    // Register Destaques Home Block
     register_block_type( 'seideagosto/destaques-home', array(
         'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_destaques_home',
         'attributes' => array(
-            'categoryId' => array(
-                'type' => 'string',
-                'default' => '0',
-            ),
-            'categoryIds' => array(
-                'type' => 'array',
-                'default' => array(),
-                'items' => array( 'type' => 'number' ),
-            ),
-            'excludeCategories' => array(
-                'type' => 'string',
-                'default' => '',
-            ),
-            'layoutType' => array(
-                'type' => 'string',
-                'default' => 'default',
-            ),
+            'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+            'categoryIds' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
+            'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
+            'layoutType' => array( 'type' => 'string', 'default' => 'default' ),
             'offset' => array( 'type' => 'number', 'default' => 0 ),
             'tags' => array( 'type' => 'string', 'default' => '' ),
             'keyword' => array( 'type' => 'string', 'default' => '' ),
@@ -284,21 +273,21 @@ function u_correio68_register_custom_blocks() {
         'render_callback' => 'u_correio68_render_news_grid',
         'attributes' => array_merge(
             array(
-                'categoryId'    => array( 'type' => 'string', 'default' => '0' ),
-                'categoryIds'   => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
+                'categoryId' => array( 'type' => 'string', 'default' => '0' ),
+                'categoryIds' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
                 'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
                 'numberOfPosts' => array( 'type' => 'number', 'default' => 9 ),
-                'offset'        => array( 'type' => 'number', 'default' => 0 ),
-                'columns'       => array( 'type' => 'number', 'default' => 3 ),
-                'paginate'      => array( 'type' => 'boolean', 'default' => false ),
-                'tags'          => array( 'type' => 'string', 'default' => '' ),
-                'keyword'       => array( 'type' => 'string', 'default' => '' ),
+                'offset' => array( 'type' => 'number', 'default' => 0 ),
+                'columns' => array( 'type' => 'number', 'default' => 3 ),
+                'paginate' => array( 'type' => 'boolean', 'default' => false ),
+                'tags' => array( 'type' => 'string', 'default' => '' ),
+                'keyword' => array( 'type' => 'string', 'default' => '' ),
             ),
             $typography_default
         ),
     ) );
 
-    // Register Category Highlight Block (1 Big + 3 List)
+    // Register Category Highlight Block
     register_block_type( 'seideagosto/category-highlight', array(
         'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
@@ -308,19 +297,19 @@ function u_correio68_register_custom_blocks() {
                 'categoryId' => array( 'type' => 'string', 'default' => '0' ),
                 'categoryIds' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
                 'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
-                'title'      => array( 'type' => 'string', 'default' => '' ),
-                'bigCount'   => array( 'type' => 'number', 'default' => 1 ),
-                'listCount'  => array( 'type' => 'number', 'default' => 3 ),
-                'offset'     => array( 'type' => 'number', 'default' => 0 ),
+                'title' => array( 'type' => 'string', 'default' => '' ),
+                'bigCount' => array( 'type' => 'number', 'default' => 1 ),
+                'listCount' => array( 'type' => 'number', 'default' => 3 ),
+                'offset' => array( 'type' => 'number', 'default' => 0 ),
                 'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
-                'tags'       => array( 'type' => 'string', 'default' => '' ),
-                'keyword'    => array( 'type' => 'string', 'default' => '' ),
+                'tags' => array( 'type' => 'string', 'default' => '' ),
+                'keyword' => array( 'type' => 'string', 'default' => '' ),
             ),
             $typography_default
         ),
     ) );
 
-    // Register Destaque Misto (2 Big + List + 1 Column)
+    // Register Destaque Misto Block
     register_block_type( 'seideagosto/destaque-misto', array(
         'category' => 'seisdeagosto',
         'editor_script' => 'seideagosto-blocks',
@@ -335,24 +324,33 @@ function u_correio68_register_custom_blocks() {
                 'showList' => array( 'type' => 'boolean', 'default' => true ),
                 'showListThumbs' => array( 'type' => 'boolean', 'default' => true ),
                 'showBadges' => array( 'type' => 'boolean', 'default' => true ),
-                'tags'       => array( 'type' => 'string', 'default' => '' ),
-                'keyword'    => array( 'type' => 'string', 'default' => '' ),
+                'tags' => array( 'type' => 'string', 'default' => '' ),
+                'keyword' => array( 'type' => 'string', 'default' => '' ),
             ),
             $typography_light
         ),
     ) );
 
-    // Register Top Most Read (Top 5) Block
+    // Register Top Most Read Block
     register_block_type( 'seideagosto/top-most-read', array(
-        'category'        => 'seisdeagosto',
-        'editor_script'   => 'seideagosto-blocks',
+        'category' => 'seisdeagosto',
+        'editor_script' => 'seideagosto-blocks',
         'render_callback' => 'u_correio68_render_top_most_read',
-        'attributes'      => array(
-            'title'      => array( 'type' => 'string', 'default' => 'Mais lidas' ),
-            'count'      => array( 'type' => 'number', 'default' => 5 ),
-            'metaKey'    => array( 'type' => 'string', 'default' => 'post_views_count' ),
+        'attributes' => array(
+            'title' => array( 'type' => 'string', 'default' => 'Mais lidas' ),
+            'count' => array( 'type' => 'number', 'default' => 5 ),
+            'metaKey' => array( 'type' => 'string', 'default' => 'post_views_count' ),
             'categoryId' => array( 'type' => 'string', 'default' => '0' ),
-            'period'     => array( 'type' => 'string', 'default' => 'year' ), // year, 90days, 30days, week
+            'categoryIds' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'number' ) ),
+            'excludeCategories' => array( 'type' => 'string', 'default' => '' ),
+            'period' => array( 'type' => 'string', 'default' => 'year' ),
+            'offset' => array( 'type' => 'number', 'default' => 0 ),
+            'tags' => array( 'type' => 'string', 'default' => '' ),
+            'keyword' => array( 'type' => 'string', 'default' => '' ),
+            'fontSize' => array( 'type' => 'number', 'default' => 16 ),
+            'fontFamily' => array( 'type' => 'string', 'default' => 'Arial, sans-serif' ),
+            'fontWeight' => array( 'type' => 'string', 'default' => 'normal' ),
+            'titleColor' => array( 'type' => 'string', 'default' => '#000000' ),
         ),
     ) );
 
@@ -365,12 +363,12 @@ function u_correio68_register_custom_blocks() {
             'cityName'      => array( 'type' => 'string', 'default' => '' ),
             'latitude'      => array( 'type' => 'string', 'default' => '' ),
             'longitude'     => array( 'type' => 'string', 'default' => '' ),
-            'units'         => array( 'type' => 'string', 'default' => 'c' ), // 'c' Celsius, 'f' Fahrenheit
-            'theme'         => array( 'type' => 'string', 'default' => 'dark' ), // 'dark' or 'light'
+            'units'         => array( 'type' => 'string', 'default' => 'c' ),
+            'theme'         => array( 'type' => 'string', 'default' => 'dark' ),
             'showWind'      => array( 'type' => 'boolean', 'default' => true ),
             'showRain'      => array( 'type' => 'boolean', 'default' => true ),
-            'forecastDays'  => array( 'type' => 'number', 'default' => 5 ), // 3, 5, or 7 days
-            'showForecast'  => array( 'type' => 'boolean', 'default' => true ), // Show/hide forecast
+            'forecastDays'  => array( 'type' => 'number', 'default' => 5 ),
+            'showForecast'  => array( 'type' => 'boolean', 'default' => true ),
         ),
     ) );
 
@@ -394,9 +392,9 @@ function u_correio68_register_custom_blocks() {
             'showUYU'     => array( 'type' => 'boolean', 'default' => false ),
             'showPYG'     => array( 'type' => 'boolean', 'default' => false ),
             'showMXN'     => array( 'type' => 'boolean', 'default' => false ),
-            'spread'      => array( 'type' => 'number',  'default' => 0 ), // percent
+            'spread'      => array( 'type' => 'number',  'default' => 0 ),
             'showUpdated' => array( 'type' => 'boolean', 'default' => true ),
-            'slidesToShow'=> array( 'type' => 'number',  'default' => 2 ), // slides per view
+            'slidesToShow'=> array( 'type' => 'number',  'default' => 2 ),
             'autoplay'    => array( 'type' => 'boolean', 'default' => true ),
             'autoplaySpeed' => array( 'type' => 'number', 'default' => 3000 ),
             'showFlags'   => array( 'type' => 'boolean', 'default' => true ),
@@ -1580,7 +1578,11 @@ function u_correio68_render_top_most_read( $attributes ) {
         'date_query'          => array( $date_query ),
         'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
     );
-    $args = u_correio68_apply_category_filter( $args, $categoryId, array() );
+    
+    // Apply all filters
+    $args = u_correio68_apply_category_filter( $args, $categoryId, $attributes );
+    $args = u_correio68_apply_offset( $args, $attributes );
+    $args = u_correio68_apply_tag_keyword_filters( $args, $attributes );
 
     $query = new WP_Query( $args );
 
@@ -1596,7 +1598,9 @@ function u_correio68_render_top_most_read( $attributes ) {
             'date_query'          => array( $date_query ),
             'post__not_in'        => class_exists( 'PG_Helper' ) ? PG_Helper::getShownPosts() : array(),
         );
-        $args_fallback = u_correio68_apply_category_filter( $args_fallback, $categoryId, array() );
+        $args_fallback = u_correio68_apply_category_filter( $args_fallback, $categoryId, $attributes );
+        $args_fallback = u_correio68_apply_offset( $args_fallback, $attributes );
+        $args_fallback = u_correio68_apply_tag_keyword_filters( $args_fallback, $attributes );
         $query = new WP_Query( $args_fallback );
     }
 
