@@ -393,17 +393,30 @@ console.groupEnd();
             }, []);
 
             React.useEffect(function() {
-                if (!attributes.postType) return;
+                // Usa 'post' como padrão se postType não estiver definido
+                var currentPostType = attributes.postType || 'post';
                 let mounted = true;
-                wp.apiFetch({ path: '/wp/v2/types/' + attributes.postType }).then(function(type) {
+                
+                console.log('[News Grid] Carregando categorias para tipo:', currentPostType);
+                
+                wp.apiFetch({ path: '/wp/v2/types/' + currentPostType }).then(function(type) {
                     if (!mounted) return;
+                    
+                    console.log('[News Grid] Tipo de post carregado:', type);
+                    
                     if (!type.taxonomies || !type.taxonomies.length) {
                         setCategories([{ label: 'Nenhuma categoria disponível', value: '' }]);
                         return;
                     }
                     var tax = type.taxonomies[0];
-                    wp.apiFetch({ path: '/wp/v2/' + tax + '?per_page=100' }).then(function(terms) {
+                    // WordPress REST API endpoint para taxonomias padrão usa plural
+                    var taxEndpoint = tax === 'category' ? 'categories' : tax === 'post_tag' ? 'tags' : tax;
+                    
+                    console.log('[News Grid] Buscando taxonomia:', taxEndpoint);
+                    
+                    wp.apiFetch({ path: '/wp/v2/' + taxEndpoint + '?per_page=100' }).then(function(terms) {
                         if (!mounted) return;
+                        console.log('[News Grid] Termos carregados:', terms);
                         var options = [{ label: 'Todas', value: '0' }];
                         if (Array.isArray(terms)) {
                             options = options.concat(terms.map(function(term) {
@@ -411,11 +424,13 @@ console.groupEnd();
                             }));
                         }
                         setCategories(options);
-                    }).catch(function() {
+                    }).catch(function(error) {
+                        console.error('[News Grid] Erro ao carregar termos:', error);
                         setCategories([{ label: 'Nenhuma categoria encontrada', value: '' }]);
                     });
-                }).catch(function() {
+                }).catch(function(error) {
                     if (!mounted) return;
+                    console.error('[News Grid] Erro ao carregar tipo de post:', error);
                     setCategories([{ label: 'Tipo de post não encontrado', value: '' }]);
                 });
                 return function() { mounted = false; };
