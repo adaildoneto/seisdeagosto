@@ -2297,3 +2297,90 @@ function cptui_register_my_cpts_edital() {
 }
 
 add_action( 'init', 'cptui_register_my_cpts_edital' );
+
+add_action( 'acf/include_fields', function() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	acf_add_local_field_group( array(
+	'key' => 'group_6243344b7e1a7',
+	'title' => 'Publicação Legal',
+	'fields' => array(
+		array(
+			'key' => 'field_6243351e30ca0',
+			'label' => 'Data da Publicação',
+			'name' => 'data_da_publicacao_',
+			'aria-label' => '',
+			'type' => 'text',
+			'instructions' => 'Escreva a data da publicaçao. Ex. 30 de fevereiros de 1999',
+			'required' => 1,
+			'conditional_logic' => 0,
+			'wrapper' => array(
+				'width' => '',
+				'class' => '',
+				'id' => '',
+			),
+			'default_value' => '',
+			'placeholder' => '',
+			'prepend' => '',
+			'append' => '',
+			'maxlength' => '',
+		),
+		array(
+			'key' => 'field_6243357e30ca1',
+			'label' => 'Arquivo PDF',
+			'name' => 'arquivo_pdf',
+			'aria-label' => '',
+			'type' => 'file',
+			'instructions' => 'Faça o uploado do Edital a ser publicado',
+			'required' => 0,
+			'conditional_logic' => 0,
+			'wrapper' => array(
+				'width' => '',
+				'class' => '',
+				'id' => '',
+			),
+			'return_format' => 'url',
+			'library' => 'uploadedTo',
+			'min_size' => '',
+			'max_size' => 10,
+			'mime_types' => 'PDF',
+			'uploader' => '',
+		),
+	),
+	'location' => array(
+		array(
+			array(
+				'param' => 'post_type',
+				'operator' => '==',
+				'value' => 'edital',
+			),
+		),
+	),
+	'menu_order' => 0,
+	'position' => 'acf_after_title',
+	'style' => 'default',
+	'label_placement' => 'top',
+	'instruction_placement' => 'label',
+	'hide_on_screen' => array(
+		0 => 'the_content',
+		1 => 'excerpt',
+		2 => 'discussion',
+		3 => 'comments',
+		4 => 'revisions',
+		5 => 'author',
+		6 => 'format',
+		7 => 'page_attributes',
+		8 => 'featured_image',
+		9 => 'categories',
+		10 => 'tags',
+		11 => 'send-trackbacks',
+	),
+	'active' => true,
+	'description' => 'Preencha os Campos',
+	'show_in_rest' => 0,
+	'display_title' => '',
+) );
+} );
+
