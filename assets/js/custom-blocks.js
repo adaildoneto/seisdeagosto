@@ -367,6 +367,8 @@ console.groupEnd();
             keyword: { type: 'string', default: '' }
         }, getTypographyAttributes()),
         edit: function(props) {
+            var attributes = props.attributes;
+            var setAttributes = props.setAttributes;
 
             // Use React hooks directly to avoid re-creating hooks on every render
             var React = wp.element;
