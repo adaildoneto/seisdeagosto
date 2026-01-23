@@ -2384,7 +2384,6 @@ add_action( 'acf/include_fields', function() {
 ) );
 } );
 
-<?php
 // Shortcode para exibir dados do edital
 function exibir_dados_edital_shortcode($atts) {
     $atts = shortcode_atts(array(
