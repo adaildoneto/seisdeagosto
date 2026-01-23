@@ -1348,9 +1348,10 @@ console.groupEnd();
     function lightPreview(name, props) {
         var a = props.attributes || {};
         var header = '📰 Bloco do Tema';
-        if (name === 'u-correio68/destaque-grande') header = '⭐ Destaque Grande';
-        if (name === 'u-correio68/destaque-pequeno') header = '⭐ Destaque Pequeno';
-        if (name === 'u-correio68/lista-noticias') header = '🗂️ Lista de Notícias';
+        if (name === 'seideagosto/destaque-grande') header = '⭐ Destaque Grande';
+        if (name === 'seideagosto/destaque-pequeno') header = '⭐ Destaque Pequeno';
+        if (name === 'seideagosto/lista-noticias') header = '🗂️ Lista de Notícias';
+        if (name === 'seideagosto/titulo-com-icone') header = '📝 Título com Ícone';
         var lines = [];
         if (typeof a.numberOfPosts !== 'undefined') lines.push('Posts: ' + a.numberOfPosts);
         if (typeof a.offset !== 'undefined') lines.push('Offset: ' + a.offset);
@@ -1377,9 +1378,10 @@ console.groupEnd();
     try {
         addFilter('blocks.registerBlockType', 'seisdeagosto/light-previews', function(settings, name) {
             var targets = [
-                'u-correio68/destaque-grande',
-                'u-correio68/destaque-pequeno',
-                'u-correio68/lista-noticias'
+                'seideagosto/destaque-grande',
+                'seideagosto/destaque-pequeno',
+                'seideagosto/lista-noticias',
+                'seideagosto/titulo-com-icone'
             ];
             if (targets.indexOf(name) !== -1) {
                 settings.edit = function(props) { return lightPreview(name, props); };
@@ -1394,9 +1396,10 @@ console.groupEnd();
     // Fallback: if blocks already registered before filters, override via domReady
     wp.domReady(function() {
         var targets = [
-            'u-correio68/destaque-grande',
-            'u-correio68/destaque-pequeno',
-            'u-correio68/lista-noticias'
+            'seideagosto/destaque-grande',
+            'seideagosto/destaque-pequeno',
+            'seideagosto/lista-noticias',
+            'seideagosto/titulo-com-icone'
         ];
         targets.forEach(function(name) {
             var existing = wp.blocks.getBlockType(name);
@@ -1429,11 +1432,6 @@ console.groupEnd();
             
             var oldNamespaces = ['u-correio68/', 'correio68/'];
             var isOld = oldNamespaces.some(function(ns) { return name.indexOf(ns) === 0; });
-
-            // Permite inserir o bloco de Título com Ícone (CTA)
-            if (name === 'u-correio68/titulo-com-icone') {
-                return settings;
-            }
             
             if (isOld) {
                 // Mark as non-insertable - will only render existing content
@@ -1664,7 +1662,7 @@ console.groupEnd();
 
     // CTA (Título com Ícone)
     wp.domReady(function() {
-        var ctaBlockName = 'u-correio68/titulo-com-icone';
+        var ctaBlockName = 'seideagosto/titulo-com-icone';
         try {
             var existing = wp.blocks.getBlockType(ctaBlockName);
             var settings = {
@@ -1782,7 +1780,7 @@ console.groupEnd();
                         ),
                         el('div', blockProps, 
                             SSR ? el(SSR, {
-                                block: 'u-correio68/titulo-com-icone',
+                                block: 'seideagosto/titulo-com-icone',
                                 attributes: attributes
                             }) : el('div', {}, 'ServerSideRender not available')
                         )

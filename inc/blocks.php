@@ -529,31 +529,30 @@ if ( ! wp_style_is( $fa_handle, 'registered' ) ) {
     // Register metadata-based blocks from theme/blocks directory
     $blocks_dir = get_template_directory() . '/blocks';
     
-    // Include render callbacks for metadata blocks
-    if ( file_exists( $blocks_dir . '/titulo-com-icone/render.php' ) ) {
-        require_once( $blocks_dir . '/titulo-com-icone/render.php' );
+    $metadata_blocks = array(
+        'destaque-grande' => 'u_correio68_render_destaque_grande',
+        'destaque-pequeno' => 'u_correio68_render_destaque_pequeno',
+        'lista-noticias' => 'u_correio68_render_lista_noticias',
+        'titulo-com-icone' => 'u_correio68_render_titulo_com_icone',
+    );
+    
+    // Include render callbacks for all metadata blocks
+    foreach ( $metadata_blocks as $slug => $callback ) {
+        $render_file = $blocks_dir . '/' . $slug . '/render.php';
+        if ( file_exists( $render_file ) ) {
+            require_once( $render_file );
+        }
     }
     
-    $metadata_blocks = array(
-        'destaque-grande',
-        'destaque-pequeno',
-        'lista-noticias',
-        'titulo-com-icone',
-    );
-    foreach ( $metadata_blocks as $slug ) {
+    // Register each block with its render callback
+    foreach ( $metadata_blocks as $slug => $callback ) {
         $path = $blocks_dir . '/' . $slug;
         if ( file_exists( $path . '/block.json' ) ) {
-            $block_config = json_decode( file_get_contents( $path . '/block.json' ), true );
-            if ( $block_config ) {
-                $block_config['render_callback'] = isset( $block_config['renderCallback'] ) ? $block_config['renderCallback'] : '';
-                $register_args = array('editor_script' => 'seisdeagosto-custom-blocks');
-                if ( ! empty( $block_config['render_callback'] ) && function_exists( $block_config['render_callback'] ) ) {
-                    $register_args['render_callback'] = $block_config['render_callback'];
-                } elseif ( $slug === 'titulo-com-icone' && function_exists( 'u_correio68_render_titulo_com_icone' ) ) {
-                    $register_args['render_callback'] = 'u_correio68_render_titulo_com_icone';
-                }
-                register_block_type( $path, $register_args );
+            $args = array();
+            if ( function_exists( $callback ) ) {
+                $args['render_callback'] = $callback;
             }
+            register_block_type( $path, $args );
         }
     }
 }

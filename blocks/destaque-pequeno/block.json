@@ -25,11 +25,11 @@
         "keyword": {
             "type": "string",
             "default": ""
+        },
+        "postType": {
+            "type": "string",
+            "default": "post"
         }
-            "postType": {
-                "type": "string",
-                "default": "post"
-            }
     },
     "example": {
         "attributes": {
@@ -49,7 +49,6 @@
         },
         "border": { "color": true, "style": true, "width": true, "radius": true }
     },
-    "editorScript": "seisdeagosto-custom-blocks",
-    "editorStyle": "file:./editor.css",
-    "renderCallback": "u_correio68_render_destaque_pequeno"
+    "editorScript": "seideagosto-blocks",
+    "editorStyle": "file:./editor.css"
 }
