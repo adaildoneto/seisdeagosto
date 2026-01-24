@@ -171,13 +171,25 @@ function u_correio68_enqueue_block_editor_assets() {
         wp_enqueue_style( $fa_handle, $fa_fallback, array(), $fa_version );
     }
 
-    // Enqueue titulo-com-icone editor script
+    // Enqueue titulo-com-icone EDIT script (main block registration)
+    $titulo_icone_edit_js = get_template_directory() . '/blocks/titulo-com-icone/edit.js';
+    if ( file_exists( $titulo_icone_edit_js ) ) {
+        wp_enqueue_script(
+            'titulo-com-icone-edit',
+            get_template_directory_uri() . '/blocks/titulo-com-icone/edit.js',
+            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ),
+            filemtime( $titulo_icone_edit_js ),
+            true
+        );
+    }
+    
+    // Enqueue titulo-com-icone EDITOR script (icon picker extension)
     $titulo_icone_editor_js = get_template_directory() . '/blocks/titulo-com-icone/editor.js';
     if ( file_exists( $titulo_icone_editor_js ) ) {
         wp_enqueue_script(
             'titulo-com-icone-editor',
             get_template_directory_uri() . '/blocks/titulo-com-icone/editor.js',
-            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'wp-hooks', 'wp-compose', 'jquery' ),
+            array( 'titulo-com-icone-edit', 'wp-hooks', 'wp-compose', 'jquery' ),
             filemtime( $titulo_icone_editor_js ),
             true
         );

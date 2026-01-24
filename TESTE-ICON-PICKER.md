@@ -1,164 +1,214 @@
-# Guia de Teste e Diagnóstico - Icon Picker no Bloco Título com Ícone
+# Guia de Teste e Diagnóstico - Icon Picker e Título com Ícone
 
-## Mudanças Realizadas
+## ⚠️ MUDANÇAS IMPORTANTES REALIZADAS
 
-### 1. Adicionadas Dependências ao Editor.js
-Adicionei `wp-hooks` e `wp-compose` às dependências do script `titulo-com-icone-editor` em [inc/blocks.php](inc/blocks.php#L180).
+### 1. Criado `edit.js` para Registrar o Bloco
+O bloco precisa de um script de registro completo. Criei [blocks/titulo-com-icone/edit.js](blocks/titulo-com-icone/edit.js) que:
+- Registra o bloco usando `wp.blocks.registerBlockType`
+- Define a interface de edição com RichText
+- Adiciona todos os controles (cores, tamanhos, alinhamento)
+- Mostra preview visual no editor
 
-### 2. Adicionado wp_localize_script para AJAX
-Adicionei configuração AJAX específica para o script do titulo-com-icone com:
-- `ajaxUrl`: URL do admin-ajax.php
-- `nonce`: Token de segurança
+### 2. Separados Dois Scripts
+- **edit.js**: Registra e define a interface do bloco
+- **editor.js**: Adiciona o Icon Picker como extensão usando `wp.hooks`
 
-## Como Testar
+### 3. Atualizado inc/blocks.php
+Modificado para carregar AMBOS os scripts na ordem correta:
+1. Carrega `edit.js` primeiro (registra o bloco)
+2. Carrega `editor.js` depois (adiciona icon picker)
 
-### Passo 1: Limpar Cache
+### 4. Adicionado Script de Debug
+Criado [debug-titulo-icone.php](debug-titulo-icone.php) que mostra:
+- ✅ Status de todas as dependências (wp.blocks, wp.hooks, etc)
+- ✅ Se o bloco está registrado
+- ✅ Se Font Awesome está carregado
+- ✅ Se AJAX está funcionando
+- ✅ Avisos visuais no admin
+- ✅ Debug no frontend também
+
+## 🔧 Como Testar Agora
+
+### PASSO 1: Limpar Cache Completamente
 ```bash
-# No navegador, pressione:
-Ctrl + Shift + R  (Windows/Linux)
-Cmd + Shift + R   (Mac)
+# No navegador:
+1. Pressione Ctrl + Shift + Delete
+2. Marque "Cache" e "Cookies"
+3. Clique em "Limpar"
+4. OU use Ctrl + Shift + R (hard reload)
 ```
 
-### Passo 2: Testar AJAX Manualmente
-1. Abra o arquivo: `test-icon-picker-ajax.html` no navegador
-2. URL seria algo como: `http://6barra8.local/wp-content/themes/seisdeagosto/test-icon-picker-ajax.html`
-3. Clique no botão "Testar AJAX"
-4. Deve mostrar: "✅ Sucesso! Total de ícones: 200+" 
+### PASSO 2: Verificar no Editor do WordPress
+1. Vá para **Painel → Posts/Páginas → Adicionar Novo**
+2. Clique no "+" para adicionar bloco
+3. Procure por "Título com Ícone" na categoria "Seis de Agosto"
+4. **DEVE APARECER AGORA** ✅
 
-### Passo 3: Testar no Editor do WordPress
-1. Acesse o admin do WordPress
-2. Edite uma página/post
-3. Adicione o bloco "Título com Ícone"
-4. No painel lateral direito (Inspector Controls), procure a opção "Ícone Font Awesome"
-5. Ative "Mostrar Ícone" se não estiver ativo
-6. Clique no botão "Escolher"
-7. Deve abrir um modal com os ícones
-
-### Passo 4: Verificar Console do Navegador
-Abra o DevTools (F12) e vá na aba Console. Procure por:
-
-**Erros esperados (se houver problema):**
-- `seideagostoBlocks is not defined`
-- `Cannot read property 'ajaxUrl' of undefined`
-- `404 Not Found` em requisição AJAX
-
-**Mensagens esperadas (se estiver funcionando):**
-- `Blocos Seis de Agosto registrados: ["seisdeagosto/titulo-com-icone", ...]`
-- Nenhum erro relacionado ao titulo-com-icone
-
-## Diagnóstico de Problemas
-
-### Problema: Modal não abre
-**Possíveis causas:**
-1. Script não carregado
-2. Dependências faltando
-3. Erro JavaScript bloqueando execução
-
-**Solução:**
-Abra o Console (F12) e execute:
-```javascript
-// Verificar se scripts estão carregados
-console.log('wp:', typeof wp);
-console.log('wp.hooks:', typeof wp.hooks);
-console.log('wp.compose:', typeof wp.compose);
-console.log('seideagostoBlocks:', window.seideagostoBlocks);
+### PASSO 3: Verificar Avisos de Debug
+No topo da página do editor, deve aparecer uma caixa verde com:
+```
+✅ Bloco "Título com Ícone" está registrado
+- Nome: seisdeagosto/titulo-com-icone
+- Título: Título com Ícone
+- Render callback: ✅ Definido
+- Função: u_correio68_render_titulo_com_icone
+- Função existe: ✅
 ```
 
-### Problema: Modal abre mas ícones não carregam
-**Possíveis causas:**
-1. AJAX retornando erro
-2. URL incorreta
-3. Nonce inválido
+Se aparecer caixa VERMELHA, há problema no registro.
+
+### PASSO 4: Testar o Icon Picker
+1. Adicione o bloco "Título com Ícone"
+2. No painel direito, abra "Ícone Font Awesome"
+3. Certifique-se que "Mostrar Ícone" está ATIVADO
+4. Clique no botão **"Escolher"**
+5. Deve abrir modal com 200+ ícones ✅
+
+### PASSO 5: Verificar Console (F12)
+Abra o DevTools e vá na aba Console. Procure por:
+
+**Mensagens esperadas:**
+```
+=== DEBUG TÍTULO COM ÍCONE ===
+1. WordPress loaded: ✅
+2. wp.blocks: ✅
+3. wp.element: ✅
+4. wp.hooks: ✅
+5. wp.compose: ✅
+6. jQuery loaded: ✅ v3.x
+7. Font Awesome loaded: ✅
+8. seideagostoBlocks: ✅
+9. Block registered: ✅
+10. Editor script tag: ✅
+11. ✅ AJAX working! Icons: 200+
+[Título com Ícone] Block registered successfully
+=== FIM DEBUG ===
+```
+
+### PASSO 6: Verificar Frontend
+1. Publique ou atualize a página com o bloco
+2. Visualize no frontend
+3. Abra o Console (F12) - deve aparecer:
+```
+=== DEBUG FRONTEND - TÍTULO COM ÍCONE ===
+1. Font Awesome loaded: ✅
+2. Titulo-com-icone blocks found: 1
+   Block 1:
+     - Icon class: fa fa-star
+     - Icon color: rgb(...)
+     - Title: CTA
+     - Font size: 28px
+     - Line color: rgb(...)
+3. Font Awesome stylesheet: ✅
+=== FIM DEBUG FRONTEND ===
+```
+
+## 🐛 Diagnóstico de Problemas
+
+### Problema: Bloco não aparece no inserter
+**Console mostra:**
+```javascript
+[Título com Ícone] Block already registered, skipping
+```
+
+**Solução:** O bloco está sendo registrado duas vezes. Verifique se há outro local registrando o mesmo bloco.
+
+---
+
+### Problema: Modal do Icon Picker não abre
+**Verifique no console:**
+```javascript
+console.log(window.seideagostoBlocks);
+```
+
+Se retornar `undefined`, o wp_localize_script não está funcionando.
+
+**Solução:** Certifique-se que [inc/blocks.php](inc/blocks.php#L185-L192) tem o wp_localize_script.
+
+---
+
+### Problema: Frontend não mostra o bloco
+**Verifique:**
+1. Console frontend mostra "Titulo-com-icone blocks found: 0"?
+2. Render callback definido?
+
+**Solução:** 
+- Verifique se [blocks/titulo-com-icone/render.php](blocks/titulo-com-icone/render.php) existe
+- Verifique se função `u_correio68_render_titulo_com_icone` está definida
+- Veja aviso admin no topo da página do editor
+
+---
+
+### Problema: Font Awesome não carrega
+**Console mostra:**
+```
+3. Font Awesome loaded: ❌
+```
 
 **Solução:**
-Abra a aba Network (Rede) no DevTools e procure por requisição `admin-ajax.php`.
-Clique nela e verifique:
-- **Status Code**: Deve ser 200
-- **Response**: Deve conter `{"success":true,"data":{"icons":[...]}}`
+1. Verifique se arquivo existe em `assets/vendor/font-awesome-4.7/css/font-awesome.min.css`
+2. Veja no source da página se há `<link>` para font-awesome
+3. Tente desabilitar cache do navegador
 
-### Problema: "Escolher" não aparece
-**Possível causa:**
-O atributo `mostrarIcone` está `false`
+---
 
-**Solução:**
-1. No editor, selecione o bloco
-2. No painel direito, ative "Mostrar Ícone"
-3. O botão "Escolher" deve aparecer
+## 📁 Arquivos Modificados/Criados
 
-## Arquivos Modificados
+### Criados:
+1. ✅ [blocks/titulo-com-icone/edit.js](blocks/titulo-com-icone/edit.js) - Registro do bloco
+2. ✅ [debug-titulo-icone.php](debug-titulo-icone.php) - Script de diagnóstico
+3. ✅ [test-icon-picker-ajax.html](test-icon-picker-ajax.html) - Teste AJAX standalone
 
-1. **[inc/blocks.php](inc/blocks.php#L174-L195)**
-   - Adicionadas dependências: `wp-hooks`, `wp-compose`
-   - Adicionado `wp_localize_script` para `titulo-com-icone-editor`
+### Modificados:
+1. ✅ [inc/blocks.php](inc/blocks.php#L174-L213) - Carrega edit.js + editor.js
+2. ✅ [functions.php](functions.php#L1749-L1752) - Inclui debug script
+3. ✅ [blocks/titulo-com-icone/editor.js](blocks/titulo-com-icone/editor.js#L55-L61) - Compatibilidade optional chaining
 
-2. **[blocks/titulo-com-icone/editor.js](blocks/titulo-com-icone/editor.js)**
-   - Usa `wp.hooks.addFilter` para estender o bloco
-   - Carrega ícones via AJAX do endpoint `get_fontawesome_icons`
-   - Modal totalmente funcional com busca
+## 🚀 Próximos Passos
 
-3. **[inc/icon-picker.php](inc/icon-picker.php)**
-   - Endpoint AJAX: `wp_ajax_get_fontawesome_icons`
-   - Retorna 200+ ícones Font Awesome 4.7
+1. ✅ **Recarregue a página com Ctrl + Shift + R**
+2. ✅ **Verifique os avisos de debug no topo do editor**
+3. ✅ **Abra o console (F12) e veja as mensagens**
+4. ✅ **Adicione o bloco e teste o icon picker**
+5. ✅ **Publique e verifique no frontend**
 
-## Verificação Rápida via Console
+## 🗑️ Remover Debug (após resolver)
 
-Cole este código no Console do navegador (F12) quando estiver no editor:
+Quando tudo funcionar, remova estas linhas de [functions.php](functions.php#L1749-L1752):
+
+```php
+// Debug - Título com Ícone (remova após resolver)
+if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+    require_once "debug-titulo-icone.php";
+}
+```
+
+E delete o arquivo `debug-titulo-icone.php`.
+
+---
+
+## 💡 Script de Diagnóstico Rápido
+
+Cole no Console (F12) quando estiver no editor:
 
 ```javascript
-// Teste completo
 (function() {
-    console.log('=== DIAGNÓSTICO ICON PICKER ===');
+    console.log('=== DIAGNÓSTICO RÁPIDO ===');
+    console.log('1. WP:', typeof wp !== 'undefined' ? '✅' : '❌');
+    console.log('2. jQuery:', typeof jQuery !== 'undefined' ? '✅' : '❌');
+    console.log('3. seideagostoBlocks:', window.seideagostoBlocks ? '✅' : '❌');
     
-    // 1. Verificar WordPress API
-    console.log('1. WordPress API:', typeof wp !== 'undefined' ? '✅' : '❌');
+    const block = wp?.blocks?.getBlockType('seisdeagosto/titulo-com-icone');
+    console.log('4. Bloco registrado:', block ? '✅' : '❌');
     
-    // 2. Verificar dependências
-    console.log('2. wp.hooks:', typeof wp.hooks !== 'undefined' ? '✅' : '❌');
-    console.log('3. wp.compose:', typeof wp.compose !== 'undefined' ? '✅' : '❌');
-    console.log('4. jQuery:', typeof jQuery !== 'undefined' ? '✅' : '❌');
-    
-    // 3. Verificar variável AJAX
-    console.log('5. seideagostoBlocks:', window.seideagostoBlocks ? '✅' : '❌');
-    if (window.seideagostoBlocks) {
-        console.log('   - ajaxUrl:', window.seideagostoBlocks.ajaxUrl);
-        console.log('   - nonce:', window.seideagostoBlocks.nonce);
-    }
-    
-    // 4. Verificar bloco registrado
-    const block = wp.blocks.getBlockType('seisdeagosto/titulo-com-icone');
-    console.log('6. Bloco registrado:', block ? '✅' : '❌');
-    if (block) {
-        console.log('   - Title:', block.title);
-        console.log('   - Attributes:', Object.keys(block.attributes));
-    }
-    
-    // 5. Testar AJAX
     if (window.seideagostoBlocks && typeof jQuery !== 'undefined') {
-        console.log('7. Testando AJAX...');
         jQuery.ajax({
             url: window.seideagostoBlocks.ajaxUrl,
             type: 'POST',
             data: { action: 'get_fontawesome_icons' },
-            success: function(r) {
-                if (r.success && r.data && r.data.icons) {
-                    console.log('   ✅ AJAX funcionando! Total ícones:', r.data.icons.length);
-                } else {
-                    console.log('   ⚠️ AJAX resposta inesperada:', r);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.log('   ❌ AJAX erro:', status, error);
-            }
+            success: (r) => console.log('5. AJAX:', r.success ? '✅ ' + r.data.icons.length + ' ícones' : '❌'),
+            error: () => console.log('5. AJAX: ❌')
         });
     }
-    
-    console.log('=== FIM DIAGNÓSTICO ===');
 })();
 ```
-
-## Próximos Passos
-
-1. ✅ Recarregue a página do editor com **Ctrl + Shift + R**
-2. ✅ Teste o botão "Escolher" no bloco Título com Ícone
-3. ✅ Se não funcionar, execute o script de diagnóstico acima
-4. ✅ Envie o resultado do console para análise
