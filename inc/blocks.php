@@ -638,7 +638,7 @@ function u_correio68_register_custom_blocks() {
         'destaque-grande' => 'u_correio68_render_destaque_grande',
         'destaque-pequeno' => 'u_correio68_render_destaque_pequeno',
         'lista-noticias' => 'u_correio68_render_lista_noticias',
-        'titulo-com-icone' => 'u_correio68_render_titulo_com_icone',
+        'titulo-com-icone' => 'seisdeagosto_render_titulo_com_icone',
     );
     
     // Include render callbacks for all metadata blocks

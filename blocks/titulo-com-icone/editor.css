@@ -1,6 +1,6 @@
 /* Titulo com Icone Block - Editor Styles */
 
-.block-editor-block-list__block[data-type="u-correio68/titulo-com-icone"] {
+.block-editor-block-list__block[data-type="seisdeagosto/titulo-com-icone"] {
     margin: 16px 0;
 }
 
@@ -34,6 +34,6 @@
     border-radius: 2px;
 }
 
-.wp-block-u-correio68-titulo-com-icone {
+.wp-block-seisdeagosto-titulo-com-icone {
     width: 100%;
 }

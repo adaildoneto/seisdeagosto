@@ -2,7 +2,7 @@
 /**
  * Render callback for Título com Ícone block
  */
-function u_correio68_render_titulo_com_icone( $attributes ) {
+function seisdeagosto_render_titulo_com_icone( $attributes ) {
     $titulo = isset( $attributes['titulo'] ) ? sanitize_text_field( $attributes['titulo'] ) : 'CTA';
     $icone = isset( $attributes['icone'] ) ? sanitize_text_field( $attributes['icone'] ) : 'fa-star';
     $mostrarIcone = isset( $attributes['mostrarIcone'] ) ? (bool) $attributes['mostrarIcone'] : true;
