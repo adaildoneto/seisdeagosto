@@ -171,6 +171,18 @@ function u_correio68_enqueue_block_editor_assets() {
         wp_enqueue_style( $fa_handle, $fa_fallback, array(), $fa_version );
     }
 
+    // Enqueue auto-migration script for deprecated blocks
+    $auto_migration_js = get_template_directory() . '/assets/js/block-auto-migration.js';
+    if ( file_exists( $auto_migration_js ) ) {
+        wp_enqueue_script(
+            'seisdeagosto-auto-migration',
+            get_template_directory_uri() . '/assets/js/block-auto-migration.js',
+            array( 'wp-blocks', 'wp-hooks', 'wp-data', 'wp-dom-ready' ),
+            filemtime( $auto_migration_js ),
+            true
+        );
+    }
+
     // Enqueue titulo-com-icone EDIT script (main block registration)
     $titulo_icone_edit_js = get_template_directory() . '/blocks/titulo-com-icone/edit.js';
     if ( file_exists( $titulo_icone_edit_js ) ) {
@@ -479,7 +491,7 @@ function u_correio68_register_custom_blocks() {
         'u-correio68/weather' => 'u_correio68_render_weather',
         'u-correio68/currency-monitor' => 'u_correio68_render_currency_monitor',
         'u-correio68/sidebar-area' => 'u_correio68_render_sidebar_area',
-        // 'u-correio68/titulo-com-icone' => 'u_correio68_render_titulo_com_icone', // Removido - usar seisdeagosto/titulo-com-icone
+        'u-correio68/titulo-com-icone' => 'seisdeagosto_render_titulo_com_icone', // Backward compatibility - usa mesma função do novo namespace
         // 'u-correio68/destaque-grande' => 'u_correio68_render_destaque_grande', // Removido - usar seisdeagosto/destaque-grande
         // 'u-correio68/destaque-pequeno' => 'u_correio68_render_destaque_pequeno', // Removido - usar seisdeagosto/destaque-pequeno
         // 'u-correio68/lista-noticias' => 'u_correio68_render_lista_noticias', // Removido - usar seisdeagosto/lista-noticias
@@ -648,6 +660,31 @@ function u_correio68_register_custom_blocks() {
             require_once( $render_file );
         }
     }
+    
+    // ============================================================================
+    // AUTO-MIGRATION: Deprecated blocks are auto-migrated when edited
+    // ============================================================================
+    
+    // Register block deprecation to auto-migrate u-correio68/titulo-com-icone to seisdeagosto/titulo-com-icone
+    add_filter( 'block_type_metadata', function( $metadata ) {
+        if ( isset( $metadata['name'] ) && $metadata['name'] === 'seisdeagosto/titulo-com-icone' ) {
+            // Add deprecated version to auto-convert old blocks
+            $metadata['deprecated'] = array(
+                array(
+                    'attributes' => $metadata['attributes'],
+                    'migrate' => function( $attributes ) {
+                        // Just return attributes as-is, conversion happens automatically
+                        return $attributes;
+                    },
+                    'isEligible' => function( $attributes, $innerBlocks, $blockType ) {
+                        // Always eligible for migration from old namespace
+                        return true;
+                    }
+                )
+            );
+        }
+        return $metadata;
+    } );
     
     // Register each block with its render callback
     foreach ( $metadata_blocks as $slug => $callback ) {

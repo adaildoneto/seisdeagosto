@@ -1747,13 +1747,6 @@ require_once "inc/widgets.php";
 require_once "inc/customizer.php";
 require_once "inc/icon-picker.php";
 
-
-
-// Debug - Título com Ícone (remova após resolver)
-if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-    require_once "debug-titulo-icone.php";
-}
-
     /* Pinegrow generated Include Resources End */
     
     // Removed invalid filter hook name.
