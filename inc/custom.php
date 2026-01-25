@@ -21,7 +21,14 @@
 //* https://jeanbaptisteaudras.com/2020/03/desactiver-le-mode-fullscreen-de-gutenberg-present-par-defaut-dans-wordpress-5-4/
 
 function st2_disable_editor_fullscreen_by_default() {
-	$script = "jQuery( window ).load(function() { const isFullscreenMode = wp.data.select( 'core/edit-post' ).isFeatureActive( 'fullscreenMode' ); if ( isFullscreenMode ) { wp.data.dispatch( 'core/edit-post' ).toggleFeature( 'fullscreenMode' ); } });";
+	$script = "jQuery( window ).load(function() { 
+		if (wp.data && wp.data.select('core/edit-post')) {
+			const isFullscreenMode = wp.data.select( 'core/edit-post' ).isFeatureActive( 'fullscreenMode' ); 
+			if ( isFullscreenMode ) { 
+				wp.data.dispatch( 'core/edit-post' ).toggleFeature( 'fullscreenMode' ); 
+			} 
+		}
+	});";
 	wp_add_inline_script( 'wp-blocks', $script );
 }
 add_action( 'enqueue_block_editor_assets', 'st2_disable_editor_fullscreen_by_default' );

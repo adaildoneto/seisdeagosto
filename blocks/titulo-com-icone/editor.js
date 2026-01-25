@@ -54,7 +54,10 @@
                 
                 // Get AJAX URL with fallback
                 var ajaxUrl = '/wp-admin/admin-ajax.php';
-                if (window.seideagostoBlocks && window.seideagostoBlocks.ajaxUrl) {
+                if (window.tituloComIconeData && window.tituloComIconeData.ajaxUrl) {
+                    ajaxUrl = window.tituloComIconeData.ajaxUrl;
+                } else if (window.seideagostoBlocks && window.seideagostoBlocks.ajaxUrl) {
+                    // Fallback to main seideagostoBlocks if available
                     ajaxUrl = window.seideagostoBlocks.ajaxUrl;
                 }
                 

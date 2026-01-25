@@ -1,0 +1,84 @@
+{
+    "apiVersion": 2,
+    "name": "seisdeagosto/category-filter",
+    "title": "Filtro de Categorias",
+    "category": "seisdeagosto",
+    "icon": "filter",
+    "description": "Filtro avançado de categorias para refinar resultados de busca e arquivo.",
+    "attributes": {
+        "showAllOption": {
+            "type": "boolean",
+            "default": true
+        },
+        "allOptionText": {
+            "type": "string",
+            "default": "Todas as Categorias"
+        },
+        "showCount": {
+            "type": "boolean",
+            "default": true
+        },
+        "showEmpty": {
+            "type": "boolean",
+            "default": false
+        },
+        "orderBy": {
+            "type": "string",
+            "default": "name"
+        },
+        "order": {
+            "type": "string",
+            "default": "ASC"
+        },
+        "hierarchical": {
+            "type": "boolean",
+            "default": true
+        },
+        "showHierarchy": {
+            "type": "boolean",
+            "default": true
+        },
+        "displayStyle": {
+            "type": "string",
+            "default": "dropdown"
+        },
+        "showIcons": {
+            "type": "boolean",
+            "default": true
+        },
+        "backgroundColor": {
+            "type": "string",
+            "default": ""
+        },
+        "textColor": {
+            "type": "string",
+            "default": ""
+        },
+        "excludeCategories": {
+            "type": "array",
+            "default": []
+        },
+        "includeCategories": {
+            "type": "array",
+            "default": []
+        }
+    },
+    "example": {
+        "attributes": {
+            "showAllOption": true,
+            "showCount": true,
+            "displayStyle": "dropdown"
+        }
+    },
+    "supports": {
+        "color": {
+            "text": true,
+            "background": true
+        },
+        "spacing": {
+            "margin": true,
+            "padding": true
+        },
+        "align": ["wide", "full"]
+    }
+}
