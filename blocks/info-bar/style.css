@@ -1,0 +1,154 @@
+/* Info Bar - Estilo minimalista para local, tempo, data e hora */
+
+.info-bar-wrapper {
+    width: 100%;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+.info-bar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.info-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.95;
+    transition: opacity 0.2s ease;
+}
+
+.info-bar-item:hover {
+    opacity: 1;
+}
+
+.info-bar-item i.fa {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+/* Weather icon mini - usando estilos do bloco clima */
+.weather-icon-mini {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+}
+
+.weather-icon-mini .icon-base {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+}
+
+.weather-icon-mini.icon-clear .icon-base {
+    background: #f9db62;
+    opacity: 0.15;
+}
+
+.weather-icon-mini.icon-cloudy .icon-base {
+    background: #95a5a6;
+    opacity: 0.12;
+}
+
+.weather-icon-mini.icon-rain .icon-base {
+    background: #6ab9e9;
+    opacity: 0.12;
+}
+
+.weather-icon-mini.icon-storm .icon-base {
+    background: #8e44ad;
+    opacity: 0.15;
+}
+
+.weather-icon-mini.icon-snow .icon-base {
+    background: #e3f2fd;
+    opacity: 0.15;
+}
+
+.weather-fa-icon-mini {
+    position: relative;
+    z-index: 1;
+    font-size: 14px !important;
+    color: inherit !important;
+}
+
+/* Ícones específicos para clima */
+.weather-icon-mini.icon-clear .weather-fa-icon-mini {
+    color: #ffd93d !important;
+}
+
+.weather-icon-mini.icon-cloudy .weather-fa-icon-mini {
+    color: #95a5a6 !important;
+}
+
+.weather-icon-mini.icon-rain .weather-fa-icon-mini {
+    color: #64b5f6 !important;
+}
+
+.weather-icon-mini.icon-storm .weather-fa-icon-mini {
+    color: #9c27b0 !important;
+}
+
+.weather-icon-mini.icon-snow .weather-fa-icon-mini {
+    color: #bbdefb !important;
+}
+
+/* Responsivo - empilhar em telas pequenas */
+@media (max-width: 768px) {
+    .info-bar-container {
+        gap: 15px;
+        font-size: 0.9em;
+    }
+    
+    .info-bar-item {
+        gap: 6px;
+    }
+    
+    /* Esconder alguns itens em telas muito pequenas */
+    @media (max-width: 480px) {
+        .info-date span {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+}
+
+/* Modo escuro padrão */
+.info-bar-wrapper {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+/* Suporte para cores customizadas via block supports */
+.info-bar-wrapper.has-background {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Alinhamento wide e full */
+.info-bar-wrapper.alignwide .info-bar-container {
+    max-width: 1400px;
+}
+
+.info-bar-wrapper.alignfull {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.info-bar-wrapper.alignfull .info-bar-container {
+    max-width: 100%;
+}

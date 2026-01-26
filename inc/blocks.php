@@ -295,8 +295,48 @@ function u_correio68_enqueue_block_editor_assets() {
             filemtime( $category_filter_editor_css )
         );
     }
+
+    // Enqueue info-bar edit script
+    $info_bar_edit_js = get_template_directory() . '/blocks/info-bar/edit.js';
+    if ( file_exists( $info_bar_edit_js ) ) {
+        wp_enqueue_script(
+            'info-bar-edit',
+            get_template_directory_uri() . '/blocks/info-bar/edit.js',
+            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ),
+            filemtime( $info_bar_edit_js ),
+            true
+        );
+    }
+
+    // Enqueue info-bar style CSS (for editor and frontend)
+    $info_bar_style_css = get_template_directory() . '/blocks/info-bar/style.css';
+    if ( file_exists( $info_bar_style_css ) ) {
+        wp_enqueue_style(
+            'info-bar-style',
+            get_template_directory_uri() . '/blocks/info-bar/style.css',
+            array(),
+            filemtime( $info_bar_style_css )
+        );
+    }
 }
 add_action( 'enqueue_block_editor_assets', 'u_correio68_enqueue_block_editor_assets' );
+
+/**
+ * Enqueue frontend block assets
+ */
+function u_correio68_enqueue_block_assets() {
+    // Enqueue info-bar style CSS on frontend
+    $info_bar_style_css = get_template_directory() . '/blocks/info-bar/style.css';
+    if ( file_exists( $info_bar_style_css ) ) {
+        wp_enqueue_style(
+            'info-bar-style',
+            get_template_directory_uri() . '/blocks/info-bar/style.css',
+            array(),
+            filemtime( $info_bar_style_css )
+        );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'u_correio68_enqueue_block_assets' );
 
 /**
  * Register custom blocks
@@ -675,6 +715,7 @@ function u_correio68_register_custom_blocks() {
         'lista-noticias' => 'u_correio68_render_lista_noticias',
         'titulo-com-icone' => 'seisdeagosto_render_titulo_com_icone',
         'category-filter' => 'seisdeagosto_render_category_filter',
+        'info-bar' => 'seisdeagosto_render_info_bar',
     );
     
     // Include render callbacks for all metadata blocks

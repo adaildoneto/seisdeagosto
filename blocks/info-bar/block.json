@@ -1,0 +1,67 @@
+{
+  "apiVersion": 2,
+  "name": "seisdeagosto/info-bar",
+  "title": "Info Bar - Local, Tempo, Data e Hora",
+  "category": "seisdeagosto",
+  "icon": "info",
+  "description": "Barra de informações mostrando local, previsão do tempo, data e hora em estilo minimalista",
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "padding": true,
+      "margin": true
+    }
+  },
+  "attributes": {
+    "cityName": {
+      "type": "string",
+      "default": "Rio Branco"
+    },
+    "latitude": {
+      "type": "string",
+      "default": "-9.9749"
+    },
+    "longitude": {
+      "type": "string",
+      "default": "-67.8103"
+    },
+    "fontFamily": {
+      "type": "string",
+      "default": "'Roboto Condensed', 'Arial Narrow', sans-serif"
+    },
+    "fontSize": {
+      "type": "number",
+      "default": 13
+    },
+    "showLocation": {
+      "type": "boolean",
+      "default": true
+    },
+    "showWeather": {
+      "type": "boolean",
+      "default": true
+    },
+    "showDate": {
+      "type": "boolean",
+      "default": true
+    },
+    "showTime": {
+      "type": "boolean",
+      "default": true
+    },
+    "backgroundColor": {
+      "type": "string",
+      "default": "#1a1a1a"
+    },
+    "textColor": {
+      "type": "string",
+      "default": "#ffffff"
+    }
+  },
+  "textdomain": "seisdeagosto"
+}
