@@ -37,12 +37,12 @@ function u_correio68_render_destaque_pequeno($attributes) {
                 <?php 
                 if ( has_post_thumbnail() ) :
                     if ( class_exists('PG_Image') ) {
-                        echo PG_Image::getPostImage(get_the_ID(), 'destatquegrande', array(
+                        echo PG_Image::getPostImage(get_the_ID(), 'destaque', array(
                             'class' => 'w-100',
-                            'sizes' => 'max-width(320px) 85vw, max-width(640px) 510px, max-width(768px) 70vw, max-width(1024px) 60vw, max-width(1280px) 730px, 730px'
+                            'sizes' => '(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 300px'
                         ), 'both', null);
                     } else {
-                        the_post_thumbnail('destatquegrande', array('class' => 'w-100'));
+                        the_post_thumbnail('destaque', array('class' => 'w-100'));
                     }
                 endif;
                 ?>
