@@ -318,6 +318,29 @@ function u_correio68_enqueue_block_editor_assets() {
             filemtime( $info_bar_style_css )
         );
     }
+
+    // Enqueue instagram-reels edit script
+    $ig_reels_edit_js = get_template_directory() . '/blocks/instagram-reels/edit.js';
+    if ( file_exists( $ig_reels_edit_js ) ) {
+        wp_enqueue_script(
+            'instagram-reels-edit',
+            get_template_directory_uri() . '/blocks/instagram-reels/edit.js',
+            array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ),
+            filemtime( $ig_reels_edit_js ),
+            true
+        );
+    }
+
+    // Enqueue instagram-reels style CSS
+    $ig_reels_style_css = get_template_directory() . '/blocks/instagram-reels/style.css';
+    if ( file_exists( $ig_reels_style_css ) ) {
+        wp_enqueue_style(
+            'instagram-reels-style',
+            get_template_directory_uri() . '/blocks/instagram-reels/style.css',
+            array(),
+            filemtime( $ig_reels_style_css )
+        );
+    }
 }
 add_action( 'enqueue_block_editor_assets', 'u_correio68_enqueue_block_editor_assets' );
 
@@ -333,6 +356,17 @@ function u_correio68_enqueue_block_assets() {
             get_template_directory_uri() . '/blocks/info-bar/style.css',
             array(),
             filemtime( $info_bar_style_css )
+        );
+    }
+    
+    // Enqueue instagram-reels style CSS on frontend
+    $ig_reels_style_css = get_template_directory() . '/blocks/instagram-reels/style.css';
+    if ( file_exists( $ig_reels_style_css ) ) {
+        wp_enqueue_style(
+            'instagram-reels-frontend-style',
+            get_template_directory_uri() . '/blocks/instagram-reels/style.css',
+            array(),
+            filemtime( $ig_reels_style_css )
         );
     }
 }
@@ -716,6 +750,7 @@ function u_correio68_register_custom_blocks() {
         'titulo-com-icone' => 'seisdeagosto_render_titulo_com_icone',
         'category-filter' => 'seisdeagosto_render_category_filter',
         'info-bar' => 'seisdeagosto_render_info_bar',
+        'instagram-reels' => 'seisdeagosto_render_instagram_reels',
     );
     
     // Include render callbacks for all metadata blocks

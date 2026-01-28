@@ -1,0 +1,63 @@
+{
+  "apiVersion": 2,
+  "name": "seisdeagosto/instagram-reels",
+  "title": "Instagram Reels Gallery",
+  "category": "seisdeagosto",
+  "icon": "instagram",
+  "description": "Exibe os últimos reels do Instagram usando apenas o @ do usuário",
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "padding": true,
+      "margin": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Siga-nos no Instagram"
+    },
+    "description": {
+      "type": "string",
+      "default": "Confira nossos últimos reels"
+    },
+    "profileUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "instagramUrls": {
+      "type": "string",
+      "default": ""
+    },
+    "accessToken": {
+      "type": "string",
+      "default": ""
+    },
+    "instagramUsername": {
+      "type": "string",
+      "default": ""
+    },
+    "numberOfReels": {
+      "type": "number",
+      "default": 6
+    },
+    "columns": {
+      "type": "number",
+      "default": 3
+    },
+    "showCaptions": {
+      "type": "boolean",
+      "default": true
+    },
+    "mediaType": {
+      "type": "string",
+      "default": "all"
+    }
+  },
+  "textdomain": "seisdeagosto"
+}
