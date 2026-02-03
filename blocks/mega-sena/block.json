@@ -69,6 +69,13 @@
   },
   "textdomain": "seisdeagosto",
   "editorScript": "file:./edit.js",
+  "script": "file:./frontend.js",
   "style": "file:./style.css",
-  "render": "file:./render.php"
+  "render": "file:./render.php",
+  "dependencies": [
+    "wp-blocks",
+    "wp-element",
+    "wp-block-editor",
+    "wp-components"
+  ]
 }

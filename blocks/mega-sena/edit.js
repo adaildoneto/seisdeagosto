@@ -1,4 +1,11 @@
-( function( blocks, element, blockEditor, components ) {
+( function() {
+    // Aguarda o WordPress carregar completamente
+    if ( ! window.wp || ! window.wp.blocks || ! window.wp.element || ! window.wp.blockEditor || ! window.wp.components ) {
+        console.error( '[Mega Sena Block] WordPress dependencies not loaded' );
+        return;
+    }
+    
+    const { blocks, element, blockEditor, components } = window.wp;
     const el = element.createElement;
     const { InspectorControls, useBlockProps } = blockEditor;
     const { PanelBody, ToggleControl, TextControl, ColorPicker } = components;
@@ -44,7 +51,8 @@
                             onChange: function( value ) {
                                 setAttributes( { title: value } );
                             },
-                            __nextHasNoMarginBottom: true
+                            __nextHasNoMarginBottom: true,
+                            __next40pxDefaultSize: true
                         } ),
                         el( ToggleControl, {
                             label: 'Mostrar número do concurso',
@@ -159,9 +167,4 @@
             return null; // Dynamic block - rendering handled by PHP
         }
     } );
-} )(
-    window.wp.blocks,
-    window.wp.element,
-    window.wp.blockEditor,
-    window.wp.components
-);
+} )();

@@ -52,9 +52,6 @@ function seisdeagosto_render_mega_sena_block( $attributes ) {
     $ball_color = isset( $attributes['ballColor'] ) ? esc_attr( $attributes['ballColor'] ) : '#209869';
 
     // Busca o resultado da API
-    // TEMPORÁRIO: Limpa cache para forçar atualização
-    delete_transient( 'loteria_' . $jogo );
-    
     $resultado = seisdeagosto_get_loteria_result( $jogo );
 
     if ( ! $resultado || isset( $resultado['error'] ) ) {
