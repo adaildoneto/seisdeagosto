@@ -4,39 +4,41 @@
  * Exibe resultados da Mega Sena via API da Caixa
  */
 
-// Carrega o API handler
-require_once __DIR__ . '/loteria-api.php';
-
-// Enqueue FontAwesome
-wp_enqueue_style(
-    'font-awesome',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    array(),
-    '6.4.0'
-);
-
-// Enqueue Bootstrap JS (necessário para accordion e dropdown)
-wp_enqueue_script(
-    'bootstrap-bundle',
-    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-    array(),
-    '5.3.0',
-    true
-);
-
-// Enqueue frontend script
-wp_enqueue_script(
-    'mega-sena-frontend',
-    get_template_directory_uri() . '/blocks/mega-sena/frontend.js',
-    array('bootstrap-bundle'),
-    filemtime( __DIR__ . '/frontend.js' ),
-    true
-);
+// Carrega o API handler (apenas uma vez)
+if ( ! function_exists( 'seisdeagosto_get_loteria_result' ) ) {
+    require_once __DIR__ . '/loteria-api.php';
+}
 
 /**
  * Renderiza o bloco Mega Sena
  */
 function seisdeagosto_render_mega_sena_block( $attributes ) {
+    // Enqueue FontAwesome
+    wp_enqueue_style(
+        'font-awesome',
+        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+        array(),
+        '6.4.0'
+    );
+
+    // Enqueue Bootstrap JS (necessário para accordion e dropdown)
+    wp_enqueue_script(
+        'bootstrap-bundle',
+        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+        array(),
+        '5.3.0',
+        true
+    );
+
+    // Enqueue frontend script
+    wp_enqueue_script(
+        'mega-sena-frontend',
+        get_template_directory_uri() . '/blocks/mega-sena/frontend.js',
+        array('bootstrap-bundle'),
+        filemtime( __DIR__ . '/frontend.js' ),
+        true
+    );
+    
     $title = isset( $attributes['title'] ) ? esc_html( $attributes['title'] ) : 'Resultado Mega Sena';
     $show_concurso = isset( $attributes['showConcurso'] ) ? $attributes['showConcurso'] : true;
     $show_data = isset( $attributes['showData'] ) ? $attributes['showData'] : true;
