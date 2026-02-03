@@ -341,6 +341,8 @@ function u_correio68_enqueue_block_editor_assets() {
             filemtime( $ig_reels_style_css )
         );
     }
+
+    // Nota: mega-sena usa block.json para carregar scripts/estilos automaticamente
 }
 add_action( 'enqueue_block_editor_assets', 'u_correio68_enqueue_block_editor_assets' );
 
@@ -369,6 +371,8 @@ function u_correio68_enqueue_block_assets() {
             filemtime( $ig_reels_style_css )
         );
     }
+
+    // Nota: mega-sena usa block.json para carregar estilos automaticamente
 }
 add_action( 'wp_enqueue_scripts', 'u_correio68_enqueue_block_assets' );
 
@@ -751,6 +755,7 @@ function u_correio68_register_custom_blocks() {
         'category-filter' => 'seisdeagosto_render_category_filter',
         'info-bar' => 'seisdeagosto_render_info_bar',
         'instagram-reels' => 'seisdeagosto_render_instagram_reels',
+        'mega-sena' => 'seisdeagosto_render_mega_sena_block',
     );
     
     // Include render callbacks for all metadata blocks
@@ -2758,3 +2763,12 @@ function u_correio68_render_image_slider( $attributes ) {
     return ob_get_clean();
 }
 
+// ============================================================================
+// SHORTCODES E WIDGETS DAS LOTERIAS
+// ============================================================================
+
+// Carrega os shortcodes e widgets das loterias
+$shortcode_file = get_template_directory() . '/blocks/mega-sena/shortcode.php';
+if ( file_exists( $shortcode_file ) ) {
+    require_once( $shortcode_file );
+}

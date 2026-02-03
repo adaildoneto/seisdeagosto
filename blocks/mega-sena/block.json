@@ -1,0 +1,74 @@
+{
+  "apiVersion": 2,
+  "name": "seisdeagosto/mega-sena",
+  "title": "Resultado Mega Sena",
+  "category": "seisdeagosto",
+  "icon": "money-alt",
+  "description": "Exibe o resultado do último sorteio da Mega Sena via API da Caixa",
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "padding": true,
+      "margin": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Resultado Mega Sena"
+    },
+    "showConcurso": {
+      "type": "boolean",
+      "default": true
+    },
+    "showData": {
+      "type": "boolean",
+      "default": true
+    },
+    "showPremio": {
+      "type": "boolean",
+      "default": true
+    },
+    "showProximoConcurso": {
+      "type": "boolean",
+      "default": true
+    },
+    "showConcursoAnterior": {
+      "type": "boolean",
+      "default": false
+    },
+    "showMenuJogos": {
+      "type": "boolean",
+      "default": false
+    },
+    "jogoSelecionado": {
+      "type": "string",
+      "default": "megasena"
+    },
+    "autoUpdate": {
+      "type": "boolean",
+      "default": true
+    },
+    "backgroundColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "textColor": {
+      "type": "string",
+      "default": "#333333"
+    },
+    "ballColor": {
+      "type": "string",
+      "default": "#209869"
+    }
+  },
+  "textdomain": "seisdeagosto",
+  "editorScript": "file:./edit.js",
+  "style": "file:./style.css",
+  "render": "file:./render.php"
+}

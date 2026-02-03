@@ -1,0 +1,231 @@
+/**
+ * Mega Sena Block Styles
+ * Minimalista com Bootstrap e FontAwesome
+ */
+
+.wp-block-seisdeagosto-mega-sena {
+    padding: 2rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 2rem 0;
+}
+
+.mega-sena-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #209869;
+    padding-bottom: 1rem;
+}
+
+.mega-sena-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.mega-sena-header .fa-trophy {
+    color: #209869;
+}
+
+.mega-sena-info {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.mega-sena-info-item {
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+}
+
+.mega-sena-info-item .label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.mega-sena-info-item .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #209869;
+}
+
+.mega-sena-numbers {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.mega-sena-ball {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: #209869;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.mega-sena-ball:hover {
+    transform: scale(1.1);
+}
+
+.mega-sena-premio {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #209869 0%, #1a7a53 100%);
+    border-radius: 8px;
+    color: #ffffff;
+    margin-top: 2rem;
+}
+
+.mega-sena-premio .label {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.mega-sena-premio .value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.mega-sena-proximo {
+    text-align: center;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.mega-sena-proximo .label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.mega-sena-proximo .value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #209869;
+}
+
+.mega-sena-loading {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.mega-sena-error {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+}
+
+.mega-sena-error i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* Menu de Jogos */
+.mega-sena-menu-jogos {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.mega-sena-menu-jogos .dropdown-toggle {
+    background-color: #209869;
+    border-color: #209869;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+}
+
+.mega-sena-menu-jogos .dropdown-toggle:hover {
+    background-color: #1a7a53;
+    border-color: #1a7a53;
+}
+
+.mega-sena-menu-jogos .dropdown-item.active {
+    background-color: #209869;
+}
+
+/* Accordion Concurso Anterior */
+.mega-sena-accordion .accordion-button {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+}
+
+.mega-sena-accordion .accordion-button:not(.collapsed) {
+    background-color: #209869;
+    color: #fff;
+}
+
+.mega-sena-accordion .accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(32, 152, 105, 0.25);
+    border-color: #209869;
+}
+
+.mega-sena-accordion .accordion-body {
+    background-color: #fff;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .mega-sena-ball {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .mega-sena-premio .value {
+        font-size: 1.5rem;
+    }
+    
+    .mega-sena-header h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .mega-sena-info {
+        flex-direction: column;
+    }
+    
+    .mega-sena-ball {
+        width: 45px;
+        height: 45px;
+        font-size: 1.125rem;
+    }
+}

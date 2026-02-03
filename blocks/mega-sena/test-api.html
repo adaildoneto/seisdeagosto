@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste API Loterias Caixa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 2rem 0;
+            background: #f8f9fa;
+        }
+        .loteria-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .loteria-ball {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #209869;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            font-weight: bold;
+            margin: 0.25rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1><i class="fas fa-trophy text-success"></i> Teste API Loterias Caixa</h1>
+            <p class="text-muted">Demonstração da integração com a API oficial</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin fa-3x text-success"></i>
+            <p class="mt-3">Carregando resultados...</p>
+        </div>
+
+        <div id="results" style="display: none;"></div>
+
+        <div id="error" class="alert alert-danger" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Erro:</strong> <span id="error-message"></span>
+        </div>
+
+        <div class="mt-5 text-center">
+            <button class="btn btn-success" onclick="loadResults()">
+                <i class="fas fa-sync-alt"></i> Recarregar
+            </button>
+            <button class="btn btn-outline-secondary" onclick="clearCache()">
+                <i class="fas fa-trash"></i> Limpar Cache
+            </button>
+        </div>
+
+        <div class="mt-5">
+            <h3>Informações da API</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Endpoint Base</th>
+                        <td><code>https://servicebus2.caixa.gov.br/portaldeloterias/api/</code></td>
+                    </tr>
+                    <tr>
+                        <th>Exemplo Mega Sena</th>
+                        <td><code>https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena</code></td>
+                    </tr>
+                    <tr>
+                        <th>Concurso Específico</th>
+                        <td><code>https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/2654</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loterias = [
+            { slug: 'megasena', nome: 'Mega Sena', color: '#209869' },
+            { slug: 'lotofacil', nome: 'Lotofácil', color: '#930089' },
+            { slug: 'quina', nome: 'Quina', color: '#260085' },
+            { slug: 'lotomania', nome: 'Lotomania', color: '#F78100' },
+            { slug: 'timemania', nome: 'Timemania', color: '#00FF48' },
+            { slug: 'duplasena', nome: 'Dupla Sena', color: '#A61324' }
+        ];
+
+        async function loadResults() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            for (const loteria of loterias) {
+                try {
+                    const response = await fetch(`https://servicebus2.caixa.gov.br/portaldeloterias/api/${loteria.slug}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    const card = document.createElement('div');
+                    card.className = 'loteria-card';
+                    
+                    let numerosHtml = '';
+                    if (data.listaDezenas) {
+                        numerosHtml = data.listaDezenas.map(num => 
+                            `<span class="loteria-ball" style="background-color: ${loteria.color}">${num}</span>`
+                        ).join('');
+                    }
+
+                    let premio = 0;
+                    if (data.listaRateioPremio && data.listaRateioPremio.length > 0) {
+                        const primeiraFaixa = data.listaRateioPremio[0];
+                        premio = primeiraFaixa.valorPremio || 0;
+                    }
+
+                    card.innerHTML = `
+                        <h3 style="color: ${loteria.color}">
+                            <i class="fas fa-clover"></i> ${loteria.nome}
+                        </h3>
+                        <p>
+                            <strong>Concurso:</strong> ${data.numero || 'N/A'} | 
+                            <strong>Data:</strong> ${data.dataApuracao ? new Date(data.dataApuracao).toLocaleDateString('pt-BR') : 'N/A'}
+                        </p>
+                        <div class="my-3">
+                            ${numerosHtml}
+                        </div>
+                        ${premio > 0 ? `
+                            <div class="alert alert-success">
+                                <strong>Prêmio:</strong> ${premio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </div>
+                        ` : ''}
+                        <details class="mt-3">
+                            <summary class="btn btn-sm btn-outline-secondary">Ver JSON Completo</summary>
+                            <pre class="mt-2 p-3 bg-light"><code>${JSON.stringify(data, null, 2)}</code></pre>
+                        </details>
+                    `;
+                    
+                    resultsDiv.appendChild(card);
+
+                } catch (error) {
+                    console.error(`Erro ao carregar ${loteria.nome}:`, error);
+                    const errorCard = document.createElement('div');
+                    errorCard.className = 'alert alert-warning';
+                    errorCard.innerHTML = `
+                        <strong>${loteria.nome}:</strong> Erro ao carregar (${error.message})
+                    `;
+                    resultsDiv.appendChild(errorCard);
+                }
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function clearCache() {
+            if (confirm('Limpar cache local do navegador?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('Cache limpo! Recarregando...');
+                location.reload();
+            }
+        }
+
+        // Carrega automaticamente ao abrir a página
+        window.addEventListener('load', loadResults);
+    </script>
+</body>
+</html>
