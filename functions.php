@@ -2415,3 +2415,13 @@ function exibir_dados_edital_shortcode($atts) {
     return ob_get_clean();
 }
 add_shortcode('edital_dados', 'exibir_dados_edital_shortcode');
+
+add_action( 'enqueue_block_editor_assets', function() {
+    wp_enqueue_script(
+        'mega-sena-block-debug',
+        get_template_directory_uri() . '/blocks/mega-sena/init.js',
+        array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components' ),
+        filemtime( get_template_directory() . '/blocks/mega-sena/init.js' ),
+        false
+    );
+} );
