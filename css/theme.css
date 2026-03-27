@@ -420,12 +420,16 @@ hr,
   flex: 0 0 25%;
   max-width: 25%;
   aspect-ratio: 3 / 5;
+  overflow: hidden;
+  border-radius: 4px;
 }
 .destaque-misto-wrapper .list-thumb img,
 .destaque-misto-wrapper .list-thumb .img-fluid {
   width: 100% !important;
   height: 100% !important;
+  display: block;
   object-fit: cover !important;
+  margin-bottom: 0 !important;
   border-radius: 4px;
 }
 .destaque-misto-wrapper .list-content {
@@ -2147,12 +2151,16 @@ body {
     width: 25%;
     max-width: 160px;
     aspect-ratio: 3 / 5;
+    overflow: hidden;
+    border-radius: 4px;
   }
   .destaque-misto-wrapper .list-thumb img,
   .destaque-misto-wrapper .list-thumb .img-fluid {
     width: 100% !important;
     height: 100% !important;
+    display: block;
     object-fit: cover !important;
+    margin-bottom: 0 !important;
     border-radius: 4px;
   }
   .destaque-misto-wrapper .list-content {
