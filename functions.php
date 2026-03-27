@@ -1,5 +1,155 @@
 <?php
 
+if ( ! function_exists( 'u_seisbarra8_asset_version' ) ) {
+    /**
+     * Safely returns a filemtime-based version without emitting warnings.
+     */
+    function u_seisbarra8_asset_version( $relative_path ) {
+        $relative_path = ltrim( (string) $relative_path, '/\\' );
+        $absolute_path = trailingslashit( get_template_directory() ) . $relative_path;
+
+        if ( file_exists( $absolute_path ) ) {
+            $mtime = filemtime( $absolute_path );
+            if ( false !== $mtime ) {
+                return $mtime;
+            }
+        }
+
+        return null;
+    }
+}
+
+if ( ! function_exists( 'u_seisbarra8_single_seo_opengraph' ) ) {
+    /**
+     * SEO and Open Graph meta for single posts.
+     */
+    function u_seisbarra8_single_seo_opengraph() {
+        if ( ! is_single() ) {
+            return;
+        }
+
+        global $post;
+        if ( ! $post ) {
+            return;
+        }
+
+        $title       = wp_strip_all_tags( get_the_title( $post ) );
+        $permalink   = get_permalink( $post );
+        $site_name   = get_bloginfo( 'name' );
+        $excerpt     = has_excerpt( $post ) ? get_the_excerpt( $post ) : '';
+        if ( empty( $excerpt ) ) {
+            $content = wp_strip_all_tags( strip_shortcodes( get_post_field( 'post_content', $post ) ) );
+            $excerpt = wp_trim_words( $content, 32, '' );
+        }
+        $description = mb_substr( trim( $excerpt ), 0, 160 );
+
+        $image_url = '';
+        if ( has_post_thumbnail( $post ) ) {
+            $src = wp_get_attachment_image_src( get_post_thumbnail_id( $post ), 'full' );
+            if ( is_array( $src ) && ! empty( $src[0] ) ) {
+                $image_url = $src[0];
+            }
+        }
+
+        $published = get_the_date( DATE_W3C, $post );
+        $modified  = get_the_modified_date( DATE_W3C, $post );
+        $author    = get_the_author_meta( 'display_name', $post->post_author );
+
+        $publisher_logo = '';
+        $custom_logo_id = get_theme_mod( 'custom_logo' );
+        if ( $custom_logo_id ) {
+            $logo_src = wp_get_attachment_image_src( $custom_logo_id, 'full' );
+            if ( is_array( $logo_src ) && ! empty( $logo_src[0] ) ) {
+                $publisher_logo = $logo_src[0];
+            }
+        }
+
+        if ( ! has_action( 'wp_head', 'rel_canonical' ) ) {
+            echo '<link rel="canonical" href="' . esc_url( $permalink ) . '" />' . "\n";
+        }
+
+        if ( $description ) {
+            echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
+        }
+
+        echo '<meta property="og:locale" content="' . esc_attr( get_locale() ) . '" />' . "\n";
+        echo '<meta property="og:type" content="article" />' . "\n";
+        echo '<meta property="og:title" content="' . esc_attr( $title ) . '" />' . "\n";
+        echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
+        echo '<meta property="og:url" content="' . esc_url( $permalink ) . '" />' . "\n";
+        echo '<meta property="og:site_name" content="' . esc_attr( $site_name ) . '" />' . "\n";
+        if ( $image_url ) {
+            echo '<meta property="og:image" content="' . esc_url( $image_url ) . '" />' . "\n";
+        }
+
+        echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
+        echo '<meta name="twitter:title" content="' . esc_attr( $title ) . '" />' . "\n";
+        echo '<meta name="twitter:description" content="' . esc_attr( $description ) . '" />' . "\n";
+        if ( $image_url ) {
+            echo '<meta name="twitter:image" content="' . esc_url( $image_url ) . '" />' . "\n";
+        }
+
+        echo '<meta property="article:published_time" content="' . esc_attr( $published ) . '" />' . "\n";
+        echo '<meta property="article:modified_time" content="' . esc_attr( $modified ) . '" />' . "\n";
+        $cats = wp_get_post_categories( $post->ID, array( 'fields' => 'names' ) );
+        if ( ! empty( $cats ) ) {
+            echo '<meta property="article:section" content="' . esc_attr( $cats[0] ) . '" />' . "\n";
+        }
+        $tags = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+        if ( ! empty( $tags ) ) {
+            foreach ( $tags as $tag_name ) {
+                echo '<meta property="article:tag" content="' . esc_attr( $tag_name ) . '" />' . "\n";
+            }
+        }
+
+        $is_news = in_array( 'post', array( get_post_type( $post ) ), true );
+        $schema  = array(
+            '@context'         => 'https://schema.org',
+            '@type'            => $is_news ? 'NewsArticle' : 'Article',
+            'mainEntityOfPage' => array(
+                '@type' => 'WebPage',
+                '@id'   => $permalink,
+            ),
+            'headline'         => $title,
+            'description'      => $description,
+            'datePublished'    => $published,
+            'dateModified'     => $modified,
+            'author'           => array(
+                '@type' => 'Person',
+                'name'  => $author,
+            ),
+            'publisher'        => array(
+                '@type' => 'Organization',
+                'name'  => $site_name,
+            ),
+        );
+        if ( $publisher_logo ) {
+            $schema['publisher']['logo'] = array(
+                '@type' => 'ImageObject',
+                'url'   => $publisher_logo,
+            );
+        }
+        if ( $image_url ) {
+            $schema['image'] = array( $image_url );
+        }
+
+        echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+    }
+}
+
+if ( ! function_exists( 'u_seisbarra8_get_footer_default_text' ) ) {
+    function u_seisbarra8_get_footer_default_text() {
+        $site_url     = home_url();
+        $site_host    = wp_parse_url( $site_url, PHP_URL_HOST );
+        $site_display = $site_host ? $site_host : $site_url;
+
+        return sprintf(
+            'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>%s</b>',
+            esc_html( $site_display )
+        );
+    }
+}
+
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
 function u_seisbarra8_setup() {
@@ -34,128 +184,7 @@ function u_seisbarra8_setup() {
      * Enable support for Post Thumbnails on posts and pages.
      */
     add_theme_support( 'post-thumbnails' );
-    
-        /**
-         * SEO and Open Graph meta for single posts.
-         */
-        function u_seisbarra8_single_seo_opengraph() {
-            if ( ! is_single() ) return;
-
-            global $post;
-            if ( ! $post ) return;
-
-            $title       = wp_strip_all_tags( get_the_title( $post ) );
-            $permalink   = get_permalink( $post );
-            $site_name   = get_bloginfo( 'name' );
-            $excerpt     = has_excerpt( $post ) ? get_the_excerpt( $post ) : '';
-            if ( empty( $excerpt ) ) {
-                // Fallback: trim content without shortcodes/HTML
-                $content = wp_strip_all_tags( strip_shortcodes( get_post_field( 'post_content', $post ) ) );
-                $excerpt = wp_trim_words( $content, 32, '' );
-            }
-            $description = mb_substr( trim( $excerpt ), 0, 160 );
-
-            // Featured image (full) if available
-            $image_url = '';
-            if ( has_post_thumbnail( $post ) ) {
-                $src = wp_get_attachment_image_src( get_post_thumbnail_id( $post ), 'full' );
-                if ( is_array( $src ) && ! empty( $src[0] ) ) {
-                    $image_url = $src[0];
-                }
-            }
-
-            $published  = get_the_date( DATE_W3C, $post );
-            $modified   = get_the_modified_date( DATE_W3C, $post );
-            $author     = get_the_author_meta( 'display_name', $post->post_author );
-
-            // Optional publisher logo from custom_logo
-            $publisher_logo = '';
-            $custom_logo_id = get_theme_mod( 'custom_logo' );
-            if ( $custom_logo_id ) {
-                $logo_src = wp_get_attachment_image_src( $custom_logo_id, 'full' );
-                if ( is_array( $logo_src ) && ! empty( $logo_src[0] ) ) {
-                    $publisher_logo = $logo_src[0];
-                }
-            }
-
-            // Canonical (avoid duplicate if WP already adds rel_canonical)
-            if ( ! has_action( 'wp_head', 'rel_canonical' ) ) {
-                echo '<link rel="canonical" href="' . esc_url( $permalink ) . '" />' . "\n";
-            }
-
-            // Basic SEO description
-            if ( $description ) {
-                echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
-            }
-
-            // Open Graph
-            echo '<meta property="og:locale" content="' . esc_attr( get_locale() ) . '" />' . "\n";
-            echo '<meta property="og:type" content="article" />' . "\n";
-            echo '<meta property="og:title" content="' . esc_attr( $title ) . '" />' . "\n";
-            echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
-            echo '<meta property="og:url" content="' . esc_url( $permalink ) . '" />' . "\n";
-            echo '<meta property="og:site_name" content="' . esc_attr( $site_name ) . '" />' . "\n";
-            if ( $image_url ) {
-                echo '<meta property="og:image" content="' . esc_url( $image_url ) . '" />' . "\n";
-            }
-
-            // Twitter Card
-            echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
-            echo '<meta name="twitter:title" content="' . esc_attr( $title ) . '" />' . "\n";
-            echo '<meta name="twitter:description" content="' . esc_attr( $description ) . '" />' . "\n";
-            if ( $image_url ) {
-                echo '<meta name="twitter:image" content="' . esc_url( $image_url ) . '" />' . "\n";
-            }
-
-            // Article-specific OG
-            echo '<meta property="article:published_time" content="' . esc_attr( $published ) . '" />' . "\n";
-            echo '<meta property="article:modified_time" content="' . esc_attr( $modified ) . '" />' . "\n";
-            $cats = wp_get_post_categories( $post->ID, array( 'fields' => 'names' ) );
-            if ( ! empty( $cats ) ) {
-                echo '<meta property="article:section" content="' . esc_attr( $cats[0] ) . '" />' . "\n";
-            }
-            $tags = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
-            if ( ! empty( $tags ) ) {
-                foreach ( $tags as $t ) {
-                    echo '<meta property="article:tag" content="' . esc_attr( $t ) . '" />' . "\n";
-                }
-            }
-
-            // JSON-LD Article/NewsArticle
-            $is_news = in_array( 'post', array( get_post_type( $post ) ), true );
-            $schema  = array(
-                '@context'        => 'https://schema.org',
-                '@type'           => $is_news ? 'NewsArticle' : 'Article',
-                'mainEntityOfPage'=> array(
-                    '@type' => 'WebPage',
-                    '@id'   => $permalink,
-                ),
-                'headline'        => $title,
-                'description'     => $description,
-                'datePublished'   => $published,
-                'dateModified'    => $modified,
-                'author'          => array(
-                    '@type' => 'Person',
-                    'name'  => $author,
-                ),
-                'publisher'       => array(
-                    '@type' => 'Organization',
-                    'name'  => $site_name,
-                ),
-            );
-            if ( $publisher_logo ) {
-                $schema['publisher']['logo'] = array(
-                    '@type' => 'ImageObject',
-                    'url'   => $publisher_logo,
-                );
-            }
-            if ( $image_url ) {
-                $schema['image'] = array( $image_url );
-            }
-
-            echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
-        }
-        add_action( 'wp_head', 'u_seisbarra8_single_seo_opengraph', 5 );
+    add_action( 'wp_head', 'u_seisbarra8_single_seo_opengraph', 5 );
 
     // Add menus.
     register_nav_menus( array(
@@ -1154,18 +1183,6 @@ function u_seisbarra8_customize_register( $wp_customize ) {
         'priority'    => 10,
     ));
 
-    if ( ! function_exists( 'u_seisbarra8_get_footer_default_text' ) ) {
-        function u_seisbarra8_get_footer_default_text() {
-            $site_url  = home_url();
-            $site_host = wp_parse_url( $site_url, PHP_URL_HOST );
-            $site_display = $site_host ? $site_host : $site_url;
-            return sprintf(
-                'Orgulhosamente feito com <i class="fa fa-heart"></i> no Acre | <b>%s</b>',
-                esc_html( $site_display )
-            );
-        }
-    }
-
     $wp_customize->add_setting( 'footer_text', array(
         'default'           => u_seisbarra8_get_footer_default_text(),
         'type'              => 'theme_mod',
@@ -1461,7 +1478,7 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
             'u_seisbarra8-main',
             get_template_directory_uri() . '/assets/js/main.js',
             array(),
-            filemtime( get_template_directory() . '/assets/js/main.js' ),
+            u_seisbarra8_asset_version( 'assets/js/main.js' ),
             true
         );
     }, 99 );
@@ -2119,7 +2136,7 @@ add_filter( 'rest_post_dispatch', 'u68_rest_error_logger', 10, 3 );
 add_action('wp_enqueue_scripts', function() {
     if ( empty( $_GET['debug'] ) || $_GET['debug'] !== 'ms' ) return;
     $registry = WP_Block_Type_Registry::get_instance();
-    $registered = $registry->is_registered('seideagosto/currency-monitor') ? 'SIM' : 'NAO';
+    $registered = $registry->is_registered('seisdeagosto/currency-monitor') ? 'SIM' : 'NAO';
     $api_msg = '';
     $api_url = 'https://open.er-api.com/v6/latest/BRL';
     $res = wp_remote_get($api_url, array('timeout' => 5));
@@ -2421,7 +2438,7 @@ add_action( 'enqueue_block_editor_assets', function() {
         'mega-sena-block-debug',
         get_template_directory_uri() . '/blocks/mega-sena/init.js',
         array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components' ),
-        filemtime( get_template_directory() . '/blocks/mega-sena/init.js' ),
+        u_seisbarra8_asset_version( 'blocks/mega-sena/init.js' ),
         false
     );
 } );

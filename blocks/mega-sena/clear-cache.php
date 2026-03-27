@@ -16,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
     }
 }
 
+if ( ! current_user_can( 'manage_options' ) ) {
+    status_header( 403 );
+    wp_die( 'Acesso negado.' );
+}
+
 // Carrega a API
 if ( ! function_exists( 'seisdeagosto_get_loteria_result' ) ) {
     require_once __DIR__ . '/loteria-api.php';
@@ -82,7 +87,7 @@ seisdeagosto_clear_loteria_cache();
         <h1>Cache Limpo com Sucesso!</h1>
         <p>O cache de todas as loterias foi removido.</p>
         <p>A próxima requisição irá buscar dados atualizados da API.</p>
-        <a href="<?php echo admin_url(); ?>" class="btn">Voltar ao WordPress</a>
+        <a href="<?php echo esc_url( admin_url() ); ?>" class="btn">Voltar ao WordPress</a>
     </div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "seideagosto/destaques-home",
+	"name": "seisdeagosto/destaques-home",
 	"version": "1.0.0",
 	"title": "Destaques Home",
 	"category": "seisdeagosto",

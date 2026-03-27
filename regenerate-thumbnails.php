@@ -1,34 +1,38 @@
 <?php
 /**
- * Regenerar miniaturas de imagens
- * Acesse: http://seisdeagosto.local/wp-content/themes/seisdeagosto/regenerate-thumbnails.php
- * 
- * Este script regenera as miniaturas das imagens recentes
+ * Regenerar miniaturas de imagens.
+ *
+ * Script utilitario administrativo.
  */
 
-// Carregar WordPress
-require_once('../../../wp-load.php');
+if ( ! defined( 'ABSPATH' ) ) {
+    $wp_load_path = dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/wp-load.php';
 
-// Verificar se é administrador
-if (!current_user_can('manage_options')) {
-    wp_die('Você não tem permissão para acessar esta página.');
+    if ( ! file_exists( $wp_load_path ) ) {
+        die( 'WordPress nao encontrado.' );
+    }
+
+    require_once $wp_load_path;
 }
 
-set_time_limit(300); // 5 minutos
+if ( ! current_user_can( 'manage_options' ) ) {
+    status_header( 403 );
+    wp_die( 'Voce nao tem permissao para acessar esta pagina.' );
+}
 
-// Pegar posts recentes com imagens
+set_time_limit( 300 );
+
 $args = array(
-    'post_type' => array('post', 'edital'),
+    'post_type'      => array( 'post', 'edital' ),
     'posts_per_page' => 50,
-    'meta_key' => '_thumbnail_id',
-    'orderby' => 'date',
-    'order' => 'DESC'
+    'meta_key'       => '_thumbnail_id',
+    'orderby'        => 'date',
+    'order'          => 'DESC',
 );
 
-$query = new WP_Query($args);
+$query       = new WP_Query( $args );
 $regenerated = 0;
-$errors = 0;
-
+$errors      = 0;
 ?>
 <!DOCTYPE html>
 <html>
@@ -51,14 +55,14 @@ $errors = 0;
 </head>
 <body>
     <div class="header">
-        <h1>🖼️ Regenerar Miniaturas de Imagens</h1>
-        <p>Regenerando miniaturas dos últimos 50 posts com imagens destacadas</p>
+        <h1>Regenerar Miniaturas de Imagens</h1>
+        <p>Regenerando miniaturas dos ultimos 50 posts com imagens destacadas</p>
     </div>
     
     <div class="content">
         <div class="stats">
             <div class="stat-box">
-                <div class="stat-number"><?php echo $query->found_posts; ?></div>
+                <div class="stat-number"><?php echo esc_html( (string) $query->found_posts ); ?></div>
                 <div>Posts com Imagem</div>
             </div>
             <div class="stat-box">
@@ -77,52 +81,50 @@ $errors = 0;
         
         <div id="log">
             <?php
-            if ($query->have_posts()) :
-                $total = $query->found_posts;
+            if ( $query->have_posts() ) :
+                $total   = $query->found_posts;
                 $current = 0;
-                
-                while ($query->have_posts()) : $query->the_post();
+
+                while ( $query->have_posts() ) :
+                    $query->the_post();
                     $current++;
                     $thumbnail_id = get_post_thumbnail_id();
-                    
-                    if ($thumbnail_id) {
+
+                    if ( $thumbnail_id ) {
                         echo '<div class="post-item">';
-                        echo '<strong>' . get_the_title() . '</strong><br>';
-                        
-                        // Regenerar miniaturas
-                        $attachment_path = get_attached_file($thumbnail_id);
-                        
-                        if ($attachment_path && file_exists($attachment_path)) {
-                            require_once(ABSPATH . 'wp-admin/includes/image.php');
-                            
-                            $metadata = wp_generate_attachment_metadata($thumbnail_id, $attachment_path);
-                            
-                            if (!is_wp_error($metadata) && !empty($metadata)) {
-                                wp_update_attachment_metadata($thumbnail_id, $metadata);
-                                echo '<span class="success">✅ Miniaturas regeneradas com sucesso!</span>';
+                        echo '<strong>' . esc_html( get_the_title() ) . '</strong><br>';
+
+                        $attachment_path = get_attached_file( $thumbnail_id );
+
+                        if ( $attachment_path && file_exists( $attachment_path ) ) {
+                            require_once ABSPATH . 'wp-admin/includes/image.php';
+
+                            $metadata = wp_generate_attachment_metadata( $thumbnail_id, $attachment_path );
+
+                            if ( ! is_wp_error( $metadata ) && ! empty( $metadata ) ) {
+                                wp_update_attachment_metadata( $thumbnail_id, $metadata );
+                                echo '<span class="success">Miniaturas regeneradas com sucesso.</span>';
                                 $regenerated++;
                             } else {
-                                echo '<span class="error">❌ Erro ao gerar metadados</span>';
+                                echo '<span class="error">Erro ao gerar metadados.</span>';
                                 $errors++;
                             }
                         } else {
-                            echo '<span class="error">❌ Arquivo de imagem não encontrado</span>';
+                            echo '<span class="error">Arquivo de imagem nao encontrado.</span>';
                             $errors++;
                         }
-                        
+
                         echo '</div>';
-                        
-                        // Atualizar progresso
-                        $percentage = round(($current / $total) * 100);
+
+                        $percentage = $total > 0 ? round( ( $current / $total ) * 100 ) : 100;
                         echo '<script>
-                            document.getElementById("progress-bar").style.width = "' . $percentage . '%";
-                            document.getElementById("progress-bar").textContent = "' . $percentage . '%";
-                            document.getElementById("regenerated-count").textContent = "' . $regenerated . '";
-                            document.getElementById("error-count").textContent = "' . $errors . '";
+                            document.getElementById("progress-bar").style.width = "' . esc_js( (string) $percentage ) . '%";
+                            document.getElementById("progress-bar").textContent = "' . esc_js( (string) $percentage ) . '%";
+                            document.getElementById("regenerated-count").textContent = "' . esc_js( (string) $regenerated ) . '";
+                            document.getElementById("error-count").textContent = "' . esc_js( (string) $errors ) . '";
                         </script>';
-                        
-                        // Flush para mostrar progresso em tempo real
-                        if (ob_get_level() > 0) {
+
+                        if ( ob_get_level() > 0 ) {
                             ob_flush();
                             flush();
                         }
@@ -138,18 +140,18 @@ $errors = 0;
         <hr style="margin: 30px 0;">
         
         <div style="background: #d4edda; padding: 20px; border-radius: 5px; border: 1px solid #c3e6cb;">
-            <h3 style="margin: 0 0 10px 0; color: #155724;">✅ Processo Concluído!</h3>
+            <h3 style="margin: 0 0 10px 0; color: #155724;">Processo Concluido</h3>
             <p style="margin: 0; color: #155724;">
-                <strong><?php echo $regenerated; ?></strong> imagens foram regeneradas com sucesso.<br>
-                <?php if ($errors > 0) : ?>
-                    <strong><?php echo $errors; ?></strong> erros encontrados.
+                <strong><?php echo esc_html( (string) $regenerated ); ?></strong> imagens foram regeneradas com sucesso.<br>
+                <?php if ( $errors > 0 ) : ?>
+                    <strong><?php echo esc_html( (string) $errors ); ?></strong> erros encontrados.
                 <?php endif; ?>
             </p>
         </div>
         
         <p style="margin-top: 30px; text-align: center;">
-            <a href="<?php echo home_url(); ?>" style="display: inline-block; padding: 10px 20px; background: #0073aa; color: white; text-decoration: none; border-radius: 5px;">← Voltar ao site</a>
-            <a href="?" style="display: inline-block; padding: 10px 20px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 5px; margin-left: 10px;">🔄 Executar Novamente</a>
+            <a href="<?php echo esc_url( home_url() ); ?>" style="display: inline-block; padding: 10px 20px; background: #0073aa; color: white; text-decoration: none; border-radius: 5px;">Voltar ao site</a>
+            <a href="?" style="display: inline-block; padding: 10px 20px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 5px; margin-left: 10px;">Executar novamente</a>
         </p>
     </div>
 </body>

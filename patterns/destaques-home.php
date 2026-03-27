@@ -12,5 +12,5 @@
 <h2>Destaques</h2>
 <!-- /wp:heading -->
 
-<!-- wp:seideagosto/destaques-home {"categoryId":"0"} /--></div>
+<!-- wp:seisdeagosto/destaques-home {"categoryId":"0"} /--></div>
 <!-- /wp:group -->

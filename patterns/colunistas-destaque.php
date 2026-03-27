@@ -16,5 +16,5 @@
 <p>As últimas publicações dos nossos colunistas.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:seideagosto/colunistas-grid /--></div>
+<!-- wp:seisdeagosto/colunistas-grid /--></div>
 <!-- /wp:group -->

@@ -206,9 +206,10 @@ Otimizados para performance e qualidade visual em diferentes dispositivos.
 - **Text Domain**: `u_correio68`
 - **Base**: Bootstrap e Starter Theme (ST2/UnderStrap)
 - **Namespaces dos blocos**: 
-  - `seideagosto/*` (principal)
+  - `seisdeagosto/*` (principal)
   - `u-correio68/*` (metadata blocks)
   - `correio68/*` (compatibilidade de renderização)
+  - `seideagosto/*` (alias legado temporário para migração segura)
 
 ### Recursos Avançados
 

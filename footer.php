@@ -21,7 +21,7 @@
                                                     esc_html( wp_parse_url( home_url(), PHP_URL_HOST ) ?: home_url() )
                                                 );
                                             ?>
-                                            <p class="text-ce text-center text-white"><?php echo get_theme_mod( 'footer_text', $footer_default ); ?></p>
+                                            <p class="text-ce text-center text-white"><?php echo wp_kses_post( get_theme_mod( 'footer_text', $footer_default ) ); ?></p>
                                         </div>
                                         <!-- .site-info -->
                                     </footer>

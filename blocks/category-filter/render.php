@@ -45,7 +45,7 @@ function seisdeagosto_render_category_filter( $attributes ) {
         'category-filter-frontend',
         get_template_directory_uri() . '/blocks/category-filter/view.js',
         array( 'jquery' ),
-        filemtime( get_template_directory() . '/blocks/category-filter/view.js' ),
+        function_exists( 'u_seisbarra8_asset_version' ) ? u_seisbarra8_asset_version( 'blocks/category-filter/view.js' ) : null,
         true
     );
     
@@ -54,7 +54,7 @@ function seisdeagosto_render_category_filter( $attributes ) {
         'category-filter-frontend',
         get_template_directory_uri() . '/blocks/category-filter/style.css',
         array(),
-        filemtime( get_template_directory() . '/blocks/category-filter/style.css' )
+        function_exists( 'u_seisbarra8_asset_version' ) ? u_seisbarra8_asset_version( 'blocks/category-filter/style.css' ) : null
     );
     
     ob_start();

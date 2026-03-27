@@ -1,6 +1,6 @@
 /**
- * Auto-migração de blocos deprecados
- * Converte automaticamente u-correio68/titulo-com-icone para seisdeagosto/titulo-com-icone
+ * Auto-migracao de blocos deprecados
+ * Converte automaticamente namespaces antigos para seisdeagosto/
  */
 
 (function() {
@@ -56,10 +56,10 @@
         'seisdeagosto/replace-old-namespace',
         function(blockType, blockName) {
             // Se detectar o bloco antigo, redireciona para o novo
-            if (blockName === 'u-correio68/titulo-com-icone') {
+            if (blockName === 'u-correio68/titulo-com-icone' || blockName === 'seideagosto/titulo-com-icone') {
                 const newBlock = wp.blocks.getBlockType('seisdeagosto/titulo-com-icone');
                 if (newBlock) {
-                    console.log('[Auto-Migration] Redirecting u-correio68/titulo-com-icone to seisdeagosto/titulo-com-icone');
+                    console.log('[Auto-Migration] Redirecting old titulo-com-icone namespace to seisdeagosto/titulo-com-icone');
                     return newBlock;
                 }
             }
@@ -81,7 +81,7 @@
             function migrateBlocks(blocksArray) {
                 blocksArray.forEach(function(block) {
                     // Detecta bloco com namespace antigo
-                    if (block.name === 'u-correio68/titulo-com-icone') {
+                    if (block.name === 'u-correio68/titulo-com-icone' || block.name === 'seideagosto/titulo-com-icone') {
                         try {
                             // Cria novo bloco com mesmo conteúdo
                             const newBlock = createBlock(
@@ -118,7 +118,7 @@
                 // Mostra aviso para salvar
                 dispatch('core/notices').createNotice(
                     'info',
-                    'Detectamos ' + migratedCount + ' bloco(s) "Título com Ícone" com namespace antigo. Foram convertidos automaticamente para o novo formato. Por favor, salve a página para preservar as mudanças.',
+                    'Detectamos ' + migratedCount + ' bloco(s) "Titulo com Icone" com namespace antigo. Foram convertidos automaticamente para o novo formato. Por favor, salve a pagina para preservar as mudancas.',
                     {
                         isDismissible: true,
                         type: 'snackbar'

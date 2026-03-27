@@ -13,80 +13,80 @@
     </style>
 </head>
 <body>
-    <h1>🔍 Debug - Data Mega Sena</h1>
+    <h1>Debug - Data Mega Sena</h1>
     
     <?php
-    // Limpa cache
-    if (isset($_GET['limpar'])) {
-        delete_transient('loteria_megasena');
-        echo '<div class="box success">✅ Cache limpo!</div>';
+    require_once dirname( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) ) . '/wp-load.php';
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        status_header( 403 );
+        wp_die( 'Acesso negado.' );
     }
-    
-    // Carrega WordPress
-    require_once dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/wp-load.php';
-    
-    // Carrega API
+
+    if ( isset( $_GET['limpar'] ) ) {
+        delete_transient( 'loteria_megasena' );
+        echo '<div class="box success">Cache limpo!</div>';
+    }
+
     require_once __DIR__ . '/loteria-api.php';
-    
-    // Busca dados
+
     echo '<div class="box">';
-    echo '<h2>📡 Requisição à API da Caixa</h2>';
-    
+    echo '<h2>Requisicao a API da Caixa</h2>';
+
     $url = 'https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena';
-    echo '<p><strong>URL:</strong> ' . $url . '</p>';
-    
-    $response = wp_remote_get($url, array('timeout' => 15));
-    
-    if (is_wp_error($response)) {
-        echo '<p class="error">❌ Erro: ' . $response->get_error_message() . '</p>';
+    echo '<p><strong>URL:</strong> ' . esc_html( $url ) . '</p>';
+
+    $response = wp_remote_get( $url, array( 'timeout' => 15 ) );
+
+    if ( is_wp_error( $response ) ) {
+        echo '<p class="error">Erro: ' . esc_html( $response->get_error_message() ) . '</p>';
     } else {
-        $status = wp_remote_retrieve_response_code($response);
-        echo '<p><strong>Status HTTP:</strong> ' . $status . '</p>';
-        
-        if ($status === 200) {
-            $body = wp_remote_retrieve_body($response);
-            $data = json_decode($body, true);
-            
-            echo '<h3>📅 Dados de Data:</h3>';
+        $status = wp_remote_retrieve_response_code( $response );
+        echo '<p><strong>Status HTTP:</strong> ' . esc_html( (string) $status ) . '</p>';
+
+        if ( 200 === $status ) {
+            $body = wp_remote_retrieve_body( $response );
+            $data = json_decode( $body, true );
+
+            echo '<h3>Dados de Data:</h3>';
             echo '<ul>';
-            echo '<li><strong>dataApuracao (RAW):</strong> ' . ($data['dataApuracao'] ?? 'N/A') . '</li>';
-            
-            if (isset($data['dataApuracao'])) {
-                // Teste 1: strtotime
-                $timestamp = strtotime($data['dataApuracao']);
-                echo '<li><strong>strtotime:</strong> ' . $timestamp . ' → ' . date('d/m/Y', $timestamp) . '</li>';
-                
-                // Teste 2: DateTime
-                try {
-                    $date = new DateTime($data['dataApuracao']);
-                    echo '<li><strong>DateTime:</strong> ' . $date->format('d/m/Y') . ' (' . $date->format('Y-m-d H:i:s') . ')</li>';
-                } catch (Exception $e) {
-                    echo '<li class="error"><strong>DateTime ERRO:</strong> ' . $e->getMessage() . '</li>';
+            echo '<li><strong>dataApuracao (RAW):</strong> ' . esc_html( $data['dataApuracao'] ?? 'N/A' ) . '</li>';
+
+            if ( isset( $data['dataApuracao'] ) ) {
+                $timestamp = strtotime( $data['dataApuracao'] );
+                if ( false !== $timestamp ) {
+                    echo '<li><strong>strtotime:</strong> ' . esc_html( (string) $timestamp ) . ' -> ' . esc_html( date( 'd/m/Y', $timestamp ) ) . '</li>';
                 }
-                
-                // Teste 3: Função helper
-                echo '<li><strong>seisdeagosto_format_date:</strong> ' . seisdeagosto_format_date($data['dataApuracao']) . '</li>';
+
+                try {
+                    $date = new DateTime( $data['dataApuracao'] );
+                    echo '<li><strong>DateTime:</strong> ' . esc_html( $date->format( 'd/m/Y' ) ) . ' (' . esc_html( $date->format( 'Y-m-d H:i:s' ) ) . ')</li>';
+                } catch ( Exception $e ) {
+                    echo '<li class="error"><strong>DateTime ERRO:</strong> ' . esc_html( $e->getMessage() ) . '</li>';
+                }
+
+                echo '<li><strong>seisdeagosto_format_date:</strong> ' . esc_html( seisdeagosto_format_date( $data['dataApuracao'] ) ) . '</li>';
             }
             echo '</ul>';
-            
-            echo '<h3>🎲 Concurso:</h3>';
-            echo '<p><strong>Número:</strong> ' . ($data['numero'] ?? 'N/A') . '</p>';
-            
-            echo '<h3>🔢 Números Sorteados:</h3>';
-            if (isset($data['listaDezenas'])) {
-                echo '<p>' . implode(' - ', $data['listaDezenas']) . '</p>';
+
+            echo '<h3>Concurso:</h3>';
+            echo '<p><strong>Numero:</strong> ' . esc_html( (string) ( $data['numero'] ?? 'N/A' ) ) . '</p>';
+
+            echo '<h3>Numeros Sorteados:</h3>';
+            if ( isset( $data['listaDezenas'] ) && is_array( $data['listaDezenas'] ) ) {
+                echo '<p>' . esc_html( implode( ' - ', $data['listaDezenas'] ) ) . '</p>';
             }
-            
-            echo '<h3>📋 JSON Completo:</h3>';
-            echo '<pre>' . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>';
+
+            echo '<h3>JSON Completo:</h3>';
+            echo '<pre>' . esc_html( wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) ) . '</pre>';
         } else {
-            echo '<p class="error">❌ Status não é 200</p>';
+            echo '<p class="error">Status nao e 200</p>';
         }
     }
     echo '</div>';
-    
+
     echo '<div class="box">';
-    echo '<h2>🗑️ Limpar Cache</h2>';
+    echo '<h2>Limpar Cache</h2>';
     echo '<a href="?limpar=1" style="display:inline-block; padding:10px 20px; background:#209869; color:white; text-decoration:none; border-radius:5px;">Limpar Cache e Recarregar</a>';
     echo '</div>';
     ?>

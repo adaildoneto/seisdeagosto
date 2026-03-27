@@ -239,7 +239,7 @@ console.groupEnd();
     }
 
     // Register Destaques Home Block
-    registerBlockType('seideagosto/destaques-home', {
+    registerBlockType('seisdeagosto/destaques-home', {
         title: 'Destaques Home',
         icon: 'star-filled',
         category: 'seisdeagosto',
@@ -259,7 +259,7 @@ console.groupEnd();
     });
 
     // Colunistas Grid (lightweight editor preview)
-    registerBlockType('seideagosto/colunistas-grid', {
+    registerBlockType('seisdeagosto/colunistas-grid', {
         title: 'Grid de Colunistas',
         icon: 'groups',
         category: 'seisdeagosto',
@@ -282,12 +282,12 @@ console.groupEnd();
                     }
                 },
                 {
-                    allowedBlocks: ['seideagosto/colunista-item'],
+                    allowedBlocks: ['seisdeagosto/colunista-item'],
                     template: [
-                        ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
-                        ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
-                        ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
-                        ['seideagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }]
+                        ['seisdeagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                        ['seisdeagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                        ['seisdeagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }],
+                        ['seisdeagosto/colunista-item', { name: '', columnTitle: '', imageUrl: '', categoryId: '0' }]
                     ],
                     templateLock: false,
                     renderAppender: wp.blockEditor.InnerBlocks.ButtonBlockAppender
@@ -335,11 +335,11 @@ console.groupEnd();
     });
 
     // Colunista Item (lightweight editor preview)
-    registerBlockType('seideagosto/colunista-item', {
+    registerBlockType('seisdeagosto/colunista-item', {
         title: 'Colunista Item',
         icon: 'admin-users',
         category: 'seisdeagosto',
-        parent: ['seideagosto/colunistas-grid'],
+        parent: ['seisdeagosto/colunistas-grid'],
         attributes: {
             name: { type: 'string', default: '' },
             columnTitle: { type: 'string', default: '' },
@@ -444,7 +444,7 @@ console.groupEnd();
     });
 
     // News Grid (Grid de Notícias)
-    registerBlockType('seideagosto/news-grid', {
+    registerBlockType('seisdeagosto/news-grid', {
         title: 'Grid de Notícias',
         icon: 'grid-view',
         category: 'seisdeagosto',
@@ -598,7 +598,7 @@ console.groupEnd();
     });
 
     // Category Highlight (1 Big + 3 List)
-    registerBlockType('seideagosto/category-highlight', {
+    registerBlockType('seisdeagosto/category-highlight', {
         title: 'Destaque Categoria (1 Grande + 3 Lista)',
         icon: 'list-view',
         category: 'seisdeagosto',
@@ -683,7 +683,7 @@ console.groupEnd();
     });
 
     // Destaque Misto (2 Big + List + 1 Column)
-    registerBlockType('seideagosto/destaque-misto', {
+    registerBlockType('seisdeagosto/destaque-misto', {
         title: 'Destaque Misto (2 Grandes + Lista + 1 Coluna)',
         icon: 'layout',
         category: 'seisdeagosto',
@@ -766,7 +766,7 @@ console.groupEnd();
     });
 
     // Top Most Read (Top N)
-    registerBlockType('seideagosto/top-most-read', {
+    registerBlockType('seisdeagosto/top-most-read', {
         title: 'Top Mais Lidas',
         icon: 'chart-area',
         category: 'seisdeagosto',
@@ -1029,7 +1029,7 @@ console.groupEnd();
         );
     };
 
-    registerBlockType('seideagosto/weather', {
+    registerBlockType('seisdeagosto/weather', {
         title: 'Clima / Tempo',
         icon: 'cloud',
         category: 'seisdeagosto',
@@ -1172,7 +1172,7 @@ console.groupEnd();
 
     // Currency Monitor
     var ToggleControl = wp.components.ToggleControl;
-    registerBlockType('seideagosto/currency-monitor', {
+    registerBlockType('seisdeagosto/currency-monitor', {
         title: 'Monitor de Câmbio',
         icon: 'money',
         category: 'seisdeagosto',
@@ -1365,7 +1365,7 @@ console.groupEnd();
     });
 
     // Sidebar Area (Widget Area Renderer)
-    registerBlockType('seideagosto/sidebar-area', {
+    registerBlockType('seisdeagosto/sidebar-area', {
         title: 'Área de Widgets (Sidebar)',
         icon: 'screenoptions',
         category: 'seisdeagosto',
@@ -1427,11 +1427,11 @@ console.groupEnd();
         var header = '📰 Bloco do Tema';
         var controls = null;
         
-        if (name === 'seideagosto/destaque-grande') header = '⭐ Destaque Grande';
-        if (name === 'seideagosto/destaque-pequeno') header = '⭐ Destaque Pequeno';
-        if (name === 'seideagosto/lista-noticias') header = '🗂️ Lista de Notícias';
+        if (name === 'seisdeagosto/destaque-grande') header = '⭐ Destaque Grande';
+        if (name === 'seisdeagosto/destaque-pequeno') header = '⭐ Destaque Pequeno';
+        if (name === 'seisdeagosto/lista-noticias') header = '🗂️ Lista de Notícias';
         
-        if (name === 'seideagosto/titulo-com-icone') {
+        if (name === 'seisdeagosto/titulo-com-icone') {
             header = '📝 Título com Ícone';
             controls = React.createElement(
                 InspectorControls,
@@ -1544,10 +1544,10 @@ console.groupEnd();
     try {
         addFilter('blocks.registerBlockType', 'seisdeagosto/light-previews', function(settings, name) {
             var targets = [
-                'seideagosto/destaque-grande',
-                'seideagosto/destaque-pequeno',
-                'seideagosto/lista-noticias',
-                'seideagosto/titulo-com-icone'
+                'seisdeagosto/destaque-grande',
+                'seisdeagosto/destaque-pequeno',
+                'seisdeagosto/lista-noticias',
+                'seisdeagosto/titulo-com-icone'
             ];
             if (targets.indexOf(name) !== -1) {
                 settings.edit = function(props) { return lightPreview(name, props); };
@@ -1562,10 +1562,10 @@ console.groupEnd();
     // Fallback: if blocks already registered before filters, override via domReady
     wp.domReady(function() {
         var targets = [
-            'seideagosto/destaque-grande',
-            'seideagosto/destaque-pequeno',
-            'seideagosto/lista-noticias',
-            'seideagosto/titulo-com-icone'
+            'seisdeagosto/destaque-grande',
+            'seisdeagosto/destaque-pequeno',
+            'seisdeagosto/lista-noticias',
+            'seisdeagosto/titulo-com-icone'
         ];
         targets.forEach(function(name) {
             var existing = wp.blocks.getBlockType(name);
@@ -1590,7 +1590,7 @@ console.groupEnd();
     // Automatically convert old namespace blocks in content to new namespace
     // This runs on editor initialization and transparently migrates content
     try {
-        addFilter('blocks.registerBlockType', 'seideagosto/migrate-old-blocks', function(settings, name) {
+        addFilter('blocks.registerBlockType', 'seisdeagosto/migrate-old-blocks', function(settings, name) {
             // Ensure name is a string
             if (typeof name !== 'string') {
                 return settings;
@@ -1617,7 +1617,7 @@ console.groupEnd();
     }
 
     // Image Slider Block
-    registerBlockType('seideagosto/image-slider', {
+    registerBlockType('seisdeagosto/image-slider', {
         title: 'Galeria em Slider (Slick)',
         icon: 'images-alt2',
         category: 'seisdeagosto',
@@ -1828,7 +1828,7 @@ console.groupEnd();
 
     // CTA (Título com Ícone)
     wp.domReady(function() {
-        var ctaBlockName = 'seideagosto/titulo-com-icone';
+        var ctaBlockName = 'seisdeagosto/titulo-com-icone';
         try {
             var existing = wp.blocks.getBlockType(ctaBlockName);
             var settings = {
@@ -1948,7 +1948,7 @@ console.groupEnd();
                         ),
                         el('div', blockProps, 
                             SSR ? el(SSR, {
-                                block: 'seideagosto/titulo-com-icone',
+                                block: 'seisdeagosto/titulo-com-icone',
                                 attributes: attributes
                             }) : el('div', {}, 'ServerSideRender not available')
                         )

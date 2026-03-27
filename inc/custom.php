@@ -275,7 +275,7 @@ add_action('loop_end', 'st2_jptweak_remove_exshare');
 //* https://jetpack.com/support/social-menu/
 function st2_jetpackme_social_menu()
 {
-	if (!function_exists('st2_jetpackme_social_menu')) {
+	if (!function_exists('jetpack_social_menu')) {
 		return;
 	} else {
 		jetpack_social_menu();

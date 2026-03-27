@@ -12,5 +12,5 @@
 <h2>Categoria em Destaque</h2>
 <!-- /wp:heading -->
 
-<!-- wp:seideagosto/category-highlight {"categoryId":"0","title":"Título da Categoria","bigCount":1,"listCount":3} /--></div>
+<!-- wp:seisdeagosto/category-highlight {"categoryId":"0","title":"Título da Categoria","bigCount":1,"listCount":3} /--></div>
 <!-- /wp:group -->

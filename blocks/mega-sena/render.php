@@ -14,28 +14,41 @@ if ( ! function_exists( 'seisdeagosto_get_loteria_result' ) ) {
  */
 function seisdeagosto_render_mega_sena_block( $attributes ) {
     // Enqueue FontAwesome
-    wp_enqueue_style(
-        'font-awesome',
-        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-        array(),
-        '6.4.0'
-    );
+    if ( wp_style_is( 'u_seisbarra8-fontawesome', 'registered' ) || wp_style_is( 'u_seisbarra8-fontawesome', 'enqueued' ) ) {
+        wp_enqueue_style( 'u_seisbarra8-fontawesome' );
+    } elseif ( function_exists( 'u_seisbarra8_ensure_fontawesome' ) ) {
+        u_seisbarra8_ensure_fontawesome();
+    }
 
     // Enqueue Bootstrap JS (necessário para accordion e dropdown)
-    wp_enqueue_script(
-        'bootstrap-bundle',
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-        array(),
-        '5.3.0',
-        true
-    );
+    if ( ! wp_script_is( 'u_seisbarra8-popper', 'registered' ) ) {
+        wp_register_script(
+            'u_seisbarra8-popper',
+            get_template_directory_uri() . '/assets/js/popper.js',
+            array(),
+            function_exists( 'u_seisbarra8_asset_version' ) ? u_seisbarra8_asset_version( 'assets/js/popper.js' ) : null,
+            true
+        );
+    }
+    wp_enqueue_script( 'u_seisbarra8-popper' );
+
+    if ( ! wp_script_is( 'u_seisbarra8-bootstrap', 'registered' ) ) {
+        wp_register_script(
+            'u_seisbarra8-bootstrap',
+            get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js',
+            array( 'jquery', 'u_seisbarra8-popper' ),
+            function_exists( 'u_seisbarra8_asset_version' ) ? u_seisbarra8_asset_version( 'bootstrap/js/bootstrap.min.js' ) : null,
+            true
+        );
+    }
+    wp_enqueue_script( 'u_seisbarra8-bootstrap' );
 
     // Enqueue frontend script
     wp_enqueue_script(
         'mega-sena-frontend',
         get_template_directory_uri() . '/blocks/mega-sena/frontend.js',
-        array('bootstrap-bundle'),
-        filemtime( __DIR__ . '/frontend.js' ),
+        array( 'u_seisbarra8-bootstrap' ),
+        file_exists( __DIR__ . '/frontend.js' ) ? filemtime( __DIR__ . '/frontend.js' ) : null,
         true
     );
     

@@ -17,7 +17,7 @@
        
 
     </head>
-    <body class="<?php echo implode(' ', get_body_class()); ?>">
+    <body <?php body_class(); ?>>
         <?php if( function_exists( 'wp_body_open' ) ) wp_body_open(); ?>
         <div id="wrapper">
             <nav id="sidebar" class="active navbar-fixed-top fixed-top h-100">

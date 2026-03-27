@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "seideagosto/top-most-read",
+	"name": "seisdeagosto/top-most-read",
 	"version": "1.0.0",
 	"title": "Posts Mais Lidos",
 	"category": "seisdeagosto",

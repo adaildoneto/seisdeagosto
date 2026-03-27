@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "seideagosto/destaque-misto",
+	"name": "seisdeagosto/destaque-misto",
 	"version": "1.0.0",
 	"title": "Destaque Misto",
 	"category": "seisdeagosto",

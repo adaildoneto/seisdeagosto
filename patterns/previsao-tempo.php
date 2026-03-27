@@ -12,5 +12,5 @@
 <h3>Previsão do Tempo</h3>
 <!-- /wp:heading -->
 
-<!-- wp:seideagosto/weather {"cityName":"Rio Branco","latitude":"-9.975","longitude":"-67.824","units":"c","showWind":true,"showRain":true} /--></div>
+<!-- wp:seisdeagosto/weather {"cityName":"Rio Branco","latitude":"-9.975","longitude":"-67.824","units":"c","showWind":true,"showRain":true} /--></div>
 <!-- /wp:group -->

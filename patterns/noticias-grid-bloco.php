@@ -12,5 +12,5 @@
 <h2>Últimas notícias</h2>
 <!-- /wp:heading -->
 
-<!-- wp:seideagosto/news-grid {"categoryId":"0","numberOfPosts":6,"offset":0,"columns":3,"paginate":false} /--></div>
+<!-- wp:seisdeagosto/news-grid {"categoryId":"0","numberOfPosts":6,"offset":0,"columns":3,"paginate":false} /--></div>
 <!-- /wp:group -->

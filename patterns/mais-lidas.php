@@ -12,5 +12,5 @@
 <h2>Mais lidas</h2>
 <!-- /wp:heading -->
 
-<!-- wp:seideagosto/top-most-read {"title":"Mais lidas","count":5,"metaKey":"post_views_count","categoryId":"0"} /--></div>
+<!-- wp:seisdeagosto/top-most-read {"title":"Mais lidas","count":5,"metaKey":"post_views_count","categoryId":"0"} /--></div>
 <!-- /wp:group -->

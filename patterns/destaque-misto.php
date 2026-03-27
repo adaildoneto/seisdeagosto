@@ -12,5 +12,5 @@
 <h2>Destaque Misto</h2>
 <!-- /wp:heading -->
 
-<!-- wp:seideagosto/destaque-misto {"categoryId":"0"} /--></div>
+<!-- wp:seisdeagosto/destaque-misto {"categoryId":"0"} /--></div>
 <!-- /wp:group -->

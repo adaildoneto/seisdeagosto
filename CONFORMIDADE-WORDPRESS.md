@@ -7,7 +7,7 @@ Conforme a [documentação oficial do WordPress](https://developer.wordpress.org
 
 **Antes:**
 ```php
-register_block_type( 'seideagosto/news-grid', array(
+register_block_type( 'seisdeagosto/news-grid', array(
     'category' => 'seisdeagosto',
     'editor_script' => 'seideagosto-blocks',
     'render_callback' => 'u_correio68_render_news_grid',
@@ -112,11 +112,11 @@ Todos os blocos incluem configuração de exemplo para visualização:
 
 ## 📁 Blocos Migrados para block.json
 
-1. **seideagosto/destaques-home** - `/blocks/destaques-home/block.json`
-2. **seideagosto/news-grid** - `/blocks/news-grid/block.json`
-3. **seideagosto/category-highlight** - `/blocks/category-highlight/block.json`
-4. **seideagosto/destaque-misto** - `/blocks/destaque-misto/block.json`
-5. **seideagosto/top-most-read** - `/blocks/top-most-read/block.json`
+1. **seisdeagosto/destaques-home** - `/blocks/destaques-home/block.json`
+2. **seisdeagosto/news-grid** - `/blocks/news-grid/block.json`
+3. **seisdeagosto/category-highlight** - `/blocks/category-highlight/block.json`
+4. **seisdeagosto/destaque-misto** - `/blocks/destaque-misto/block.json`
+5. **seisdeagosto/top-most-read** - `/blocks/top-most-read/block.json`
 
 ## 🎯 Benefícios da Migração
 
@@ -169,10 +169,20 @@ Todos os blocos incluem configuração de exemplo para visualização:
 - [x] `version` para versionamento
 
 ### ✅ Best Practices
-- [x] Namespace consistente (`seideagosto/`)
+- [x] Namespace consistente (`seisdeagosto/`)
 - [x] Atributos com valores padrão
 - [x] Separação de concerns (JSON vs PHP)
 - [x] Documentação inline
+
+### Compatibilidade de Migração
+
+O namespace canônico dos blocos agora é `seisdeagosto/*`.
+
+Para evitar quebra em conteúdo já salvo:
+
+- o tema ainda registra aliases legados `seideagosto/*` no PHP;
+- o editor tenta migrar automaticamente blocos antigos para `seisdeagosto/*`;
+- patterns e novos registros usam apenas o namespace canônico.
 
 ## 🔄 Próximos Passos
 
