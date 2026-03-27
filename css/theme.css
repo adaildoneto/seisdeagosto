@@ -647,12 +647,22 @@ ol li::before {
 
 .imagem-destaque {
   height: var(--u68-featured-height, 425px);
-  width: auto; }
+  width: 100%;
+  display: block;
+  -o-object-fit: cover;
+     object-fit: cover; }
+
+.imagem-destaque-pequeno {
+  height: var(--u68-featured-small-height, 220px); }
 
 /* Destaque home mobile - larger images */
 @media (max-width: 768px) {
   .imagem-destaque {
     height: 450px !important;
+  }
+
+  .imagem-destaque-pequeno {
+    height: 260px !important;
   }
   
   .destaques-home-wrapper .imagem-destaque,

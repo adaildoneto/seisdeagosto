@@ -1021,11 +1021,11 @@ function u_correio68_render_destaques_home( $attributes ) {
                                     <?php 
                                     if ( class_exists( 'PG_Image' ) ) {
                                         echo PG_Image::getPostImage( $post->ID, 'destatquegrande', array(
-                                            'class' => 'w-100',
+                                            'class' => 'imagem-destaque imagem-destaque-pequeno w-100',
                                             'sizes' => 'max-width(320px) 85vw, max-width(640px) 510px, max-width(768px) 70vw, max-width(1024px) 60vw, max-width(1280px) 730px, 730px'
                                         ), 'both', null );
                                     } else {
-                                        echo get_the_post_thumbnail( $post->ID, 'destatquegrande', array( 'class' => 'w-100' ) );
+                                        echo get_the_post_thumbnail( $post->ID, 'destatquegrande', array( 'class' => 'imagem-destaque imagem-destaque-pequeno w-100' ) );
                                     }
                                     ?>
                                     <div class="card-img-overlay grad gradiente space d-flex flex-column justify-content-end">
