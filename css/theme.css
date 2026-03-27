@@ -662,13 +662,12 @@ ol li::before {
 .destaques-home-side-column > div {
   display: flex;
   flex-direction: column;
-  height: var(--u68-featured-height, 425px);
   gap: var(--u68-card-spacing, 8px);
 }
 
 .destaques-home-side-column .destaque-home-card-pequeno {
-  flex: 1 1 0;
-  min-height: 0;
+  height: var(--u68-featured-small-height, calc((var(--u68-featured-height, 425px) - var(--u68-card-spacing, 8px)) / 2));
+  flex: 0 0 var(--u68-featured-small-height, calc((var(--u68-featured-height, 425px) - var(--u68-card-spacing, 8px)) / 2));
   margin-bottom: 0;
 }
 
