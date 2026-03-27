@@ -1011,13 +1011,13 @@ function u_correio68_render_destaques_home( $attributes ) {
 
                     <!-- Small Posts -->
                     <?php if ( $layout_type !== 'single' ) : ?>
-                    <div class="col-md-4">
+                    <div class="col-md-4 destaques-home-side-column">
                         <div>
                             <?php foreach ( $posts_small as $post ) : 
                                 setup_postdata( $post ); 
                                 if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
                             ?>
-                                <div class="card spaces text-white" id="post-<?php echo $post->ID; ?>">
+                                <div class="card spaces destaque-home-card-pequeno text-white" id="post-<?php echo $post->ID; ?>">
                                     <?php 
                                     if ( class_exists( 'PG_Image' ) ) {
                                         echo PG_Image::getPostImage( $post->ID, 'destatquegrande', array(

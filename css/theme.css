@@ -653,7 +653,16 @@ ol li::before {
      object-fit: cover; }
 
 .imagem-destaque-pequeno {
-  height: var(--u68-featured-small-height, 220px); }
+  height: var(--u68-featured-small-height, calc((var(--u68-featured-height, 425px) - var(--u68-card-spacing, 8px)) / 2)); }
+
+.destaques-home-side-column > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.destaques-home-side-column .destaque-home-card-pequeno:last-child {
+  margin-bottom: 0;
+}
 
 /* Destaque home mobile - larger images */
 @media (max-width: 768px) {
