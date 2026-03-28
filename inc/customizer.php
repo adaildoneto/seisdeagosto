@@ -653,6 +653,17 @@ function u_correio68_customizer_css() {
             --u68-team-bg: <?php echo esc_attr( $team_bg ); ?>;
             --u68-header-bg: <?php echo esc_attr( $header_bg ); ?>;
             --u68-footer-bg: <?php echo esc_attr( $footer_bg ); ?>;
+            --u68-header-text: #ffffff;
+            --u68-header-text-muted: rgba(255, 255, 255, 0.82);
+            --u68-header-border: rgba(255, 255, 255, 0.14);
+            --u68-header-accent: <?php echo esc_attr( $badge_color ); ?>;
+            --u68-footer-text: <?php echo esc_attr( $badge_text_color ); ?>;
+            --u68-footer-text-muted: rgba(255, 255, 255, 0.82);
+            --u68-footer-border: rgba(255, 255, 255, 0.14);
+            --u68-footer-accent: <?php echo esc_attr( $badge_color ); ?>;
+            --u68-shell-radius: 0px;
+            --u68-shell-padding-y: 0.75rem;
+            --u68-shell-padding-x: 1rem;
             --u68-title-large-size: <?php echo absint( $title_large ); ?>px;
             --u68-title-medium-size: <?php echo absint( $title_medium ); ?>px;
             --u68-post-title-size: <?php echo floatval( $post_title ); ?>rem;
@@ -856,6 +867,20 @@ function u_correio68_customizer_css() {
         #wrapper-footer,
         .site-footer {
             background-color: <?php echo esc_attr( $footer_bg ); ?> !important;
+        }
+
+        .theme-header-shell,
+        .theme-topbar,
+        .theme-categories-bar,
+        .theme-sidebar-header {
+            color: var(--u68-header-text);
+        }
+
+        .theme-footer-shell,
+        .theme-footer,
+        .theme-footer-info,
+        .theme-footer-copy {
+            color: var(--u68-footer-text);
         }
 
         /* Single post reader helpers */

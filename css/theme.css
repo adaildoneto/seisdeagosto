@@ -724,6 +724,76 @@ ol li::before {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.theme-header-shell {
+  background: var(--u68-header-bg, var(--u68-primary-color, #0a4579));
+  color: var(--u68-header-text, #fff);
+  border-bottom: 1px solid var(--u68-header-border, rgba(255, 255, 255, 0.14));
+}
+
+.theme-topbar {
+  background: var(--u68-header-bg, var(--u68-primary-color, #0a4579)) !important;
+  color: var(--u68-header-text, #fff);
+  padding-inline: var(--u68-shell-padding-x, 1rem);
+}
+
+.theme-topbar .navbar-brand,
+.theme-topbar .nav-link,
+.theme-topbar .navbar-toggler,
+.theme-topbar .navbar-search .form-control,
+.theme-topbar .navbar-search .btn,
+.theme-topbar .search-field,
+.theme-topbar .search-submit {
+  color: var(--u68-header-text, #fff);
+}
+
+.theme-topbar .nav-link,
+.theme-categories-bar .nav-link,
+.theme-sidebar-header a,
+#sidebar ul li a {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-categories-bar {
+  background: color-mix(in srgb, var(--u68-header-bg, #0a4579) 92%, black 8%) !important;
+  border-top-color: var(--u68-header-border, rgba(255, 255, 255, 0.14)) !important;
+  border-bottom: 1px solid var(--u68-header-border, rgba(255, 255, 255, 0.14));
+}
+
+.theme-sidebar-header,
+#sidebar {
+  background: var(--u68-header-bg, var(--u68-primary-color, #0a4579));
+  color: var(--u68-header-text, #fff);
+}
+
+.theme-sidebar-header {
+  border-bottom: 1px solid var(--u68-header-border, rgba(255, 255, 255, 0.14));
+}
+
+.theme-footer-shell,
+.theme-footer {
+  background: var(--u68-footer-bg, var(--u68-badge-color, #ec940d)) !important;
+  color: var(--u68-footer-text, #fff);
+}
+
+.theme-footer-shell {
+  border-top: 1px solid var(--u68-footer-border, rgba(255, 255, 255, 0.14));
+}
+
+.theme-footer-info {
+  padding: var(--u68-shell-padding-y, 0.75rem) var(--u68-shell-padding-x, 1rem);
+}
+
+.theme-footer-copy {
+  margin-bottom: 0;
+  color: var(--u68-footer-text, #fff);
+}
+
+.theme-footer a,
+.theme-footer-copy a {
+  color: var(--u68-footer-text, #fff);
+  text-decoration-color: var(--u68-footer-accent, var(--u68-badge-color, #ec940d));
+}
+
 /* Inline navbar search with transitions */
 .navbar-search .form-control {
   min-width: 220px;

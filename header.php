@@ -25,7 +25,7 @@
                 // Sidebar header with logo and customizable intro text
                 $sidebar_intro = get_theme_mod( 'u_correio68_sidebar_intro_text', function_exists( 'u_correio68_get_sidebar_intro_default_text' ) ? u_correio68_get_sidebar_intro_default_text() : '' );
                 ?>
-                <div class="sidebar-header p-3 text-white">
+                <div class="sidebar-header theme-sidebar-header p-3 text-white">
                     <div class="mb-2">
                         <?php if ( function_exists('the_custom_logo') && has_custom_logo() ) { the_custom_logo(); } else { ?>
                             <a rel="home" class="text-white p-0 m-0 h5 d-inline-block" href="<?php echo esc_url( home_url() ); ?>"><?php bloginfo( 'name' ); ?></a>
@@ -50,11 +50,11 @@
             </nav>
             <div id="content">
                 <div class="hfeed site" id="page">
-                    <header class="site-header sticky-top shadow-sm" role="banner">
+                    <header class="site-header theme-header-shell sticky-top shadow-sm" role="banner">
                         <div itemscope itemtype="http://schema.org/WebSite" id="wrapper-navbar">
                             <a class="skip-link visually-hidden-focusable" href="#content"><?php _e( 'Skip to content', 'u_correio68' ); ?></a>
 
-                            <nav id="headnev" class="navbar navbar-expand-lg navbar-dark bg-primary headnev topbar" aria-label="<?php esc_attr_e( 'Navegação principal', 'u_correio68' ); ?>">
+                            <nav id="headnev" class="navbar navbar-expand-lg navbar-dark bg-primary headnev topbar theme-topbar" aria-label="<?php esc_attr_e( 'Navegação principal', 'u_correio68' ); ?>">
                                 <div class="container">
                                     <div class="d-flex align-items-center w-100">
                                         <?php echo u68_header_brand_markup(); ?>
@@ -85,7 +85,7 @@
                             </nav>
 
                             <?php if ( has_nav_menu( 'categorias' ) ) : ?>
-                                <nav id="categoriesNav" class="navbar navbar-expand navbar-categorias categories-nav-top bg-body-tertiary border-top" aria-label="<?php esc_attr_e( 'Categorias', 'u_correio68' ); ?>">
+                                <nav id="categoriesNav" class="navbar navbar-expand navbar-categorias categories-nav-top bg-body-tertiary border-top theme-categories-bar" aria-label="<?php esc_attr_e( 'Categorias', 'u_correio68' ); ?>">
                                     <div class="container">
                                         <div class="categories-slider-wrapper">
                                         <?php
