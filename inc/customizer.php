@@ -99,6 +99,13 @@ function u_correio68_customize_register_extended( $wp_customize ) {
         'priority'    => 28,
     ) );
 
+    if ( $wp_customize->get_section( 'title_tagline' ) ) {
+        $wp_customize->get_section( 'title_tagline' )->panel       = 'u_correio68_appearance_panel';
+        $wp_customize->get_section( 'title_tagline' )->priority    = 5;
+        $wp_customize->get_section( 'title_tagline' )->title       = __( 'Identidade do Site', 'u_correio68' );
+        $wp_customize->get_section( 'title_tagline' )->description = __( 'Altere logo, nome do site, descricao e icone do site.', 'u_correio68' );
+    }
+
     // ====================
     // SEÇÃO: Cores Principais
     // ====================

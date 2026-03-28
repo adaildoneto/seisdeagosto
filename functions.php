@@ -172,6 +172,17 @@ function u_seisbarra8_setup() {
      */
     add_theme_support( 'title-tag' );
 
+    add_theme_support(
+        'custom-logo',
+        array(
+            'height'               => 120,
+            'width'                => 360,
+            'flex-width'           => true,
+            'flex-height'          => true,
+            'unlink-homepage-logo' => true,
+        )
+    );
+
     // Block theme capabilities (align with Twenty Twenty-Four)
     add_theme_support( 'block-templates' );
     add_theme_support( 'wp-block-styles' );
