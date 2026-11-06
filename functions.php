@@ -150,6 +150,27 @@ if ( ! function_exists( 'u_seisbarra8_get_footer_default_text' ) ) {
 	}
 }
 
+if ( ! function_exists( 'u_seisbarra8_remove_version_meta' ) ) {
+	/**
+	 * Remove metas que vazam versões (WordPress, Site Kit e legados).
+	 *
+	 * Reduz a superfície de ataque: versões conhecidas ajudam atacantes a
+	 * identificar CVEs. Nenhuma funcionalidade é afetada.
+	 */
+	function u_seisbarra8_remove_version_meta() {
+		// Núcleo: <meta name="generator" content="WordPress x.x.x">.
+		remove_action( 'wp_head', 'wp_generator', 10 );
+
+		// Links legados (Windows Live Writer e RSD/xmlrpc — este imprime o "EditURI").
+		remove_action( 'wp_head', 'wlwmanifest_link', 10 );
+		remove_action( 'wp_head', 'rsd_link', 10 );
+
+		// Site Kit registra um closure no wp_head (não removível via remove_action),
+		// mas expõe o filtro público "googlesitekit_generator".
+		add_filter( 'googlesitekit_generator', '__return_empty_string' );
+	}
+}
+
 if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 
 	function u_seisbarra8_setup() {
@@ -197,6 +218,9 @@ if ( ! function_exists( 'u_seisbarra8_setup' ) ) :
 		 */
 		add_theme_support( 'post-thumbnails' );
 		add_action( 'wp_head', 'u_seisbarra8_single_seo_opengraph', 5 );
+
+		// Remove metas que vazam versões (WP, Site Kit e links legados).
+		u_seisbarra8_remove_version_meta();
 
 		// Add menus.
 		register_nav_menus(
