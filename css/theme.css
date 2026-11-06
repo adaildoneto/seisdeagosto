@@ -410,6 +410,26 @@ hr,
   height: 0;
 }
 
+/*
+ * Listas do texto das matérias (bloco "Lista" e listas de posts clássicos).
+ * A biblioteca do Pinegrow (components/pg.blocks.wp/css/style-library-1.css), feita para
+ * seções escuras, define globalmente "ul li, ol li { color: #f3f3f8 }" e
+ * "ul { list-style: none }": no texto das matérias os itens ficavam quase brancos sobre
+ * branco (contraste 1,1:1) e sem marcador. Aqui só as listas do conteúdo voltam ao
+ * normal; as listas internas dos blocos do tema não são afetadas.
+ */
+:is(ul, ol).wp-block-list,
+.wp-block-post-content > :is(ul, ol):not([class]),
+.wp-block-post-content > :is(ul, ol):not([class]) :is(ul, ol) {
+  list-style: revert;
+  padding-left: 1.5em;
+}
+:is(ul, ol).wp-block-list li,
+.wp-block-post-content > :is(ul, ol):not([class]) li {
+  color: inherit;
+  font-size: inherit;
+}
+
 /* Destaque Misto: list layout across all screens */
 .destaque-misto-wrapper .list-item {
   display: flex;

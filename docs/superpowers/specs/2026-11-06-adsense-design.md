@@ -245,9 +245,10 @@ de tamanho fixo e injeta `.google-auto-placed` dentro dos grids do tema.
 - **CLS:** o teste cobra das posições fixas (espaço reservado) um aumento menor que 0,05
   em relação à página sem anúncios. O CLS com Anúncios automáticos só é informado,
   porque o Google os insere depois do carregamento.
-- **Problema anterior do tema, fora deste escopo:** a grade de notícias da capa
-  (`.row.news-grid`) se reorganiza cerca de 1 s após o carregamento no celular,
-  gerando CLS de 0,26 sem nenhum anúncio.
+- **Problema anterior do tema (corrigido à parte):** a capa no celular tinha CLS de
+  0,26 sem nenhum anúncio. O deslocamento aparecia na grade de notícias, mas a causa
+  era o carrossel de destaques acima dela, que mostrava os 3 itens empilhados até o
+  Slick iniciar. Corrigido em `css/theme.css`: CLS 0,26 -> 0,002.
 - **Anúncio automático dentro do item do Destaque Misto:** ele fica abaixo da miniatura
   e do texto, e aquela coluna da linha fica mais alta que as vizinhas. As larguras não
   mudam. Se não quiser anúncios nessa área, exclua-a no painel do AdSense.
