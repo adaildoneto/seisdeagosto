@@ -18,36 +18,36 @@ conector do AdSense não estava autenticado. Veja "Próxima etapa" no fim.
 
 ## Passo a passo (nesta ordem)
 
-### 1. Publicar o tema 1.2.0
-Faça o merge do PR #1 ou instale o `.zip` em **Aparência → Temas → Adicionar novo → Enviar tema**.
-Depois, em **Jetpack → Boost**, limpe o cache.
+### 1. Publicar o tema (1.2.1 ou mais novo)
+Faça o merge no `main` (se o site puxa o tema do GitHub) ou instale o `.zip` em
+**Aparência → Temas → Adicionar novo → Enviar tema**. Depois, em **Jetpack → Boost**,
+limpe o cache.
 
-### 2. Uma única fonte da tag do AdSense
-Hoje o Site Kit insere a tag. Com o tema 1.2.0, o próprio tema insere a tag, gera o
-`ads.txt` e coloca os anúncios fixos. Para não haver duas fontes:
-
-- **Site Kit → Configurações → Serviços conectados → AdSense → Editar**: desligue a
-  opção de o Site Kit colocar o código do AdSense no site. O Site Kit continua
-  conectado, mostrando os relatórios no painel do WordPress.
-
-### 3. Configurar o tema
-**Aparência → Personalizar → 📢 AdSense**:
-
-| Campo | Valor |
-|---|---|
-| Tag ou ID do AdSense | `ca-pub-1705380769951157` |
-| Ativar anúncios | ligado |
-| IDs dos blocos de anúncio | os números criados no passo 4 (veja a tabela) |
-| Anúncio da matéria após o parágrafo nº | 3 |
-| 2º anúncio nas matérias longas | ligado |
-| 2º anúncio após o parágrafo nº | 10 |
+**Só isso já resolve a configuração no WordPress.** A partir da 1.2.1, com o campo do
+tema vazio, o tema usa o ID que o Site Kit já tem (`ca-pub-1705380769951157`):
+- o `/ads.txt` passa a responder com a linha certa;
+- entra a meta de verificação;
+- o Site Kit continua inserindo a tag, sem duplicar;
+- o tema bloqueia a tag do Site Kit para usuários logados, nas Publicações Legais, nas
+  páginas 404 e na busca vazia.
 
 **Confira logo depois:**
 - `https://portaldorosas.com.br/ads.txt` deve mostrar
   `google.com, pub-1705380769951157, DIRECT, f08c47fec0942fa0`;
 - no código-fonte de uma matéria (sem estar logado), `adsbygoogle.js` aparece **uma vez**.
 
-### 4. Criar os blocos de anúncio no AdSense
+### 2. (Opcional) Ajustes no Personalizador
+**Aparência → Personalizar → 📢 AdSense**. Não é preciso colar o ID: o campo vazio usa o
+do Site Kit. Os padrões já são os recomendados:
+
+| Campo | Padrão |
+|---|---|
+| Ativar anúncios | ligado |
+| Anúncio da matéria após o parágrafo nº | 3 |
+| 2º anúncio nas matérias longas | ligado, após o 10º parágrafo |
+| IDs dos blocos de anúncio | vazios até você criá-los no passo 3 |
+
+### 3. Criar os blocos de anúncio no AdSense
 **AdSense → Anúncios → Por bloco de anúncios → Criar**. Cinco blocos cobrem as 6 posições:
 
 | Bloco (nome sugerido) | Tipo | Posição no tema |
@@ -58,13 +58,13 @@ Hoje o Site Kit insere a tag. Com o tema 1.2.0, o próprio tema insere a tag, ge
 | `rosas-topo` | De display, responsivo | Topo |
 | `rosas-lateral` | De display, responsivo | Barra lateral (só se ela estiver ativa) |
 
-Cole só o número de cada bloco (o `data-ad-slot`) no campo da posição. Se quiser
+Cole só o número de cada bloco (o `data-ad-slot`) no campo da posição, em Personalizar → 📢 AdSense. Se quiser
 começar com menos, priorize **matéria**, **fim da matéria** e **lista**: é onde fica a
 leitura. A posição **Capa** só aparece depois de um bloco "Destaques Home", e a capa
 atual começa com o Destaque Misto; deixe-a vazia, porque os Anúncios automáticos cobrem
 a capa.
 
-### 5. Anúncios automáticos (painel do AdSense)
+### 4. Anúncios automáticos (painel do AdSense)
 **AdSense → Anúncios → Por site → portaldorosas.com.br → Editar**:
 
 - **Anúncios automáticos:** ligados.
@@ -78,7 +78,7 @@ a capa.
 - **Áreas excluídas:** use a pré-visualização do painel e exclua o topo da capa
   (Destaque Misto) se aparecer anúncio entre as miniaturas.
 
-### 6. Privacidade e mensagens
+### 5. Privacidade e mensagens
 **AdSense → Privacidade e mensagens → Europeias**: crie a mensagem de consentimento
 padrão do Google. Ela só aparece para visitantes da Europa e do Reino Unido, e sem ela o
 AdSense pode limitar os anúncios para esse público.

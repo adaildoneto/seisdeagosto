@@ -10,31 +10,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Anúncios podem aparecer nesta requisição?
+ * Esta página pode ter anúncios? (Só as regras de página, sem olhar a configuração.)
  *
- * Falso sem ID válido, com "Ativar anúncios" desligado, para usuários logados,
- * em Publicações Legais, 404, busca sem resultados, preview, feed, admin, AJAX,
- * REST e AMP.
+ * Falso para usuários logados, em Publicações Legais, 404, busca sem resultados,
+ * preview do Personalizador, feed, admin, AJAX, REST e AMP.
+ *
+ * @return bool
+ */
+function seisdeagosto_adsense_page_allows_ads() {
+	if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_feed() ) {
+		return false;
+	}
+	if ( is_user_logged_in() || is_customize_preview() ) {
+		return false;
+	}
+	if ( is_404() || is_singular( 'edital' ) || is_post_type_archive( 'edital' ) ) {
+		return false;
+	}
+	if ( is_search() && empty( $GLOBALS['wp_query']->post_count ) ) {
+		// Não usar have_posts(): dentro do loop, no último post, ele dispara loop_end e rebobina.
+		return false;
+	}
+	if ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Anúncios do tema podem aparecer nesta requisição?
+ *
+ * Exige ID válido (do tema ou do Site Kit), "Ativar anúncios" ligado e as regras de página.
  *
  * @return bool
  */
 function seisdeagosto_adsense_is_allowed() {
-	$allowed = '' !== seisdeagosto_adsense_get_client() && seisdeagosto_adsense_is_enabled();
-
-	if ( $allowed ) {
-		if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_feed() ) {
-			$allowed = false;
-		} elseif ( is_user_logged_in() || is_customize_preview() ) {
-			$allowed = false;
-		} elseif ( is_404() || is_singular( 'edital' ) || is_post_type_archive( 'edital' ) ) {
-			$allowed = false;
-		} elseif ( is_search() && empty( $GLOBALS['wp_query']->post_count ) ) {
-			// Não usar have_posts(): dentro do loop, no último post, ele dispara loop_end e rebobina.
-			$allowed = false;
-		} elseif ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) {
-			$allowed = false;
-		}
-	}
+	$allowed = '' !== seisdeagosto_adsense_get_client() && seisdeagosto_adsense_is_enabled() && seisdeagosto_adsense_page_allows_ads();
 
 	/**
 	 * Permite exceções às regras de exibição dos anúncios.
@@ -43,6 +54,25 @@ function seisdeagosto_adsense_is_allowed() {
 	 */
 	return (bool) apply_filters( 'seisdeagosto_adsense_is_allowed', $allowed );
 }
+
+/**
+ * Aplica as mesmas regras à tag do AdSense inserida pelo Site Kit by Google.
+ *
+ * Sem anúncios para logados, em editais, 404, busca vazia etc., e nenhum anúncio
+ * com "Ativar anúncios" desligado no tema, venha a tag do tema ou do Site Kit.
+ *
+ * @param bool $blocked Se o Site Kit já bloqueou a tag.
+ * @return bool
+ */
+function seisdeagosto_adsense_block_sitekit_tag( $blocked ) {
+	if ( $blocked ) {
+		return true;
+	}
+	$allowed = seisdeagosto_adsense_is_enabled() && seisdeagosto_adsense_page_allows_ads();
+	/** This filter is documented in inc/adsense/output.php */
+	return ! (bool) apply_filters( 'seisdeagosto_adsense_is_allowed', $allowed );
+}
+add_filter( 'googlesitekit_adsense_tag_blocked', 'seisdeagosto_adsense_block_sitekit_tag' );
 
 /**
  * Outro plugin (Site Kit by Google) já insere o script do AdSense?
@@ -54,7 +84,8 @@ function seisdeagosto_adsense_other_loader() {
 	$modules = get_option( 'googlesitekit_active_modules' );
 	if ( is_array( $modules ) && in_array( 'adsense', $modules, true ) ) {
 		$settings = get_option( 'googlesitekit_adsense_settings' );
-		$other    = is_array( $settings ) && ! empty( $settings['useSnippet'] );
+		// A mesma regra do Site Kit (Tag_Guard): ele só insere a tag com useSnippet e clientID.
+		$other = is_array( $settings ) && ! empty( $settings['useSnippet'] ) && ! empty( $settings['clientID'] );
 	}
 
 	/**

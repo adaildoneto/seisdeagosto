@@ -195,6 +195,83 @@ $robots = seisdeagosto_adsense_robots_txt( "User-agent: *\nDisallow: /wp-admin/\
 sda_check( false !== strpos( $robots, "User-agent: Mediapartners-Google\nAllow: /" ), 'robots.txt libera o Mediapartners-Google' );
 sda_check( seisdeagosto_adsense_robots_txt( "User-agent: Mediapartners-Google\nAllow: /\n", true ) === "User-agent: Mediapartners-Google\nAllow: /\n", 'robots.txt não duplica a regra' );
 
+// ---------------------------------------------------------------- Site Kit by Google.
+$sk_mods_saved = get_option( 'googlesitekit_active_modules', null );
+$sk_set_saved  = get_option( 'googlesitekit_adsense_settings', null );
+wp_set_current_user( 0 );
+remove_theme_mod( 'seisdeagosto_adsense_client' );
+update_option( 'googlesitekit_active_modules', array( 'adsense', 'analytics-4' ) );
+update_option(
+	'googlesitekit_adsense_settings',
+	array(
+		'clientID'   => 'ca-pub-1705380769951157',
+		'useSnippet' => true,
+	)
+);
+sda_check( 'ca-pub-1705380769951157' === seisdeagosto_adsense_get_client(), 'Site Kit: campo do tema vazio -> usa o ID do Site Kit' );
+sda_check( "google.com, pub-1705380769951157, DIRECT, f08c47fec0942fa0\n" === seisdeagosto_adsense_ads_txt( seisdeagosto_adsense_get_client() ), 'Site Kit: ads.txt sai com o ID do Site Kit' );
+sda_check( seisdeagosto_adsense_other_loader(), 'Site Kit: com useSnippet e clientID, o tema não imprime a tag (sem duplicar)' );
+set_theme_mod( 'seisdeagosto_adsense_client', $client );
+sda_check( $client === seisdeagosto_adsense_get_client(), 'Site Kit: ID preenchido no tema tem prioridade' );
+remove_theme_mod( 'seisdeagosto_adsense_client' );
+update_option(
+	'googlesitekit_adsense_settings',
+	array(
+		'clientID'   => 'ca-pub-1705380769951157',
+		'useSnippet' => false,
+	)
+);
+sda_check( ! seisdeagosto_adsense_other_loader() && 'ca-pub-1705380769951157' === seisdeagosto_adsense_get_client(), 'Site Kit com o código desligado: o tema imprime a tag com o ID do Site Kit' );
+update_option(
+	'googlesitekit_adsense_settings',
+	array(
+		'clientID'   => '',
+		'useSnippet' => true,
+	)
+);
+sda_check( ! seisdeagosto_adsense_other_loader(), 'Site Kit sem clientID não conta como quem insere a tag (mesma regra do Site Kit)' );
+update_option( 'googlesitekit_active_modules', array( 'analytics-4' ) );
+update_option(
+	'googlesitekit_adsense_settings',
+	array(
+		'clientID'   => 'ca-pub-1705380769951157',
+		'useSnippet' => true,
+	)
+);
+sda_check( '' === seisdeagosto_adsense_get_client(), 'Site Kit com o módulo AdSense inativo: não usa o ID' );
+update_option(
+	'googlesitekit_adsense_settings',
+	array(
+		'clientID'   => '"><script>',
+		'useSnippet' => true,
+	)
+);
+update_option( 'googlesitekit_active_modules', array( 'adsense' ) );
+sda_check( '' === seisdeagosto_adsense_get_client(), 'Site Kit com clientID inválido: recusado' );
+
+// Exclusões aplicadas à tag do Site Kit (filtro googlesitekit_adsense_tag_blocked).
+set_theme_mod( 'seisdeagosto_adsense_enabled', true );
+wp_set_current_user( 0 );
+sda_check( false === apply_filters( 'googlesitekit_adsense_tag_blocked', false ), 'Tag do Site Kit: liberada para visitante numa página comum' );
+wp_set_current_user( (int) $admins[0] );
+sda_check( true === apply_filters( 'googlesitekit_adsense_tag_blocked', false ), 'Tag do Site Kit: bloqueada para usuário logado' );
+wp_set_current_user( 0 );
+set_theme_mod( 'seisdeagosto_adsense_enabled', false );
+sda_check( true === apply_filters( 'googlesitekit_adsense_tag_blocked', false ), 'Tag do Site Kit: bloqueada com "Ativar anúncios" desligado' );
+set_theme_mod( 'seisdeagosto_adsense_enabled', true );
+sda_check( true === apply_filters( 'googlesitekit_adsense_tag_blocked', true ), 'Tag do Site Kit: o tema não desbloqueia o que o Site Kit bloqueou' );
+
+foreach ( array(
+	'googlesitekit_active_modules'   => $sk_mods_saved,
+	'googlesitekit_adsense_settings' => $sk_set_saved,
+) as $opt => $val ) {
+	if ( null === $val ) {
+		delete_option( $opt );
+	} else {
+		update_option( $opt, $val );
+	}
+}
+
 // ---------------------------------------------------------------- Restaura e resume.
 foreach ( array_keys( get_theme_mods() ) as $mod ) {
 	if ( ! array_key_exists( $mod, (array) $sda_saved_mods ) ) {

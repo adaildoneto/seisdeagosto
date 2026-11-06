@@ -91,7 +91,26 @@ function seisdeagosto_adsense_sanitize_paragraph( $raw ) {
  * @return string
  */
 function seisdeagosto_adsense_get_client() {
-	return seisdeagosto_adsense_extract_client( (string) get_theme_mod( 'seisdeagosto_adsense_client', '' ) );
+	$client = seisdeagosto_adsense_extract_client( (string) get_theme_mod( 'seisdeagosto_adsense_client', '' ) );
+	return '' !== $client ? $client : seisdeagosto_adsense_sitekit_client();
+}
+
+/**
+ * ID de editor que o Site Kit by Google já tem configurado, ou ''.
+ *
+ * Usado quando o campo do tema está vazio: o site já conectado ao AdSense pelo
+ * Site Kit passa a ter ads.txt, meta de verificação e posições fixas sem
+ * nenhuma configuração extra.
+ *
+ * @return string
+ */
+function seisdeagosto_adsense_sitekit_client() {
+	$modules = get_option( 'googlesitekit_active_modules' );
+	if ( ! is_array( $modules ) || ! in_array( 'adsense', $modules, true ) ) {
+		return '';
+	}
+	$settings = get_option( 'googlesitekit_adsense_settings' );
+	return is_array( $settings ) && ! empty( $settings['clientID'] ) ? seisdeagosto_adsense_extract_client( (string) $settings['clientID'] ) : '';
 }
 
 /**
@@ -183,7 +202,7 @@ function seisdeagosto_adsense_customize_register( $wp_customize ) {
 		'seisdeagosto_adsense_client',
 		array(
 			'label'       => __( 'Tag ou ID do AdSense', 'u_correio68' ),
-			'description' => __( 'Ex.: ca-pub-1234567890123456 ou a tag <script> inteira.', 'u_correio68' ),
+			'description' => __( 'Ex.: ca-pub-1234567890123456 ou a tag <script> inteira. Vazio: usa o ID do Site Kit by Google, se ele estiver conectado ao AdSense.', 'u_correio68' ),
 			'section'     => 'seisdeagosto_adsense',
 			'type'        => 'textarea',
 		)
