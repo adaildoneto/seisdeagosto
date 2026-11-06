@@ -1,0 +1,5 @@
+# Commits só de formatação, ignorados pelo git blame.
+# Ative com: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# phpcbf (WordPress Coding Standards)
+3b61a1638d7d85e37594f3698ec3524844ed8c75
