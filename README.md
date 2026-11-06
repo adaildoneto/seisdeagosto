@@ -175,6 +175,9 @@ tag `<script>` inteira (AdSense → Sites → "Obter código") ou só o ID `ca-p
 
 - **Script do AdSense** no `<head>`, uma única vez, no formato exigido pelo Google.
   Se o plugin Site Kit by Google já insere o script, o tema não duplica.
+- **Integração com o Site Kit:** com o campo do tema vazio, o tema usa o ID que o
+  Site Kit já tem, e as regras de exibição abaixo também valem para a tag do Site Kit
+  (filtro `googlesitekit_adsense_tag_blocked`).
 - **Verificação do site:** meta `google-adsense-account`.
 - **`/ads.txt`** gerado com o seu ID. Um arquivo `ads.txt` físico no servidor tem
   prioridade; se o WordPress não estiver na raiz do domínio, um aviso no admin explica

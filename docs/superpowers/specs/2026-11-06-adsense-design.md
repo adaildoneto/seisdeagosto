@@ -266,3 +266,16 @@ A auditoria de portaldorosas.com.br mostrou:
   "uma vez por página": é a única posição com duas ocorrências.
 - A posição Capa continua após o Destaques Home. O usuário optou por não mudá-la para o
   Destaque Misto, que é o primeiro bloco da capa do site.
+
+## 13. Integração com o Site Kit (1.2.1)
+
+- **ID:** `seisdeagosto_adsense_get_client()` usa o campo do tema e, se ele estiver
+  vazio, o `clientID` de `googlesitekit_adsense_settings`, quando `adsense` está em
+  `googlesitekit_active_modules`. Nomes conferidos no código do Site Kit
+  (`includes/Modules/AdSense/Settings.php`, `includes/Core/Modules/Modules.php`).
+- **Sem duplicar:** o tema não imprime a tag quando o Site Kit a insere, pela mesma regra
+  do `Tag_Guard` do Site Kit (`useSnippet` e `clientID`).
+- **Exclusões na tag do Site Kit:** as regras de página foram separadas em
+  `seisdeagosto_adsense_page_allows_ads()` e aplicadas pelo filtro
+  `googlesitekit_adsense_tag_blocked`, junto com "Ativar anúncios". O tema nunca
+  desbloqueia o que o Site Kit bloqueou. A tag AMP do Site Kit não é afetada.
