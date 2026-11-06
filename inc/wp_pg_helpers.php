@@ -146,8 +146,9 @@ class PG_Helper {
                 return null;
             }
             if(count($value) === 1) {
-                if(strpos($value[0], 'a:') >= 0 && strpos($value[0], '{') >= 0) {
-                    return unserialize($value[0]);
+                if ( is_string( $value[0] ) && is_serialized( $value[0] ) ) {
+                    // Nunca instancia objetos a partir de metadados (evita PHP Object Injection).
+                    return @unserialize( $value[0], array( 'allowed_classes' => false ) );
                 }
                 if(is_string($value[0])) {
                     return explode(',', $value[0]);

@@ -42,7 +42,13 @@ function seisdeagosto_loteria_shortcode( $atts ) {
         'mostrar_concurso' => 'true',
         'cor_bola' => '#209869',
         'tamanho' => 'normal',
-    ), $atts );
+    ), $atts, 'loteria' );
+
+    // Cor da bola: aceita apenas hexadecimal (o valor vai para atributos style).
+    $atts['cor_bola'] = sanitize_hex_color( $atts['cor_bola'] );
+    if ( empty( $atts['cor_bola'] ) ) {
+        $atts['cor_bola'] = '#209869';
+    }
 
     // Converte strings boolean
     $mostrar_numeros = filter_var( $atts['mostrar_numeros'], FILTER_VALIDATE_BOOLEAN );
@@ -106,16 +112,16 @@ function seisdeagosto_loteria_shortcode( $atts ) {
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: <?php echo $tamanho_bola; ?>;
-                    height: <?php echo $tamanho_bola; ?>;
+                    width: <?php echo esc_attr( $tamanho_bola ); ?>;
+                    height: <?php echo esc_attr( $tamanho_bola ); ?>;
                     border-radius: 50%;
                     background-color: <?php echo esc_attr( $atts['cor_bola'] ); ?>;
                     color: #ffffff;
                     font-weight: bold;
-                    font-size: calc(<?php echo $tamanho_bola; ?> * 0.4);
+                    font-size: calc(<?php echo esc_attr( $tamanho_bola ); ?> * 0.4);
                     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 ">
-                    <?php echo str_pad( $numero, 2, '0', STR_PAD_LEFT ); ?>
+                    <?php echo esc_html( str_pad( (string) $numero, 2, '0', STR_PAD_LEFT ) ); ?>
                 </span>
             <?php endforeach; ?>
         </div>
@@ -124,7 +130,7 @@ function seisdeagosto_loteria_shortcode( $atts ) {
         <?php if ( $mostrar_premio && $premio > 0 ) : ?>
         <div style="margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, <?php echo esc_attr( $atts['cor_bola'] ); ?> 0%, <?php echo esc_attr( adjustBrightness( $atts['cor_bola'], -20 ) ); ?> 100%); color: #fff; border-radius: 8px;">
             <div style="font-size: 0.875rem; opacity: 0.9;">Prêmio</div>
-            <div style="font-size: 1.5rem; font-weight: bold;"><?php echo seisdeagosto_format_currency( $premio ); ?></div>
+            <div style="font-size: 1.5rem; font-weight: bold;"><?php echo esc_html( seisdeagosto_format_currency( (float) $premio ) ); ?></div>
         </div>
         <?php endif; ?>
         
@@ -143,7 +149,7 @@ function seisdeagosto_loterias_lista_shortcode( $atts ) {
         'layout' => 'grid',
         'colunas' => '3',
         'modalidades' => '', // CSV de modalidades ou vazio para todas
-    ), $atts );
+    ), $atts, 'loterias_lista' );
 
     $loterias = seisdeagosto_get_all_loterias();
 
@@ -161,7 +167,7 @@ function seisdeagosto_loterias_lista_shortcode( $atts ) {
 
     ob_start();
     ?>
-    <div class="loterias-lista-shortcode" style="display: grid; grid-template-columns: repeat(<?php echo intval( $atts['colunas'] ); ?>, 1fr); gap: 1.5rem; margin: 2rem 0;">
+    <div class="loterias-lista-shortcode" style="display: grid; grid-template-columns: repeat(<?php echo esc_attr( max( 1, min( 6, intval( $atts['colunas'] ) ) ) ); ?>, 1fr); gap: 1.5rem; margin: 2rem 0;">
         <?php foreach ( $loterias as $loteria ) : ?>
             <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <h4 style="margin: 0 0 1rem; color: #209869;"><?php echo esc_html( $loteria['nome'] ); ?></h4>
@@ -184,6 +190,7 @@ add_shortcode( 'loterias_lista', 'seisdeagosto_loterias_lista_shortcode' );
 /**
  * Função auxiliar para ajustar brilho de cor
  */
+if ( ! function_exists( 'adjustBrightness' ) ) :
 function adjustBrightness( $hex, $steps ) {
     $hex = str_replace( '#', '', $hex );
     
@@ -199,6 +206,7 @@ function adjustBrightness( $hex, $steps ) {
                . str_pad( dechex( $g ), 2, '0', STR_PAD_LEFT )
                . str_pad( dechex( $b ), 2, '0', STR_PAD_LEFT );
 }
+endif;
 
 /**
  * Exemplo de Widget (WordPress Legacy Widget)
@@ -217,7 +225,7 @@ class Seisdeagosto_Loteria_Widget extends WP_Widget {
         echo $args['before_widget'];
         
         if ( ! empty( $instance['title'] ) ) {
-            echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+            echo $args['before_title'] . esc_html( apply_filters( 'widget_title', $instance['title'] ) ) . $args['after_title'];
         }
         
         $modalidade = ! empty( $instance['modalidade'] ) ? $instance['modalidade'] : 'megasena';
@@ -235,15 +243,15 @@ class Seisdeagosto_Loteria_Widget extends WP_Widget {
         $modalidade = ! empty( $instance['modalidade'] ) ? $instance['modalidade'] : 'megasena';
         ?>
         <p>
-            <label for="<?php echo $this->get_field_id( 'title' ); ?>">Título:</label>
-            <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" 
-                   name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">Título:</label>
+            <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" 
+                   name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" 
                    value="<?php echo esc_attr( $title ); ?>">
         </p>
         <p>
-            <label for="<?php echo $this->get_field_id( 'modalidade' ); ?>">Modalidade:</label>
-            <select class="widefat" id="<?php echo $this->get_field_id( 'modalidade' ); ?>" 
-                    name="<?php echo $this->get_field_name( 'modalidade' ); ?>">
+            <label for="<?php echo esc_attr( $this->get_field_id( 'modalidade' ) ); ?>">Modalidade:</label>
+            <select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'modalidade' ) ); ?>" 
+                    name="<?php echo esc_attr( $this->get_field_name( 'modalidade' ) ); ?>">
                 <option value="megasena" <?php selected( $modalidade, 'megasena' ); ?>>Mega Sena</option>
                 <option value="lotofacil" <?php selected( $modalidade, 'lotofacil' ); ?>>Lotofácil</option>
                 <option value="quina" <?php selected( $modalidade, 'quina' ); ?>>Quina</option>
@@ -257,8 +265,8 @@ class Seisdeagosto_Loteria_Widget extends WP_Widget {
 
     public function update( $new_instance, $old_instance ) {
         $instance = array();
-        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-        $instance['modalidade'] = ( ! empty( $new_instance['modalidade'] ) ) ? strip_tags( $new_instance['modalidade'] ) : 'megasena';
+        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? sanitize_text_field( $new_instance['title'] ) : '';
+        $instance['modalidade'] = ( ! empty( $new_instance['modalidade'] ) ) ? sanitize_key( $new_instance['modalidade'] ) : 'megasena';
         return $instance;
     }
 }

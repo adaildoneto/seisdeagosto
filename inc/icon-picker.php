@@ -8,7 +8,7 @@
  * Register AJAX actions for icon picker
  */
 add_action( 'wp_ajax_get_fontawesome_icons', 'seisdeagosto_get_fontawesome_icons' );
-add_action( 'wp_ajax_nopriv_get_fontawesome_icons', 'seisdeagosto_get_fontawesome_icons' );
+// Apenas usuários logados (o seletor só existe no editor).
 
 /**
  * Get all Font Awesome 4.7 icons

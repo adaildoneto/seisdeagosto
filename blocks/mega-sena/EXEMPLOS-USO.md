@@ -339,6 +339,12 @@ add_action('verificar_loteria_ganhador', 'verificar_e_notificar_ganhador');
 
 ### Limpar Cache
 
+Pelo painel: administradores veem o item **"Limpar cache das loterias"** na barra
+de administração (ação protegida por nonce, substitui o antigo `clear-cache.php`).
+
+Falhas da API da Caixa ficam em cache por 5 minutos, para que a API fora do ar não
+deixe cada visita esperando até 15 segundos.
+
 ```php
 <?php
 // Limpar cache de uma loteria

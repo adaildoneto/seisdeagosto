@@ -15,24 +15,32 @@
  * @return array|false Dados do concurso ou false em caso de erro
  */
 function seisdeagosto_get_loteria_result( $modalidade = 'megasena', $concurso = null ) {
+    // Aceita apenas modalidades conhecidas: o valor compõe a URL da API e a chave de cache.
+    $modalidade = sanitize_key( (string) $modalidade );
+    if ( ! array_key_exists( $modalidade, seisdeagosto_get_loteria_modalidades() ) ) {
+        return array( 'error' => 'Modalidade de loteria inválida.' );
+    }
+
+    $concurso = absint( $concurso );
+
     // Cache key
     $cache_key = 'loteria_' . $modalidade;
     if ( $concurso ) {
         $cache_key .= '_' . $concurso;
     }
-    
-    // Verifica cache (30 minutos)
+
+    // Verifica cache (30 minutos para sucesso, 5 minutos para falhas)
     $cached_data = get_transient( $cache_key );
     if ( false !== $cached_data ) {
         return $cached_data;
     }
-    
+
     // Monta a URL da API
-    $url = 'https://servicebus2.caixa.gov.br/portaldeloterias/api/' . $modalidade;
+    $url = 'https://servicebus2.caixa.gov.br/portaldeloterias/api/' . rawurlencode( $modalidade );
     if ( $concurso ) {
         $url .= '/' . $concurso;
     }
-    
+
     // Faz a requisição
     $response = wp_remote_get( $url, array(
         'timeout' => 15,
@@ -40,39 +48,60 @@ function seisdeagosto_get_loteria_result( $modalidade = 'megasena', $concurso = 
             'Accept' => 'application/json',
         ),
     ) );
-    
-    // Verifica erros
+
+    $error = null;
+
     if ( is_wp_error( $response ) ) {
         error_log( '[Loteria API] Erro: ' . $response->get_error_message() );
-        return array( 'error' => 'Erro ao conectar com a API: ' . $response->get_error_message() );
+        $error = 'Erro ao conectar com a API: ' . $response->get_error_message();
+    } else {
+        $status_code = wp_remote_retrieve_response_code( $response );
+        if ( 200 !== (int) $status_code ) {
+            error_log( '[Loteria API] Status code: ' . $status_code );
+            $error = 'API retornou status ' . $status_code;
+        } else {
+            $data = json_decode( wp_remote_retrieve_body( $response ), true );
+            if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $data ) ) {
+                error_log( '[Loteria API] Erro ao decodificar JSON: ' . json_last_error_msg() );
+                $error = 'Erro ao processar dados da API';
+            }
+        }
     }
-    
-    $status_code = wp_remote_retrieve_response_code( $response );
-    if ( $status_code !== 200 ) {
-        error_log( '[Loteria API] Status code: ' . $status_code );
-        return array( 'error' => 'API retornou status ' . $status_code );
+
+    if ( null !== $error ) {
+        // Guarda a falha por pouco tempo para não repetir a requisição lenta a cada visita.
+        $result = array( 'error' => $error );
+        set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
+        return $result;
     }
-    
-    // Decodifica a resposta
-    $body = wp_remote_retrieve_body( $response );
-    $data = json_decode( $body, true );
-    
-    if ( json_last_error() !== JSON_ERROR_NONE ) {
-        error_log( '[Loteria API] Erro ao decodificar JSON: ' . json_last_error_msg() );
-        return array( 'error' => 'Erro ao processar dados da API' );
-    }
-    
+
     // Salva no cache por 30 minutos
     set_transient( $cache_key, $data, 30 * MINUTE_IN_SECONDS );
-    
+
     return $data;
 }
 
 /**
- * Busca todas as modalidades disponíveis
- * 
- * @return array Lista de modalidades com seus últimos resultados
+ * Lista de modalidades aceitas (slug => nome).
+ *
+ * @return array
  */
+function seisdeagosto_get_loteria_modalidades() {
+    return array(
+        'megasena'       => 'Mega Sena',
+        'lotofacil'      => 'Lotofácil',
+        'quina'          => 'Quina',
+        'lotomania'      => 'Lotomania',
+        'timemania'      => 'Timemania',
+        'duplasena'      => 'Dupla Sena',
+        'federal'        => 'Federal',
+        'loteca'         => 'Loteca',
+        'diadesorte'     => 'Dia de Sorte',
+        'supersete'      => 'Super Sete',
+        'maismilionaria' => '+Milionária',
+    );
+}
+
 function seisdeagosto_get_all_loterias() {
     // Cache key
     $cache_key = 'todas_loterias';
@@ -83,20 +112,7 @@ function seisdeagosto_get_all_loterias() {
         return $cached_data;
     }
     
-    // Lista de modalidades disponíveis
-    $modalidades = array(
-        'megasena' => 'Mega Sena',
-        'lotofacil' => 'Lotofácil',
-        'quina' => 'Quina',
-        'lotomania' => 'Lotomania',
-        'timemania' => 'Timemania',
-        'duplasena' => 'Dupla Sena',
-        'federal' => 'Federal',
-        'loteca' => 'Loteca',
-        'diadesorte' => 'Dia de Sorte',
-        'supersete' => 'Super Sete',
-        'maismilionaria' => '+Milionária',
-    );
+    $modalidades = seisdeagosto_get_loteria_modalidades();
     
     $resultados = array();
     
@@ -124,15 +140,11 @@ function seisdeagosto_get_all_loterias() {
  */
 function seisdeagosto_clear_loteria_cache( $modalidade = null ) {
     if ( $modalidade ) {
-        delete_transient( 'loteria_' . $modalidade );
+        delete_transient( 'loteria_' . sanitize_key( $modalidade ) );
     } else {
         // Limpa todos os caches
         delete_transient( 'todas_loterias' );
-        $modalidades = array(
-            'megasena', 'lotofacil', 'quina', 'lotomania', 'timemania',
-            'duplasena', 'federal', 'loteca', 'diadesorte', 'supersete', 'maismilionaria'
-        );
-        foreach ( $modalidades as $mod ) {
+        foreach ( array_keys( seisdeagosto_get_loteria_modalidades() ) as $mod ) {
             delete_transient( 'loteria_' . $mod );
         }
     }
@@ -223,3 +235,42 @@ function seisdeagosto_format_date( $data ) {
         return $data;
     }
 }
+
+/**
+ * Ação do admin para limpar o cache das loterias (substitui o antigo clear-cache.php).
+ * URL: wp-admin/admin-post.php?action=seisdeagosto_clear_loteria_cache&_wpnonce=...
+ */
+function seisdeagosto_handle_clear_loteria_cache() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'Acesso negado.', 'u_correio68' ), 403 );
+    }
+    check_admin_referer( 'seisdeagosto_clear_loteria_cache' );
+
+    seisdeagosto_clear_loteria_cache();
+
+    $redirect = wp_get_referer();
+    wp_safe_redirect( $redirect ? $redirect : admin_url() );
+    exit;
+}
+add_action( 'admin_post_seisdeagosto_clear_loteria_cache', 'seisdeagosto_handle_clear_loteria_cache' );
+
+/**
+ * Atalho na barra de administração para limpar o cache das loterias.
+ *
+ * @param WP_Admin_Bar $wp_admin_bar Barra de administração.
+ */
+function seisdeagosto_loteria_admin_bar( $wp_admin_bar ) {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    $url = wp_nonce_url(
+        admin_url( 'admin-post.php?action=seisdeagosto_clear_loteria_cache' ),
+        'seisdeagosto_clear_loteria_cache'
+    );
+    $wp_admin_bar->add_node( array(
+        'id'    => 'seisdeagosto-clear-loteria-cache',
+        'title' => esc_html__( 'Limpar cache das loterias', 'u_correio68' ),
+        'href'  => $url,
+    ) );
+}
+add_action( 'admin_bar_menu', 'seisdeagosto_loteria_admin_bar', 121 );

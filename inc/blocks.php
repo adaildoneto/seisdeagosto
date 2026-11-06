@@ -978,7 +978,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                             setup_postdata( $post ); 
                             if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
                         ?>
-                            <div class="card spaces text-white" id="post-<?php echo $post->ID; ?>">
+                            <div class="card spaces text-white" id="post-<?php echo (int) $post->ID; ?>">
                                 <?php 
                                 if ( class_exists( 'PG_Image' ) ) {
                                     echo PG_Image::getPostImage( $post->ID, 'destatquegrande', array(
@@ -1017,7 +1017,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                                 setup_postdata( $post ); 
                                 if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
                             ?>
-                                <div class="card spaces destaque-home-card-pequeno text-white" id="post-<?php echo $post->ID; ?>">
+                                <div class="card spaces destaque-home-card-pequeno text-white" id="post-<?php echo (int) $post->ID; ?>">
                                     <?php 
                                     if ( class_exists( 'PG_Image' ) ) {
                                         echo PG_Image::getPostImage( $post->ID, 'destatquegrande', array(
@@ -1374,7 +1374,7 @@ function u_correio68_render_category_highlight( $attributes ) {
 
             <!-- Big Posts -->
             <?php foreach ( $big_posts as $post ) : setup_postdata( $post ); if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost(); ?>
-                <div class="primeiro mb-3 position-relative" id="post-<?php echo $post->ID; ?>" style="transition: opacity 0.2s ease;">
+                <div class="primeiro mb-3 position-relative" id="post-<?php echo (int) $post->ID; ?>" style="transition: opacity 0.2s ease;">
                     <div class="news-image-wrapper overflow-hidden mb-2 position-relative" style="height: 200px; border-radius: 4px; border: 1px solid #e9ecef;">
                         <?php 
                         if ( class_exists( 'PG_Image' ) ) {
@@ -1412,7 +1412,7 @@ function u_correio68_render_category_highlight( $attributes ) {
                     setup_postdata( $post );
                     if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
                 ?>
-                    <div class="mb-2 pb-2 border-bottom" id="post-<?php echo $post->ID; ?>" style="transition: opacity 0.2s ease;">
+                    <div class="mb-2 pb-2 border-bottom" id="post-<?php echo (int) $post->ID; ?>" style="transition: opacity 0.2s ease;">
                         <?php 
                         $cor = function_exists('get_field') ? get_field( 'cor', $post->ID ) : '';
                         $icones = function_exists('get_field') ? get_field( 'icones', $post->ID ) : '';
@@ -2664,9 +2664,9 @@ function u_correio68_render_image_slider( $attributes ) {
         <div class="<?php echo esc_attr( $slider_id ); ?> image-slider-slick">
             <?php foreach ( $images as $image ) : 
                 $image_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
-                $image_url = isset( $image['url'] ) ? esc_url( $image['url'] ) : '';
-                $link_url = isset( $image['link'] ) ? esc_url( $image['link'] ) : '';
-                $alt_text = isset( $image['alt'] ) ? esc_attr( $image['alt'] ) : '';
+                $image_url = isset( $image['url'] ) ? (string) $image['url'] : '';
+                $link_url = isset( $image['link'] ) ? (string) $image['link'] : '';
+                $alt_text = isset( $image['alt'] ) ? (string) $image['alt'] : '';
                 
                 if ( empty( $image_url ) && $image_id > 0 ) {
                     $image_url = wp_get_attachment_image_url( $image_id, 'full' );
@@ -2677,11 +2677,11 @@ function u_correio68_render_image_slider( $attributes ) {
             ?>
                 <div class="slide-item">
                     <?php if ( ! empty( $link_url ) ) : ?>
-                        <a href="<?php echo $link_url; ?>" target="_blank" rel="noopener">
-                            <img src="<?php echo $image_url; ?>" alt="<?php echo $alt_text; ?>" class="img-fluid w-100" style="display: block; height: auto;">
+                        <a href="<?php echo esc_url( $link_url ); ?>" target="_blank" rel="noopener">
+                            <img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $alt_text ); ?>" class="img-fluid w-100" style="display: block; height: auto;">
                         </a>
                     <?php else : ?>
-                        <img src="<?php echo $image_url; ?>" alt="<?php echo $alt_text; ?>" class="img-fluid w-100" style="display: block; height: auto;">
+                        <img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $alt_text ); ?>" class="img-fluid w-100" style="display: block; height: auto;">
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
@@ -2704,11 +2704,11 @@ function u_correio68_render_image_slider( $attributes ) {
             }
             
             $slider.slick({
-                slidesToShow: <?php echo $slidesToShow; ?>,
-                slidesToScroll: <?php echo $slidesToScroll; ?>,
-                speed: <?php echo $speed; ?>,
+                slidesToShow: <?php echo (int) $slidesToShow; ?>,
+                slidesToScroll: <?php echo (int) $slidesToScroll; ?>,
+                speed: <?php echo (int) $speed; ?>,
                 autoplay: <?php echo $autoplay ? 'true' : 'false'; ?>,
-                autoplaySpeed: <?php echo $autoplaySpeed; ?>,
+                autoplaySpeed: <?php echo (int) $autoplaySpeed; ?>,
                 arrows: false,
                 dots: false,
                 infinite: true,
