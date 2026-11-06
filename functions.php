@@ -1976,6 +1976,7 @@ require_once get_template_directory() . '/inc/blocks.php';
 require_once get_template_directory() . '/inc/widgets.php';
 require_once get_template_directory() . '/inc/customizer.php';
 require_once get_template_directory() . '/inc/icon-picker.php';
+require_once get_template_directory() . '/inc/adsense/adsense.php';
 
 	/* Pinegrow generated Include Resources End */
 

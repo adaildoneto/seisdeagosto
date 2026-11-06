@@ -166,6 +166,63 @@ Todos os blocos do tema aparecem no inseridor dentro da seção **Seis de Agosto
 
 ---
 
+## 📢 Google AdSense
+
+Basta colar a tag do AdSense em **Aparência → Personalizar → 📢 AdSense**. Pode ser a
+tag `<script>` inteira (AdSense → Sites → "Obter código") ou só o ID `ca-pub-…`.
+
+### O que o tema faz sozinho
+
+- **Script do AdSense** no `<head>`, uma única vez, no formato exigido pelo Google.
+  Se o plugin Site Kit by Google já insere o script, o tema não duplica.
+- **Verificação do site:** meta `google-adsense-account`.
+- **`/ads.txt`** gerado com o seu ID. Um arquivo `ads.txt` físico no servidor tem
+  prioridade; se o WordPress não estiver na raiz do domínio, um aviso no admin explica
+  como criar o arquivo.
+- **`robots.txt`:** libera o robô do AdSense (`Mediapartners-Google`).
+- **Sem anúncios** para usuários logados (evita tráfego inválido da própria equipe),
+  nas Publicações Legais (editais), em páginas 404, na busca sem resultados e no
+  preview do Personalizador.
+
+### Anúncios automáticos e posições fixas
+
+- **Anúncios automáticos:** ligados no painel do AdSense (Anúncios → Por site). Lá,
+  prefira a **âncora embaixo**, porque o cabeçalho do tema é fixo no topo.
+- **Posições fixas (opcionais):** crie um bloco de anúncio no AdSense e cole só o
+  número (`data-ad-slot`) no campo da posição. Posição sem ID fica a cargo dos
+  Anúncios automáticos.
+
+| Posição | Onde | Tipo de bloco no AdSense |
+|---|---|---|
+| Topo | Abaixo do cabeçalho, em todas as páginas | De display |
+| Dentro da matéria | Entre parágrafos, após o 3º (configurável); nunca antes de imagem ou título | No artigo |
+| Fim da matéria | Logo após o texto do post | De display |
+| Barra lateral | Topo da barra lateral direita, nos posts | De display |
+| Entre notícias | Antes da 5ª notícia em categorias, tags, busca e arquivos | De display |
+| Capa | Após o primeiro bloco de destaques | De display |
+
+Também há o bloco **"Anúncio (AdSense)"** no editor, para colocar um anúncio em
+qualquer página ou template.
+
+### Sem deformar o conteúdo
+
+- Nenhum anúncio fica mais largo que a coluna onde está.
+- O espaço do anúncio é reservado antes de ele carregar, para a página não "pular".
+- Se o Google não tiver anúncio para mostrar, o espaço some.
+- Anúncios automáticos que caírem dentro de grids ou linhas do tema ocupam a linha
+  inteira, em vez de espremer os cards. Eles nunca são escondidos, porque isso
+  viola a política do AdSense.
+
+### Filtros para desenvolvedores
+
+- `seisdeagosto_adsense_is_allowed` (bool): exceções às regras de exibição.
+- `seisdeagosto_adsense_skip_script` (bool): não imprimir o script (outro plugin o carrega).
+
+Teste de layout com AdSense simulado: `dev/tests/adsense-layout.test.js`.
+Especificação: `docs/superpowers/specs/2026-11-06-adsense-design.md`.
+
+---
+
 ## 📱 Áreas de Widgets
 
 O tema oferece **13 áreas de widgets** estrategicamente posicionadas:

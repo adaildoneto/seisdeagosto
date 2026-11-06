@@ -447,7 +447,8 @@ hr,
   max-width: 100%;
 }
 /* Texto ocupa o espaço que sobra ao lado da miniatura (25% + 75% + gap passava do item). */
-.destaque-misto-wrapper .list-thumb + .list-content {
+/* (:has e não "+": um anúncio automático inserido entre a miniatura e o texto não pode quebrar a regra.) */
+.destaque-misto-wrapper .list-item:has(> .list-thumb) > .list-content {
   flex: 1 1 0;
   max-width: none;
   min-width: 0;

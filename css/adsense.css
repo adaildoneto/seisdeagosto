@@ -1,0 +1,104 @@
+/**
+ * AdSense no tema SeisdeAgosto: anúncios sem deformar o conteúdo.
+ * Carregado só quando os anúncios podem aparecer (seisdeagosto_adsense_is_allowed()).
+ */
+
+/* ---------- Posições fixas e bloco "Anúncio" ---------- */
+
+.sda-ad {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	margin: 1.5rem auto;
+	text-align: center;
+	clear: both;
+	/* Sem overflow:hidden: cortar o anúncio viola a política do AdSense. */
+}
+
+.sda-ad ins.adsbygoogle {
+	display: block;
+	max-width: 100%;
+	margin: 0 auto;
+}
+
+.sda-ad__label {
+	display: block;
+	margin: 0 0 4px;
+	font: 400 11px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #767676; /* contraste AA sobre branco */
+}
+
+/* Altura reservada antes de o anúncio carregar (evita a página "pular", CLS). */
+.sda-ad--horizontal ins.adsbygoogle { min-height: 90px; }
+.sda-ad--auto ins.adsbygoogle,
+.sda-ad--retangulo ins.adsbygoogle,
+.sda-ad--materia ins.adsbygoogle { min-height: 250px; }
+.sda-ad--vertical ins.adsbygoogle { min-height: 600px; }
+
+@media (max-width: 767.98px) {
+	.sda-ad--horizontal ins.adsbygoogle { min-height: 100px; }
+	.sda-ad--vertical ins.adsbygoogle { min-height: 250px; }
+}
+
+/* Sem anúncio para mostrar: recolhe o espaço (forma documentada pelo AdSense). */
+ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+.sda-ad:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
+
+/* Topo: fica fora do cabeçalho fixo; sem margem extra em cima. */
+.sda-ad-topo-wrap .sda-ad { margin: 1rem auto; }
+
+/* Item "Entre notícias": ocupa a linha inteira da lista ou do grid. */
+.sda-ad-item {
+	list-style: none;
+	flex: 0 0 100%;
+	width: 100%;
+	max-width: 100%;
+	grid-column: 1 / -1;
+}
+.sda-ad-item .sda-ad { margin: 0.5rem auto 1.5rem; }
+
+/* ---------- Anúncios automáticos (.google-auto-placed) ---------- */
+
+/*
+ * O robô do Google pode inserir anúncios dentro de linhas e grids do tema.
+ * Em vez de esconder (proibido), o anúncio ocupa a linha inteira:
+ * - em linhas flex que quebram (.row) e em grids, vai para uma linha própria;
+ * - em flex que não quebra (ex.: miniatura + texto do Destaque Misto), o contêiner
+ *   passa a quebrar só quando há um anúncio dentro, e o anúncio desce para a
+ *   linha seguinte sem espremer a miniatura e o texto.
+ */
+.google-auto-placed {
+	box-sizing: border-box;
+	flex: 0 0 100%;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	grid-column: 1 / -1;
+	clear: both;
+}
+
+.google-auto-placed ins.adsbygoogle {
+	max-width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+:has(> .google-auto-placed) {
+	flex-wrap: wrap;
+}
+
+/*
+ * Em itens flex do tipo "miniatura + texto" (Destaque Misto, .media, .d-flex), um
+ * anúncio inserido no meio separaria a miniatura do texto. Ele vai para o fim do
+ * item: miniatura e texto continuam lado a lado e o anúncio fica na linha de baixo.
+ * Nas linhas .row (grades), o anúncio já ocupa uma linha própria no lugar em que caiu.
+ */
+.list-item > .google-auto-placed,
+.media > .google-auto-placed,
+.d-flex:not(.flex-wrap) > .google-auto-placed {
+	order: 99;
+}

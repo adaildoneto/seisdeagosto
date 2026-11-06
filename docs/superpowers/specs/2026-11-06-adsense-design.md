@@ -1,6 +1,6 @@
 # AdSense no tema SeisdeAgosto: especificação
 
-Data: 2026-11-06 · Status: aguardando revisão
+Data: 2026-11-06 · Status: implementado (veja a seção 11)
 
 ## 1. Objetivo
 
@@ -139,7 +139,7 @@ Cada posição aparece só com slot preenchido e no máximo uma vez por página.
 
 | # | Posição | Onde | Como | Formato |
 |---|---|---|---|---|
-| 1 | Topo | Logo após o fechamento do `</header>` do template, **fora** do cabeçalho fixo (para o anúncio não "grudar" no topo) | `render_block_core/html`: no primeiro bloco HTML que contém `</header>`, insere logo após essa tag | `horizontal` |
+| 1 | Topo | Logo após o fechamento do `</header>` do template, **fora** do cabeçalho fixo (para o anúncio não "grudar" no topo) | `render_block_core/html`: logo após o `</header>` que fecha um `<header>` aberto em **outro** bloco (o de fora). O template part do cabeçalho tem o seu próprio `<header>…</header>`; depois dele, o anúncio ficaria dentro do cabeçalho fixo | `horizontal` |
 | 2 | Dentro da matéria | Após o N-ésimo parágrafo (padrão 3) do post | `the_content` com prioridade 8 (antes de `do_blocks`), só no post principal de `is_singular( 'post' )`, detalhes abaixo | `materia` |
 | 3 | Fim da matéria | Logo após o conteúdo do post | `render_block_core/post-content` em `is_singular( 'post' )` | `auto` |
 | 4 | Barra lateral | Topo da barra lateral direita, nos posts | `dynamic_sidebar_before` para `right-sidebar` em `is_singular( 'post' )` | `vertical` |
@@ -191,6 +191,10 @@ Carregado só quando `is_allowed()`.
   - dentro de grids (`.news-grid`, `.wp-block-post-template.is-layout-grid` e afins):
     `grid-column:1 / -1`.
 
+  - dentro de flex que não quebra (`.list-item`, `.media`, `.d-flex`): o contêiner
+    passa a quebrar só quando há um anúncio dentro (`:has(> .google-auto-placed)`), e o
+    anúncio vai para o fim do item (`order: 99`), para não separar a miniatura do texto.
+
   O anúncio ocupa a linha inteira em vez de espremer os cards. Ele **nunca é
   escondido**.
 
@@ -227,3 +231,23 @@ de tamanho fixo e injeta `.google-auto-placed` dentro dos grids do tema.
   posição Topo deixa de aparecer. Ela falha em silêncio, sem quebrar a página.
 - **Detecção de outro plugin:** cobre o Site Kit e o filtro. Outros plugins podem
   duplicar o script, e o README explica como desligar no tema.
+
+## 11. Notas da implementação
+
+- **Cabeçalho aninhado:** os templates envolvem o template part do cabeçalho (que já
+  tem `<header>`) em outro `<header class="site-header sticky-top">`. A primeira versão
+  da posição Topo caía dentro do cabeçalho fixo. Foi corrigida e agora há verificação
+  nos três testes: nenhum anúncio dentro de `<header>` ou de um elemento sticky/fixed.
+- **Destaque Misto:** a regra que dá ao texto o espaço ao lado da miniatura usava
+  `.list-thumb + .list-content`. Com um anúncio automático inserido entre os dois, ela
+  deixava de valer e o texto quebrava para outra linha. Agora usa
+  `.list-item:has(> .list-thumb) > .list-content`.
+- **CLS:** o teste cobra das posições fixas (espaço reservado) um aumento menor que 0,05
+  em relação à página sem anúncios. O CLS com Anúncios automáticos só é informado,
+  porque o Google os insere depois do carregamento.
+- **Problema anterior do tema, fora deste escopo:** a grade de notícias da capa
+  (`.row.news-grid`) se reorganiza cerca de 1 s após o carregamento no celular,
+  gerando CLS de 0,26 sem nenhum anúncio.
+- **Anúncio automático dentro do item do Destaque Misto:** ele fica abaixo da miniatura
+  e do texto, e aquela coluna da linha fica mais alta que as vizinhas. As larguras não
+  mudam. Se não quiser anúncios nessa área, exclua-a no painel do AdSense.
