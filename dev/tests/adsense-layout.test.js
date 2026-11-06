@@ -110,7 +110,7 @@ async function measure(page) {
 		const out = { widths: {}, scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth };
 		selectors.forEach((sel) => {
 			out.widths[sel] = Array.from(document.querySelectorAll(sel)).slice(0, 12)
-				.filter((e) => !e.closest('.sda-ad, .google-auto-placed'))
+				.filter((e) => !e.closest('.sda-ad, .google-auto-placed, .sda-ad-item'))
 				.map((e) => Math.round(e.getBoundingClientRect().width));
 		});
 		const ads = Array.from(document.querySelectorAll('.sda-ad, .google-auto-placed'))

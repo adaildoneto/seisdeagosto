@@ -123,9 +123,11 @@ add_filter( 'render_block_core/html', 'seisdeagosto_adsense_place_topo', 20 );
  * @param string $content Conteúdo do post (marcação de blocos).
  * @param int    $n       Parágrafo após o qual inserir.
  * @param string $markup  Marcação a inserir (um bloco serializado).
+ * @param int    $after   (Saída) Número do parágrafo após o qual inseriu; 0 se não inseriu.
  * @return string Conteúdo com o bloco, ou o original se não houver lugar adequado.
  */
-function seisdeagosto_adsense_insert_after_paragraph_blocks( $content, $n, $markup ) {
+function seisdeagosto_adsense_insert_after_paragraph_blocks( $content, $n, $markup, &$after = 0 ) {
+	$after  = 0;
 	$blocks = parse_blocks( $content );
 	$tops   = array();
 	foreach ( $blocks as $i => $block ) {
@@ -160,6 +162,7 @@ function seisdeagosto_adsense_insert_after_paragraph_blocks( $content, $n, $mark
 		if ( $count >= $n && $is_paragraph( $next ) ) {
 			$insert = parse_blocks( $markup );
 			array_splice( $blocks, $tops[ $k ] + 1, 0, $insert );
+			$after = $count;
 			return serialize_blocks( $blocks );
 		}
 	}
@@ -167,14 +170,53 @@ function seisdeagosto_adsense_insert_after_paragraph_blocks( $content, $n, $mark
 }
 
 /**
+ * Número de parágrafos (não vazios) de primeiro nível de um conteúdo em blocos.
+ *
+ * @param string $content Conteúdo do post.
+ * @return int
+ */
+function seisdeagosto_adsense_count_paragraph_blocks( $content ) {
+	$total = 0;
+	foreach ( parse_blocks( $content ) as $block ) {
+		if ( 'core/paragraph' === $block['blockName'] && '' !== trim( wp_strip_all_tags( $block['innerHTML'] ) ) ) {
+			++$total;
+		}
+	}
+	return $total;
+}
+
+/**
+ * Parágrafo do 2º anúncio, ou 0 se a matéria não for longa o bastante ou se ele estiver desligado.
+ *
+ * Regras: matéria com pelo menos 14 parágrafos (filtro seisdeagosto_adsense_materia2_min),
+ * e o 2º anúncio sempre a pelo menos 4 parágrafos do primeiro.
+ *
+ * @param int $total Parágrafos da matéria.
+ * @param int $first Parágrafo após o qual entrou o 1º anúncio.
+ * @return int
+ */
+function seisdeagosto_adsense_second_paragraph( $total, $first ) {
+	if ( ! $first || ! seisdeagosto_adsense_materia2_enabled() ) {
+		return 0;
+	}
+	$min = max( 8, (int) apply_filters( 'seisdeagosto_adsense_materia2_min', 14 ) );
+	if ( $total < $min ) {
+		return 0;
+	}
+	return max( seisdeagosto_adsense_get_paragraph2(), $first + 4 );
+}
+
+/**
  * Insere HTML depois do N-ésimo parágrafo de um post clássico (sem blocos), já com <p>.
  *
- * @param string $html HTML do post (depois do wpautop).
- * @param int    $n    Parágrafo após o qual inserir.
- * @param string $ad   HTML do anúncio.
+ * @param string $html  HTML do post (depois do wpautop).
+ * @param int    $n     Parágrafo após o qual inserir.
+ * @param string $ad    HTML do anúncio.
+ * @param int    $after (Saída) Número do parágrafo após o qual inseriu; 0 se não inseriu.
  * @return string
  */
-function seisdeagosto_adsense_insert_after_paragraph_html( $html, $n, $ad ) {
+function seisdeagosto_adsense_insert_after_paragraph_html( $html, $n, $ad, &$after = 0 ) {
+	$after = 0;
 	// Pontos "</p> seguido diretamente de <p": entre dois parágrafos.
 	if ( ! preg_match_all( '#</p>(?=\s*<p[\s>])#i', $html, $m, PREG_OFFSET_CAPTURE ) ) {
 		return $html;
@@ -187,7 +229,8 @@ function seisdeagosto_adsense_insert_after_paragraph_html( $html, $n, $ad ) {
 		$before = substr( $html, 0, $match[1] );
 		$index  = substr_count( strtolower( $before ), '</p>' ) + 1; // Número deste </p>.
 		if ( $index >= $n ) {
-			$pos = $match[1] + strlen( '</p>' );
+			$pos   = $match[1] + strlen( '</p>' );
+			$after = $index;
 			return substr( $html, 0, $pos ) . $ad . substr( $html, $pos );
 		}
 	}
@@ -208,16 +251,31 @@ function seisdeagosto_adsense_place_materia_blocks( $content ) {
 	if ( '' === $slot || ! seisdeagosto_adsense_is_allowed() ) {
 		return $content;
 	}
-	$markup = '<!-- wp:seisdeagosto/anuncio ' . wp_json_encode(
-		array(
-			'slot'    => $slot,
-			'formato' => 'materia',
-			'posicao' => 'materia',
-		)
-	) . ' /-->';
-	$result = seisdeagosto_adsense_insert_after_paragraph_blocks( $content, seisdeagosto_adsense_get_paragraph(), $markup );
-	if ( $result !== $content ) {
-		seisdeagosto_adsense_claim( 'materia' );
+	$markup = function ( $posicao ) use ( $slot ) {
+		return '<!-- wp:seisdeagosto/anuncio ' . wp_json_encode(
+			array(
+				'slot'    => $slot,
+				'formato' => 'materia',
+				'posicao' => $posicao,
+			)
+		) . ' /-->';
+	};
+	$first  = 0;
+	$result = seisdeagosto_adsense_insert_after_paragraph_blocks( $content, seisdeagosto_adsense_get_paragraph(), $markup( 'materia' ), $first );
+	if ( ! $first ) {
+		return $content;
+	}
+	seisdeagosto_adsense_claim( 'materia' );
+
+	// 2º anúncio nas matérias longas (o mesmo bloco de anúncio pode se repetir na página).
+	$n2 = seisdeagosto_adsense_second_paragraph( seisdeagosto_adsense_count_paragraph_blocks( $content ), $first );
+	if ( $n2 ) {
+		$second = 0;
+		$with2  = seisdeagosto_adsense_insert_after_paragraph_blocks( $result, $n2, $markup( 'materia-2' ), $second );
+		if ( $second ) {
+			seisdeagosto_adsense_claim( 'materia-2' );
+			$result = $with2;
+		}
 	}
 	return $result;
 }
@@ -241,7 +299,14 @@ function seisdeagosto_adsense_place_materia_classic( $content ) {
 	if ( '' === $ad ) {
 		return $content;
 	}
-	return seisdeagosto_adsense_insert_after_paragraph_html( $content, seisdeagosto_adsense_get_paragraph(), $ad );
+	$first  = 0;
+	$result = seisdeagosto_adsense_insert_after_paragraph_html( $content, seisdeagosto_adsense_get_paragraph(), $ad, $first );
+	$n2     = seisdeagosto_adsense_second_paragraph( substr_count( strtolower( $content ), '</p>' ), $first );
+	if ( $n2 && seisdeagosto_adsense_claim( 'materia-2' ) ) {
+		$ad2    = seisdeagosto_adsense_unit( 'materia-2', seisdeagosto_adsense_get_slot( 'materia' ), 'materia' );
+		$result = seisdeagosto_adsense_insert_after_paragraph_html( $result, $n2, $ad2 );
+	}
+	return $result;
 }
 add_filter( 'the_content', 'seisdeagosto_adsense_place_materia_classic', 20 );
 
@@ -326,6 +391,85 @@ function seisdeagosto_adsense_place_lista( $content ) {
 	return '' === $ad ? $content : seisdeagosto_adsense_insert_in_post_list( $content, 5, $ad );
 }
 add_filter( 'render_block_core/post-template', 'seisdeagosto_adsense_place_lista', 20 );
+
+/**
+ * Posições de início dos itens diretos da primeira .news-grid de um HTML.
+ *
+ * @param string $html HTML do bloco Grade de Notícias.
+ * @return int[] Deslocamentos (em bytes) do "<div" de cada item direto da grade.
+ */
+function seisdeagosto_adsense_news_grid_items( $html ) {
+	if ( ! preg_match( '#<div\s[^>]*class="[^"]*\bnews-grid\b[^"]*"[^>]*>#i', $html, $g, PREG_OFFSET_CAPTURE ) ) {
+		return array();
+	}
+	$start = $g[0][1] + strlen( $g[0][0] );
+	if ( ! preg_match_all( '#<(/?)div\b[^>]*>#i', $html, $tags, PREG_SET_ORDER | PREG_OFFSET_CAPTURE, $start ) ) {
+		return array();
+	}
+	$items = array();
+	$depth = 0;
+	foreach ( $tags as $tag ) {
+		if ( '' === $tag[1][0] ) {
+			if ( 0 === $depth ) {
+				$items[] = $tag[0][1]; // Item direto da grade.
+			}
+			++$depth;
+		} elseif ( 0 === $depth ) {
+			break; // Fechou a própria .news-grid.
+		} else {
+			--$depth;
+		}
+	}
+	return $items;
+}
+
+/**
+ * Insere um item de anúncio de largura inteira antes do N-ésimo item da Grade de Notícias.
+ *
+ * @param string $html HTML do bloco.
+ * @param int    $n    Item antes do qual inserir (1 = primeiro).
+ * @param string $ad   HTML do anúncio.
+ * @return string
+ */
+function seisdeagosto_adsense_insert_in_news_grid( $html, $n, $ad ) {
+	$items = seisdeagosto_adsense_news_grid_items( $html );
+	if ( count( $items ) < $n ) {
+		return $html;
+	}
+	$pos = $items[ $n - 1 ];
+	return substr( $html, 0, $pos ) . '<div class="col-12 sda-ad-item">' . $ad . '</div>' . substr( $html, $pos );
+}
+
+/**
+ * "Entre notícias" no bloco Grade de Notícias (categorias, tags, busca e capa):
+ * anúncio de largura inteira depois da 6ª notícia (2 linhas de 3), na primeira
+ * grade da página que tenha pelo menos 7 notícias.
+ *
+ * @param string $content Bloco renderizado.
+ * @param array  $block   Bloco.
+ * @return string
+ */
+function seisdeagosto_adsense_place_lista_grid( $content, $block ) {
+	$names = array( 'seisdeagosto/news-grid', 'seideagosto/news-grid', 'u-correio68/news-grid', 'correio68/news-grid' );
+	if ( empty( $block['blockName'] ) || ! in_array( $block['blockName'], $names, true ) ) {
+		return $content;
+	}
+	if ( ! ( is_archive() || is_search() || is_home() || is_front_page() ) || '' === seisdeagosto_adsense_get_slot( 'lista' ) ) {
+		return $content;
+	}
+	/**
+	 * Notícia antes da qual entra o anúncio na Grade de Notícias (padrão: 7, ou seja, após a 6ª).
+	 *
+	 * @param int $before Posição do item.
+	 */
+	$before = max( 2, (int) apply_filters( 'seisdeagosto_adsense_grid_position', 7 ) );
+	if ( count( seisdeagosto_adsense_news_grid_items( $content ) ) < $before ) {
+		return $content;
+	}
+	$ad = seisdeagosto_adsense_position_html( 'lista' );
+	return '' === $ad ? $content : seisdeagosto_adsense_insert_in_news_grid( $content, $before, $ad );
+}
+add_filter( 'render_block', 'seisdeagosto_adsense_place_lista_grid', 20, 2 );
 
 /*
 -------------------------------------------------------------------------

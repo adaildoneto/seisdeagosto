@@ -139,6 +139,49 @@ $out    = seisdeagosto_adsense_insert_in_post_list( $items, 5, '[AD]' );
 sda_check( false !== strpos( $out, 'N4</li><li class="wp-block-post sda-ad-item">[AD]</li><li class="wp-block-post post-5' ), 'anúncio antes da 5ª notícia' );
 sda_check( seisdeagosto_adsense_insert_in_post_list( '<ul><li class="wp-block-post">1</li></ul>', 5, '[AD]' ) === '<ul><li class="wp-block-post">1</li></ul>', 'lista curta: sem anúncio' );
 
+// ---------------------------------------------------------------- Grade de Notícias.
+$grid = '<div class="wp-block-x"><div class="row news-grid" style="--columns:3;">';
+for ( $i = 1; $i <= 9; $i++ ) {
+	$grid .= '<div class="col-md-4 mb-4" id="post-' . $i . '"><article class="news-item"><div class="inner"><a>N' . $i . '</a></div></article></div>';
+}
+$grid .= '</div><div class="paginacao"><div>1</div></div></div>';
+sda_check( 9 === count( seisdeagosto_adsense_news_grid_items( $grid ) ), 'Grade: conta só os 9 itens diretos (ignora divs internas e a paginação)' );
+$out = seisdeagosto_adsense_insert_in_news_grid( $grid, 7, '[AD]' );
+sda_check( false !== strpos( $out, 'N6</a></div></article></div><div class="col-12 sda-ad-item">[AD]</div><div class="col-md-4 mb-4" id="post-7">' ), 'Grade: anúncio de largura inteira entre a 6ª e a 7ª notícia' );
+sda_check( seisdeagosto_adsense_insert_in_news_grid( '<div class="row news-grid"><div>1</div><div>2</div></div>', 7, '[AD]' ) === '<div class="row news-grid"><div>1</div><div>2</div></div>', 'Grade curta (2 notícias): sem anúncio' );
+sda_check( array() === seisdeagosto_adsense_news_grid_items( '<div class="row">sem grade</div>' ), 'HTML sem .news-grid: nada a fazer' );
+
+// ---------------------------------------------------------------- 2º anúncio nas matérias longas.
+set_theme_mod( 'seisdeagosto_adsense_materia2', true );
+remove_theme_mod( 'seisdeagosto_adsense_materia2_paragrafo' );
+sda_check( 10 === seisdeagosto_adsense_second_paragraph( 16, 3 ), '2º anúncio: matéria de 16 parágrafos -> após o 10º' );
+sda_check( 0 === seisdeagosto_adsense_second_paragraph( 13, 3 ), '2º anúncio: matéria de 13 parágrafos -> não entra' );
+sda_check( 12 === seisdeagosto_adsense_second_paragraph( 20, 8 ), '2º anúncio: sempre 4 parágrafos depois do 1º (1º no 8º -> 2º no 12º)' );
+sda_check( 0 === seisdeagosto_adsense_second_paragraph( 20, 0 ), '2º anúncio: sem o 1º, não há 2º' );
+set_theme_mod( 'seisdeagosto_adsense_materia2', false );
+sda_check( 0 === seisdeagosto_adsense_second_paragraph( 20, 3 ), '2º anúncio: desligado no Personalizador' );
+set_theme_mod( 'seisdeagosto_adsense_materia2', true );
+sda_check( 10 === seisdeagosto_adsense_sanitize_paragraph2( 99 ) && 12 === seisdeagosto_adsense_sanitize_paragraph2( '12' ), '2º anúncio: parágrafo limitado a 6..30' );
+
+$long = '';
+for ( $i = 1; $i <= 16; $i++ ) {
+	$long .= sda_p( 'P' . $i );
+	if ( 10 === $i ) {
+		$long .= "<!-- wp:quote -->\n<blockquote class=\"wp-block-quote\"><p>Citação</p></blockquote>\n<!-- /wp:quote -->\n\n";
+	}
+}
+$after1 = 0;
+$r1     = seisdeagosto_adsense_insert_after_paragraph_blocks( $long, 3, '<!-- wp:seisdeagosto/anuncio {"posicao":"materia"} /-->', $after1 );
+$after2 = 0;
+$r2     = seisdeagosto_adsense_insert_after_paragraph_blocks( $r1, seisdeagosto_adsense_second_paragraph( seisdeagosto_adsense_count_paragraph_blocks( $long ), $after1 ), '<!-- wp:seisdeagosto/anuncio {"posicao":"materia-2"} /-->', $after2 );
+sda_check( 3 === $after1 && 11 === $after2, "2º anúncio: pula a citação após o 10º e entra após o 11º (1º após o {$after1}º, 2º após o {$after2}º)" );
+sda_check( 16 === seisdeagosto_adsense_count_paragraph_blocks( $r2 ), '2º anúncio: os parágrafos da matéria continuam todos lá' );
+$cl  = str_repeat( '<p>x</p>', 16 );
+$ca1 = 0;
+$cr  = seisdeagosto_adsense_insert_after_paragraph_html( $cl, 3, '[A1]', $ca1 );
+$cr  = seisdeagosto_adsense_insert_after_paragraph_html( $cr, seisdeagosto_adsense_second_paragraph( 16, $ca1 ), '[A2]' );
+sda_check( 1 === substr_count( $cr, '[A1]' ) && 1 === substr_count( $cr, '[A2]' ) && strpos( $cr, '[A1]' ) === strlen( str_repeat( '<p>x</p>', 3 ) ) && strpos( $cr, '[A2]' ) === strlen( str_repeat( '<p>x</p>', 10 ) ) + 4, 'post clássico longo: 1º após o 3º e 2º após o 10º parágrafo' );
+
 // ---------------------------------------------------------------- Topo: </header> de fora.
 sda_check( false === seisdeagosto_adsense_outer_header_close( '<header class="x"><div>marca</div></header>' ), 'Topo: </header> com abertura no mesmo bloco (cabeçalho interno) é ignorado' );
 sda_check( 9 === seisdeagosto_adsense_outer_header_close( '</header><div class="wrapper">' ), 'Topo: </header> que fecha o cabeçalho de fora é usado' );

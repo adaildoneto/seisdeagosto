@@ -195,10 +195,10 @@ tag `<script>` inteira (AdSense → Sites → "Obter código") ou só o ID `ca-p
 | Posição | Onde | Tipo de bloco no AdSense |
 |---|---|---|
 | Topo | Abaixo do cabeçalho, em todas as páginas | De display |
-| Dentro da matéria | Entre parágrafos, após o 3º (configurável); nunca antes de imagem ou título | No artigo |
+| Dentro da matéria | Entre parágrafos, após o 3º (configurável); nunca antes de imagem, citação ou título. Em matérias com 14+ parágrafos, um 2º anúncio por volta do 10º (configurável, com liga/desliga), sempre a 4+ parágrafos do 1º, usando o mesmo bloco | No artigo |
 | Fim da matéria | Logo após o texto do post | De display |
 | Barra lateral | Topo da barra lateral direita, nos posts | De display |
-| Entre notícias | Antes da 5ª notícia em categorias, tags, busca e arquivos | De display |
+| Entre notícias | Lista padrão do WordPress: antes da 5ª notícia. Bloco Grade de Notícias (categorias montadas com a Grade e capa): linha inteira após a 6ª notícia, na primeira grade com 7+ notícias | De display |
 | Capa | Após o primeiro bloco de destaques | De display |
 
 Também há o bloco **"Anúncio (AdSense)"** no editor, para colocar um anúncio em
@@ -217,6 +217,8 @@ qualquer página ou template.
 
 - `seisdeagosto_adsense_is_allowed` (bool): exceções às regras de exibição.
 - `seisdeagosto_adsense_skip_script` (bool): não imprimir o script (outro plugin o carrega).
+- `seisdeagosto_adsense_grid_position` (int, padrão 7): notícia da Grade antes da qual entra o anúncio.
+- `seisdeagosto_adsense_materia2_min` (int, padrão 14): parágrafos mínimos para o 2º anúncio na matéria.
 
 Teste de layout com AdSense simulado: `dev/tests/adsense-layout.test.js`.
 Especificação: `docs/superpowers/specs/2026-11-06-adsense-design.md`.

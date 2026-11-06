@@ -123,6 +123,35 @@ function seisdeagosto_adsense_get_paragraph() {
 }
 
 /**
+ * Parágrafo do 2º anúncio nas matérias longas (6 a 30).
+ *
+ * @param mixed $raw Valor digitado.
+ * @return int
+ */
+function seisdeagosto_adsense_sanitize_paragraph2( $raw ) {
+	$n = absint( $raw );
+	return ( $n >= 6 && $n <= 30 ) ? $n : 10;
+}
+
+/**
+ * 2º anúncio nas matérias longas ligado.
+ *
+ * @return bool
+ */
+function seisdeagosto_adsense_materia2_enabled() {
+	return (bool) get_theme_mod( 'seisdeagosto_adsense_materia2', true );
+}
+
+/**
+ * Parágrafo configurado para o 2º anúncio nas matérias longas.
+ *
+ * @return int
+ */
+function seisdeagosto_adsense_get_paragraph2() {
+	return seisdeagosto_adsense_sanitize_paragraph2( get_theme_mod( 'seisdeagosto_adsense_materia2_paragrafo', 10 ) );
+}
+
+/**
  * Seção "📢 AdSense" no Personalizador.
  *
  * @param WP_Customize_Manager $wp_customize Personalizador.
@@ -219,6 +248,42 @@ function seisdeagosto_adsense_customize_register( $wp_customize ) {
 					'input_attrs' => array(
 						'min' => 2,
 						'max' => 10,
+					),
+				)
+			);
+
+			$wp_customize->add_setting(
+				'seisdeagosto_adsense_materia2',
+				array(
+					'default'           => true,
+					'sanitize_callback' => 'rest_sanitize_boolean',
+				)
+			);
+			$wp_customize->add_control(
+				'seisdeagosto_adsense_materia2',
+				array(
+					'label'       => __( '2º anúncio nas matérias longas', 'u_correio68' ),
+					'description' => __( 'Em matérias com 14 parágrafos ou mais, repete o bloco "No artigo" mais adiante no texto, sempre a pelo menos 4 parágrafos do primeiro.', 'u_correio68' ),
+					'section'     => 'seisdeagosto_adsense',
+					'type'        => 'checkbox',
+				)
+			);
+			$wp_customize->add_setting(
+				'seisdeagosto_adsense_materia2_paragrafo',
+				array(
+					'default'           => 10,
+					'sanitize_callback' => 'seisdeagosto_adsense_sanitize_paragraph2',
+				)
+			);
+			$wp_customize->add_control(
+				'seisdeagosto_adsense_materia2_paragrafo',
+				array(
+					'label'       => __( '2º anúncio após o parágrafo nº', 'u_correio68' ),
+					'section'     => 'seisdeagosto_adsense',
+					'type'        => 'number',
+					'input_attrs' => array(
+						'min' => 6,
+						'max' => 30,
 					),
 				)
 			);

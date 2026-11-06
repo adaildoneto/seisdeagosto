@@ -252,3 +252,17 @@ de tamanho fixo e injeta `.google-auto-placed` dentro dos grids do tema.
 - **Anúncio automático dentro do item do Destaque Misto:** ele fica abaixo da miniatura
   e do texto, e aquela coluna da linha fica mais alta que as vizinhas. As larguras não
   mudam. Se não quiser anúncios nessa área, exclua-a no painel do AdSense.
+
+## 12. Ajustes para o Portal do Rosas (auditoria do site no ar)
+
+A auditoria de portaldorosas.com.br mostrou:
+- As categorias usam o bloco Grade de Notícias, por um template salvo no banco, e não a
+  lista padrão: a posição 5 também passa a atuar na Grade (linha inteira `col-12` após a
+  6ª notícia, na primeira grade com 7 ou mais notícias, em arquivos, busca e capa).
+- As matérias são longas (9 a 34 parágrafos): há um **2º anúncio "No artigo"** em
+  matérias com 14 ou mais parágrafos, por volta do 10º parágrafo (Personalizador, 6 a 30),
+  sempre a pelo menos 4 parágrafos do 1º e com as mesmas regras de vizinhança. Usa o
+  mesmo slot da posição 2, que o AdSense permite repetir na página. Exceção à regra
+  "uma vez por página": é a única posição com duas ocorrências.
+- A posição Capa continua após o Destaques Home. O usuário optou por não mudá-la para o
+  Destaque Misto, que é o primeiro bloco da capa do site.
