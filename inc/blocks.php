@@ -2414,7 +2414,8 @@ function u_correio68_render_destaque_misto( $attributes ) {
 												endif;
 											endif;
 											?>
-											<h5 class="mt-0" style="<?php echo esc_attr( $titleStyle ); ?>"><a href="<?php the_permalink(); ?>" class="text-dark"><?php the_title(); ?></a></h5>
+											<?php // Sem <a> aqui: o card inteiro já é um link (.dm-card-link). Link dentro de link é HTML inválido e o navegador reestrutura o item, encolhendo a miniatura. ?>
+											<h5 class="mt-0" style="<?php echo esc_attr( $titleStyle ); ?>"><span class="text-dark"><?php the_title(); ?></span></h5>
 											<small class="text-muted"><?php echo get_the_date(); ?></small>
 										</div>
 										</div>

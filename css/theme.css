@@ -446,6 +446,20 @@ hr,
   flex: 1 1 100%;
   max-width: 100%;
 }
+/* Texto ocupa o espaço que sobra ao lado da miniatura (25% + 75% + gap passava do item). */
+.destaque-misto-wrapper .list-thumb + .list-content {
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 0;
+}
+/* Selo de chamada longo não transborda para o card vizinho. */
+.destaque-misto-wrapper .list-content .badge {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
 img.wp-post-image,
 article img,
 figure,
@@ -3294,6 +3308,10 @@ body {
   left: 12px;
   top: 12px;
   z-index: 10;
+  /* Selo longo não passa da borda do card (cortado com reticências). */
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Destaque Misto: garantir que gradiente apareça sobre a imagem */
