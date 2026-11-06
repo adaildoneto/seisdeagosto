@@ -219,9 +219,7 @@ function u_seisbarra8_setup() {
 
     add_image_size( 'destaque', 300, 180, true );
     add_image_size( 'destatquegrande', 730, 410, true );
-    update_option( 'thumbnail_size_w', 250 );
-    update_option( 'thumbnail_size_h', 120 );
-    update_option( 'thumbnail_crop', 1 );
+    // Tamanho padrão das miniaturas é definido na ativação do tema (u_seisbarra8_set_default_media_sizes).
 
     /* Pinegrow generated Image Sizes End */
 
@@ -263,6 +261,17 @@ function u_seisbarra8_setup() {
 endif; // u_seisbarra8_setup
 
 add_action( 'after_setup_theme', 'u_seisbarra8_setup' );
+
+/**
+ * Define o tamanho padrão das miniaturas apenas na ativação do tema,
+ * sem sobrescrever a cada requisição o que o admin configurar em Configurações > Mídia.
+ */
+function u_seisbarra8_set_default_media_sizes() {
+    update_option( 'thumbnail_size_w', 250 );
+    update_option( 'thumbnail_size_h', 120 );
+    update_option( 'thumbnail_crop', 1 );
+}
+add_action( 'after_switch_theme', 'u_seisbarra8_set_default_media_sizes' );
 
 /**
  * Process shortcodes inside wp:html blocks in FSE templates.
@@ -478,19 +487,29 @@ add_shortcode( 'u68_weather_selector', 'u68_weather_selector_shortcode' );
  * AJAX handler for weather data
  */
 function u68_ajax_get_weather() {
-    check_ajax_referer( 'u68_weather_nonce', 'nonce' );
-    
-    $city = isset( $_POST['city'] ) ? sanitize_text_field( $_POST['city'] ) : '';
-    $lat = isset( $_POST['lat'] ) ? sanitize_text_field( $_POST['lat'] ) : '';
-    $lon = isset( $_POST['lon'] ) ? sanitize_text_field( $_POST['lon'] ) : '';
-    $units = isset( $_POST['units'] ) ? sanitize_text_field( $_POST['units'] ) : 'c';
+    // Endpoint público e somente leitura. Para visitantes anônimos o nonce não é exigido:
+    // ele fica gravado no HTML em cache de página e expira, quebrando o widget.
+    if ( is_user_logged_in() ) {
+        check_ajax_referer( 'u68_weather_nonce', 'nonce' );
+    }
+
+    $city          = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
+    $lat           = isset( $_POST['lat'] ) ? filter_var( wp_unslash( $_POST['lat'] ), FILTER_VALIDATE_FLOAT ) : false;
+    $lon           = isset( $_POST['lon'] ) ? filter_var( wp_unslash( $_POST['lon'] ), FILTER_VALIDATE_FLOAT ) : false;
+    $units         = ( isset( $_POST['units'] ) && 'f' === $_POST['units'] ) ? 'f' : 'c';
     $show_forecast = ! empty( $_POST['show_forecast'] );
-    $forecast_days = isset( $_POST['forecast_days'] ) ? intval( $_POST['forecast_days'] ) : 5;
-    
-    if ( empty( $lat ) || empty( $lon ) ) {
+    $forecast_days = isset( $_POST['forecast_days'] ) ? absint( $_POST['forecast_days'] ) : 5;
+    $forecast_days = max( 1, min( 16, $forecast_days ) );
+
+    if ( false === $lat || false === $lon || $lat < -90 || $lat > 90 || $lon < -180 || $lon > 180 ) {
         wp_send_json_error( array( 'message' => 'Coordenadas inválidas' ) );
     }
-    
+
+    // Arredonda (~1 km) para limitar a quantidade de chaves de cache distintas.
+    $lat  = (string) round( $lat, 2 );
+    $lon  = (string) round( $lon, 2 );
+    $city = mb_substr( $city, 0, 100 );
+
     $weather_atts = array(
         'cityName'     => $city,
         'latitude'     => $lat,
@@ -883,16 +902,12 @@ function u_seisbarra8_ensure_jquery_first() {
     }
     // Enqueue core jQuery (do not replace with bundled files)
     wp_enqueue_script( 'jquery' );
-    // Ensure jQuery loads in header group to satisfy plugins expecting early availability
-    if ( wp_script_is( 'jquery', 'registered' ) ) {
-        wp_script_add_data( 'jquery', 'group', 1 );
-    }
+    // jQuery permanece no <head> (grupo padrão 0) para plugins que dependem dele cedo.
     // Provide $ alias for legacy scripts that expect global $
     wp_add_inline_script( 'jquery', 'window.$ = window.$ || window.jQuery;', 'after' );
     // Enqueue jQuery Migrate if registered by WP (helps older plugins)
     if ( wp_script_is( 'jquery-migrate', 'registered' ) ) {
         wp_enqueue_script( 'jquery-migrate' );
-        wp_script_add_data( 'jquery-migrate', 'group', 1 );
     }
 }
 add_action( 'wp_enqueue_scripts', 'u_seisbarra8_ensure_jquery_first', 0 );
@@ -902,7 +917,9 @@ add_action( 'wp_enqueue_scripts', 'u_seisbarra8_ensure_jquery_first', 0 );
  * logs script queue and common MetaSlider markers in the browser console.
  */
 function u_seisbarra8_debug_metaslider_footer() {
-    if ( empty( $_GET['debug'] ) || $_GET['debug'] !== 'ms' ) return;
+    if ( empty( $_GET['debug'] ) || 'ms' !== $_GET['debug'] || ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
     $wp_scripts = wp_scripts();
     $queue      = is_array( $wp_scripts->queue ) ? $wp_scripts->queue : array();
     $handles    = array_values( $queue );
@@ -979,8 +996,8 @@ function u_seisbarra8_custom_image_sizes_names( $sizes ) {
     /* Pinegrow generated Image Sizes Names Begin */
 
     return array_merge( $sizes, array(
-        'destaque' => __( 'imagens do Destaque Normal ' ),
-        'destatquegrande' => __( 'Imagens do Destaque grande' )
+        'destaque' => __( 'Imagens do Destaque Normal', 'u_seisbarra8' ),
+        'destatquegrande' => __( 'Imagens do Destaque Grande', 'u_seisbarra8' )
     ) );
 
     /* Pinegrow generated Image Sizes Names End */
@@ -1226,39 +1243,39 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     // jQuery is enqueued early by u_seisbarra8_ensure_jquery_first().
 
     if ( ! $is_amp ) {
-        wp_enqueue_script( 'u_seisbarra8-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), null, true );
+        wp_enqueue_script( 'u_seisbarra8-popper', get_template_directory_uri() . '/assets/js/popper.js', array(), u_seisbarra8_asset_version( 'assets/js/popper.js' ), true );
 
-        wp_enqueue_script( 'u_seisbarra8-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), null, true );
+        wp_enqueue_script( 'u_seisbarra8-menustick', get_template_directory_uri() . '/assets/js/menustick.js', array('jquery'), u_seisbarra8_asset_version( 'assets/js/menustick.js' ), true );
 
-        wp_enqueue_script( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', array('jquery', 'u_seisbarra8-popper'), null, true );
+        wp_enqueue_script( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js', array('jquery', 'u_seisbarra8-popper'), u_seisbarra8_asset_version( 'bootstrap/js/bootstrap.min.js' ), true );
 
-        wp_enqueue_script( 'u_seisbarra8-outline', get_template_directory_uri() . '/assets/js/outline.js', null, null, true );
+        wp_enqueue_script( 'u_seisbarra8-outline', get_template_directory_uri() . '/assets/js/outline.js', null, u_seisbarra8_asset_version( 'assets/js/outline.js' ), true );
 
         if ( ! wp_script_is( 'u_seisbarra8-plugins', 'enqueued' ) ) {
-            wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), null, true);
+            wp_enqueue_script( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/js/plugins.js', array('jquery'), u_seisbarra8_asset_version( 'components/pg.blocks.wp/js/plugins.js' ), true);
         }
 
         if ( ! wp_script_is( 'u_seisbarra8-bskitscripts', 'enqueued' ) ) {
-            wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), null, true);
+            wp_enqueue_script( 'u_seisbarra8-bskitscripts', get_template_directory_uri() . '/components/pg.blocks.wp/js/bskit-scripts.js', array('jquery'), u_seisbarra8_asset_version( 'components/pg.blocks.wp/js/bskit-scripts.js' ), true);
         }
 
         // Remove external Google Maps API to avoid CDN/external dependency
         wp_deregister_script( 'u_seisbarra8-script' );
 
         if ( ! wp_script_is( 'u_seisbarra8-slick', 'enqueued' ) ) {
-            wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), null, true );
+            wp_enqueue_script( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.min.js', array('jquery'), u_seisbarra8_asset_version( 'slick/slick.min.js' ), true );
         }
         
         // Carousel init - must load after slick
-        wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap', 'u_seisbarra8-slick'), null, true );
+        wp_enqueue_script( 'u_seisbarra8-carousel_init', get_template_directory_uri() . '/assets/js/carousel_init.js', array('jquery', 'u_seisbarra8-bootstrap', 'u_seisbarra8-slick'), u_seisbarra8_asset_version( 'assets/js/carousel_init.js' ), true );
         
         if ( apply_filters( 'u_seisbarra8_enable_colunistas_slick', false ) ) {
-            wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+            wp_enqueue_script( 'u_seisbarra8-colunistas-slick', get_template_directory_uri() . '/assets/js/colunistas-slick.js', array('jquery', 'u_seisbarra8-slick'), u_seisbarra8_asset_version( 'assets/js/colunistas-slick.js' ), true );
         }
         // Weather forecast slider init (uses slick)
-        wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), null, true );
+        wp_enqueue_script( 'u_seisbarra8-weather-forecast', get_template_directory_uri() . '/assets/js/weather-forecast.js', array('jquery', 'u_seisbarra8-slick'), u_seisbarra8_asset_version( 'assets/js/weather-forecast.js' ), true );
         // Post-load i18n for weekday names (pt-BR)
-        wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), null, true );
+        wp_enqueue_script( 'u_seisbarra8-weather-i18n', get_template_directory_uri() . '/assets/js/weather-i18n.js', array('jquery', 'u_seisbarra8-weather-forecast'), u_seisbarra8_asset_version( 'assets/js/weather-i18n.js' ), true );
         
         // City Selector for Weather Widget
         wp_enqueue_style( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/css/city-selector.css', array(), '1.0.0' );
@@ -1271,11 +1288,11 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
 
     // Estilos são carregados pelo enqueue_block_assets; apenas adicionar inline CSS aqui
     if ( ! wp_style_is( 'u_seisbarra8-bootstrap', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-bootstrap', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css', false, u_seisbarra8_asset_version( 'bootstrap/css/bootstrap.min.css' ), 'all');
     }
 
     if ( ! wp_style_is( 'u_seisbarra8-theme', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-theme', get_template_directory_uri() . '/css/theme.css', array('u_seisbarra8-bootstrap'), null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-theme', get_template_directory_uri() . '/css/theme.css', array('u_seisbarra8-bootstrap'), u_seisbarra8_asset_version( 'css/theme.css' ), 'all');
     }
     // Inline CSS to align icon colors and spacing with theme variables
     wp_add_inline_style( 'u_seisbarra8-theme', '
@@ -1318,19 +1335,19 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     ' );
 
     if ( ! wp_style_is( 'u_seisbarra8-woocommerce', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-woocommerce', get_template_directory_uri() . '/css/woocommerce.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-woocommerce', get_template_directory_uri() . '/css/woocommerce.css', false, u_seisbarra8_asset_version( 'css/woocommerce.css' ), 'all');
     }
 
     if ( ! wp_style_is( 'u_seisbarra8-blocks', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-blocks', get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-blocks', get_template_directory_uri() . '/components/pg.blocks.wp/css/blocks.css', false, u_seisbarra8_asset_version( 'components/pg.blocks.wp/css/blocks.css' ), 'all');
     }
 
     if ( ! wp_style_is( 'u_seisbarra8-plugins', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-plugins', get_template_directory_uri() . '/components/pg.blocks.wp/css/plugins.css', false, u_seisbarra8_asset_version( 'components/pg.blocks.wp/css/plugins.css' ), 'all');
     }
 
     if ( ! wp_style_is( 'u_seisbarra8-stylelibrary', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-stylelibrary', get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-stylelibrary', get_template_directory_uri() . '/components/pg.blocks.wp/css/style-library-1.css', false, u_seisbarra8_asset_version( 'components/pg.blocks.wp/css/style-library-1.css' ), 'all');
     }
 
     // Remove Google Fonts to avoid CDN/external dependency (use local fonts instead)
@@ -1348,15 +1365,15 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     }
 
     if ( ! wp_style_is( 'u_seisbarra8-slick', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-slick', get_template_directory_uri() . '/slick/slick.css', false, u_seisbarra8_asset_version( 'slick/slick.css' ), 'all');
     }
 
     if ( ! wp_style_is( 'u_seisbarra8-slicktheme', 'enqueued' ) ) {
-        wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, null, 'all');
+        wp_enqueue_style( 'u_seisbarra8-slicktheme', get_template_directory_uri() . '/slick/slick-theme.css', false, u_seisbarra8_asset_version( 'slick/slick-theme.css' ), 'all');
     }
 
     // Enqueue blocks layout CSS
-    wp_enqueue_style( 'seideagosto-blocks-layout', get_template_directory_uri() . '/css/blocks-layout.css', false, null, 'all');
+    wp_enqueue_style( 'seideagosto-blocks-layout', get_template_directory_uri() . '/css/blocks-layout.css', false, u_seisbarra8_asset_version( 'css/blocks-layout.css' ), 'all');
 
     // Check if local fonts exist, otherwise fallback to Google Fonts CDN
     $stylesheet_dir = get_stylesheet_directory();
@@ -1388,7 +1405,7 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
             ),
             'https://fonts.googleapis.com/css2'
         );
-        wp_enqueue_style( 'u_seisbarra8-google-fonts', esc_url( $google_url ), false, null, 'all' );
+        wp_enqueue_style( 'u_seisbarra8-google-fonts', esc_url_raw( $google_url ), false, null, 'all' );
     } elseif ( file_exists( $open_sans_file ) && file_exists( $lato_file ) ) {
         // Use local self-hosted fonts with absolute URLs
         $font_uri = $stylesheet_uri . '/assets/fonts';
@@ -1477,7 +1494,7 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
     }
 
     wp_deregister_style( 'u_seisbarra8-style-2' );
-    wp_enqueue_style( 'u_seisbarra8-style-2', get_bloginfo('stylesheet_url'), false, null, 'all');
+    wp_enqueue_style( 'u_seisbarra8-style-2', get_stylesheet_uri(), false, wp_get_theme()->get( 'Version' ), 'all' );
 
     /* Pinegrow generated Enqueue Styles End */
 
@@ -1523,18 +1540,18 @@ function u_seisbarra8_enqueue_block_assets() {
     $theme_uri = get_template_directory_uri();
 
     // CSS: Bootstrap + main + theme + icons + blocks + slick
-    wp_enqueue_style( 'u_seisbarra8-bootstrap', $theme_uri . '/bootstrap/css/bootstrap.min.css', array(), null );
-    wp_enqueue_style( 'u_seisbarra8-main', $theme_uri . '/css/main.css', array( 'u_seisbarra8-bootstrap' ), null );
-    wp_enqueue_style( 'u_seisbarra8-theme', $theme_uri . '/css/theme.css', array( 'u_seisbarra8-bootstrap', 'u_seisbarra8-main' ), null );
+    wp_enqueue_style( 'u_seisbarra8-bootstrap', $theme_uri . '/bootstrap/css/bootstrap.min.css', array(), u_seisbarra8_asset_version( 'bootstrap/css/bootstrap.min.css' ) );
+    wp_enqueue_style( 'u_seisbarra8-main', $theme_uri . '/css/main.css', array( 'u_seisbarra8-bootstrap' ), u_seisbarra8_asset_version( 'css/main.css' ) );
+    wp_enqueue_style( 'u_seisbarra8-theme', $theme_uri . '/css/theme.css', array( 'u_seisbarra8-bootstrap', 'u_seisbarra8-main' ), u_seisbarra8_asset_version( 'css/theme.css' ) );
     wp_enqueue_style( 'u_seisbarra8-fontawesome', $theme_uri . '/assets/vendor/font-awesome-4.7/css/font-awesome.min.css', array(), '4.7.0' );
     // Override @font-face with modern formats (removes .eot/.svg preload warnings)
     wp_enqueue_style( 'u_seisbarra8-fontawesome-modern', $theme_uri . '/css/local-fa-fallback.css', array( 'u_seisbarra8-fontawesome' ), '1.1' );
-    wp_enqueue_style( 'u_seisbarra8-blocks', $theme_uri . '/components/pg.blocks.wp/css/blocks.css', array( 'u_seisbarra8-theme' ), null );
-    wp_enqueue_style( 'u_seisbarra8-plugins', $theme_uri . '/components/pg.blocks.wp/css/plugins.css', array( 'u_seisbarra8-theme' ), null );
-    wp_enqueue_style( 'u_seisbarra8-stylelibrary', $theme_uri . '/components/pg.blocks.wp/css/style-library-1.css', array( 'u_seisbarra8-theme' ), null );
-    wp_enqueue_style( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.css', array( 'u_seisbarra8-theme' ), null );
-    wp_enqueue_style( 'u_seisbarra8-slicktheme', $theme_uri . '/slick/slick-theme.css', array( 'u_seisbarra8-slick' ), null );
-    wp_enqueue_style( 'seideagosto-blocks-layout', $theme_uri . '/css/blocks-layout.css', array( 'u_seisbarra8-theme' ), null );
+    wp_enqueue_style( 'u_seisbarra8-blocks', $theme_uri . '/components/pg.blocks.wp/css/blocks.css', array( 'u_seisbarra8-theme' ), u_seisbarra8_asset_version( 'components/pg.blocks.wp/css/blocks.css' ) );
+    wp_enqueue_style( 'u_seisbarra8-plugins', $theme_uri . '/components/pg.blocks.wp/css/plugins.css', array( 'u_seisbarra8-theme' ), u_seisbarra8_asset_version( 'components/pg.blocks.wp/css/plugins.css' ) );
+    wp_enqueue_style( 'u_seisbarra8-stylelibrary', $theme_uri . '/components/pg.blocks.wp/css/style-library-1.css', array( 'u_seisbarra8-theme' ), u_seisbarra8_asset_version( 'components/pg.blocks.wp/css/style-library-1.css' ) );
+    wp_enqueue_style( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.css', array( 'u_seisbarra8-theme' ), u_seisbarra8_asset_version( 'slick/slick.css' ) );
+    wp_enqueue_style( 'u_seisbarra8-slicktheme', $theme_uri . '/slick/slick-theme.css', array( 'u_seisbarra8-slick' ), u_seisbarra8_asset_version( 'slick/slick-theme.css' ) );
+    wp_enqueue_style( 'seideagosto-blocks-layout', $theme_uri . '/css/blocks-layout.css', array( 'u_seisbarra8-theme' ), u_seisbarra8_asset_version( 'css/blocks-layout.css' ) );
 
     // JS: Bootstrap and dependencies needed for navbar toggler, dropdowns, etc.
     // Skip on AMP requests
@@ -1547,19 +1564,19 @@ function u_seisbarra8_enqueue_block_assets() {
 
     // Popper.js (Bootstrap 5 dependency)
     if ( ! wp_script_is( 'u_seisbarra8-popper', 'registered' ) ) {
-        wp_register_script( 'u_seisbarra8-popper', $theme_uri . '/assets/js/popper.js', array(), null, true );
+        wp_register_script( 'u_seisbarra8-popper', $theme_uri . '/assets/js/popper.js', array(), u_seisbarra8_asset_version( 'assets/js/popper.js' ), true );
     }
     wp_enqueue_script( 'u_seisbarra8-popper' );
 
     // Bootstrap JS
     if ( ! wp_script_is( 'u_seisbarra8-bootstrap', 'registered' ) ) {
-        wp_register_script( 'u_seisbarra8-bootstrap', $theme_uri . '/bootstrap/js/bootstrap.min.js', array( 'jquery', 'u_seisbarra8-popper' ), null, true );
+        wp_register_script( 'u_seisbarra8-bootstrap', $theme_uri . '/bootstrap/js/bootstrap.min.js', array( 'jquery', 'u_seisbarra8-popper' ), u_seisbarra8_asset_version( 'bootstrap/js/bootstrap.min.js' ), true );
     }
     wp_enqueue_script( 'u_seisbarra8-bootstrap' );
 
     // Slick carousel JS
     if ( ! wp_script_is( 'u_seisbarra8-slick', 'registered' ) ) {
-        wp_register_script( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.min.js', array( 'jquery' ), null, true );
+        wp_register_script( 'u_seisbarra8-slick', $theme_uri . '/slick/slick.min.js', array( 'jquery' ), u_seisbarra8_asset_version( 'slick/slick.min.js' ), true );
     }
     wp_enqueue_script( 'u_seisbarra8-slick' );
 
@@ -1584,6 +1601,15 @@ function u68_force_theme_css() {
 }
 add_action( 'enqueue_block_assets', 'u68_force_theme_css', 1 );
 add_action( 'wp_enqueue_scripts', 'u68_force_theme_css', 1 );
+
+/**
+ * Diagnóstico de assets: apenas para administradores com WP_DEBUG ativo
+ * (ou forçado via filtro 'u68_asset_diagnostics').
+ */
+function u68_asset_diagnostics_enabled() {
+    $enabled = defined( 'WP_DEBUG' ) && WP_DEBUG;
+    return (bool) apply_filters( 'u68_asset_diagnostics', $enabled ) && current_user_can( 'manage_options' );
+}
 
 // Admin-only asset health checks to quickly debug missing header/footer or CSS loads.
 function u68_get_asset_statuses() {
@@ -1636,7 +1662,7 @@ function u68_get_asset_statuses() {
 }
 
 function u68_adminbar_asset_status( $wp_admin_bar ) {
-    if ( ! is_admin_bar_showing() || ! current_user_can( 'manage_options' ) ) {
+    if ( ! u68_asset_diagnostics_enabled() || ! is_admin_bar_showing() ) {
         return;
     }
 
@@ -1668,7 +1694,7 @@ add_action( 'admin_bar_menu', 'u68_adminbar_asset_status', 120 );
 
 // Console report to quickly inspect header/footer and CSS presence (admins only, front and editor).
 function u68_asset_console_probe() {
-    if ( ! current_user_can( 'manage_options' ) ) {
+    if ( ! u68_asset_diagnostics_enabled() ) {
         return;
     }
 
@@ -1737,7 +1763,8 @@ function u_seisbarra8_force_front_assets() {
         'seideagosto-blocks-layout' => get_template_directory_uri() . '/css/blocks-layout.css',
     ) as $handle => $src ) {
         if ( ! wp_style_is( $handle, 'enqueued' ) ) {
-            wp_enqueue_style( $handle, $src, array(), null );
+            $relative = str_replace( trailingslashit( get_template_directory_uri() ), '', $src );
+            wp_enqueue_style( $handle, $src, array(), u_seisbarra8_asset_version( $relative ) );
         }
     }
 
@@ -1756,7 +1783,8 @@ function u_seisbarra8_force_front_assets() {
     );
     foreach ( $scripts as $handle => $data ) {
         if ( ! wp_script_is( $handle, 'enqueued' ) ) {
-            wp_enqueue_script( $handle, $data['src'], $data['deps'], null, $data['in_footer'] );
+            $relative = str_replace( trailingslashit( get_template_directory_uri() ), '', $data['src'] );
+            wp_enqueue_script( $handle, $data['src'], $data['deps'], u_seisbarra8_asset_version( $relative ), $data['in_footer'] );
         }
     }
 }
@@ -1767,13 +1795,13 @@ function pgwp_sanitize_placeholder($input) { return $input; }
  * Resource files included by Pinegrow.*/
  
 /* Pinegrow generated Include Resources Begin */
-require_once "inc/custom.php";
-require_once "inc/wp_pg_helpers.php";
-require_once "inc/bootstrap/wp_bootstrap4_navwalker.php";
-require_once "inc/blocks.php";
-require_once "inc/widgets.php";
-require_once "inc/customizer.php";
-require_once "inc/icon-picker.php";
+require_once get_template_directory() . '/inc/custom.php';
+require_once get_template_directory() . '/inc/wp_pg_helpers.php';
+require_once get_template_directory() . '/inc/bootstrap/wp_bootstrap4_navwalker.php';
+require_once get_template_directory() . '/inc/blocks.php';
+require_once get_template_directory() . '/inc/widgets.php';
+require_once get_template_directory() . '/inc/customizer.php';
+require_once get_template_directory() . '/inc/icon-picker.php';
 
     /* Pinegrow generated Include Resources End */
     
@@ -1952,6 +1980,16 @@ require_once "inc/icon-picker.php";
         // Ensure the reusable blocks post type exists
         if ( ! post_type_exists( 'wp_block' ) ) return;
 
+        // Executa apenas uma vez por versão da lista (evita consultas em toda requisição
+        // e não recria padrões que o usuário apagou de propósito).
+        $synced_version = '1';
+        if ( get_option( 'u_seisbarra8_synced_patterns_version' ) === $synced_version ) {
+            return;
+        }
+        if ( ! is_admin() ) {
+            return;
+        }
+
         $defs = array(
             array(
                 'file'  => 'patterns/destaques-home.php',
@@ -2013,6 +2051,8 @@ require_once "inc/icon-picker.php";
                 'post_content' => $content,
             ) );
         }
+
+        update_option( 'u_seisbarra8_synced_patterns_version', $synced_version, false );
     }, 20 );
 
     
@@ -2143,29 +2183,6 @@ function u68_rest_error_logger( $response, $server, $request ) {
 }
 add_filter( 'rest_post_dispatch', 'u68_rest_error_logger', 10, 3 );
 
-// DEBUG TEMPORÁRIO - Remover após teste
-add_action('wp_enqueue_scripts', function() {
-    if ( empty( $_GET['debug'] ) || $_GET['debug'] !== 'ms' ) return;
-    $registry = WP_Block_Type_Registry::get_instance();
-    $registered = $registry->is_registered('seisdeagosto/currency-monitor') ? 'SIM' : 'NAO';
-    $api_msg = '';
-    $api_url = 'https://open.er-api.com/v6/latest/BRL';
-    $res = wp_remote_get($api_url, array('timeout' => 5));
-    if (!is_wp_error($res)) {
-        $body = wp_remote_retrieve_body($res);
-        $json = json_decode($body, true);
-        if (isset($json['rates']['USD'])) {
-            $api_msg = 'API funcionando - USD: ' . esc_js( $json['rates']['USD'] );
-        } else {
-            $api_msg = 'API retornou dados incompletos';
-        }
-    } else {
-        $api_msg = 'Erro ao acessar API: ' . esc_js( $res->get_error_message() );
-    }
-    $inline = "console.log('[Currency Debug] Verificando bloco de cambio...');console.log('[Currency Debug] Bloco registrado: " . esc_js( $registered ) . "');console.log('[Currency Debug] " . $api_msg . "');";
-    wp_add_inline_script('jquery', $inline, 'after');
-}, 12);
-
 /**
  * Shortcode: header search form only for mobile (toggle).
  */
@@ -2255,77 +2272,6 @@ function cptui_register_my_cpts() {
 
 add_action( 'init', 'cptui_register_my_cpts' );
 
-function cptui_register_my_cpts_edital() {
-
-	/**
-	 * Post Type: editais.
-	 */
-
-	$labels = [
-		"name" => esc_html__( "editais", "u_correio68" ),
-		"singular_name" => esc_html__( "Edital", "u_correio68" ),
-		"menu_name" => esc_html__( "Publicações Legais", "u_correio68" ),
-		"all_items" => esc_html__( "Todos os editais", "u_correio68" ),
-		"add_new" => esc_html__( "Adicionar novo", "u_correio68" ),
-		"add_new_item" => esc_html__( "Adicionar novo Edital", "u_correio68" ),
-		"edit_item" => esc_html__( "Editar Edital", "u_correio68" ),
-		"new_item" => esc_html__( "Novo Edital", "u_correio68" ),
-		"view_item" => esc_html__( "Ver Edital", "u_correio68" ),
-		"view_items" => esc_html__( "Ver editais", "u_correio68" ),
-		"search_items" => esc_html__( "Pesquisar editais", "u_correio68" ),
-		"not_found" => esc_html__( "Nenhum editais encontrado", "u_correio68" ),
-		"not_found_in_trash" => esc_html__( "Nenhum editais encontrado na lixeira", "u_correio68" ),
-		"parent" => esc_html__( "Edital ascendente:", "u_correio68" ),
-		"featured_image" => esc_html__( "Imagem em destaque para este Edital", "u_correio68" ),
-		"set_featured_image" => esc_html__( "Definir imagem em destaque para este Edital", "u_correio68" ),
-		"remove_featured_image" => esc_html__( "Remover imagem em destaque para este Edital", "u_correio68" ),
-		"use_featured_image" => esc_html__( "Usar como imagem em destaque para este Edital", "u_correio68" ),
-		"archives" => esc_html__( "Arquivos de Edital", "u_correio68" ),
-		"insert_into_item" => esc_html__( "Inserir no Edital", "u_correio68" ),
-		"uploaded_to_this_item" => esc_html__( "Enviar para esse Edital", "u_correio68" ),
-		"filter_items_list" => esc_html__( "Filtrar lista de editais", "u_correio68" ),
-		"items_list_navigation" => esc_html__( "Navegação na lista de editais", "u_correio68" ),
-		"items_list" => esc_html__( "Lista de editais", "u_correio68" ),
-		"attributes" => esc_html__( "Atributos de editais", "u_correio68" ),
-		"name_admin_bar" => esc_html__( "Edital", "u_correio68" ),
-		"item_published" => esc_html__( "Edital publicado", "u_correio68" ),
-		"item_published_privately" => esc_html__( "Edital publicado de forma privada.", "u_correio68" ),
-		"item_reverted_to_draft" => esc_html__( "Edital revertido para rascunho.", "u_correio68" ),
-		"item_scheduled" => esc_html__( "Edital agendado.", "u_correio68" ),
-		"item_updated" => esc_html__( "Edital atualizado.", "u_correio68" ),
-		"parent_item_colon" => esc_html__( "Edital ascendente:", "u_correio68" ),
-	];
-
-	$args = [
-		"label" => esc_html__( "editais", "u_correio68" ),
-		"labels" => $labels,
-		"description" => "",
-		"public" => true,
-		"publicly_queryable" => true,
-		"show_ui" => true,
-		"show_in_rest" => true,
-		"rest_base" => "",
-		"rest_controller_class" => "WP_REST_Posts_Controller",
-		"rest_namespace" => "wp/v2",
-		"has_archive" => false,
-		"show_in_menu" => true,
-		"show_in_nav_menus" => true,
-		"delete_with_user" => false,
-		"exclude_from_search" => false,
-		"capability_type" => "post",
-		"map_meta_cap" => true,
-		"hierarchical" => false,
-		"can_export" => false,
-		"rewrite" => [ "slug" => "edital", "with_front" => true ],
-		"query_var" => true,
-		"supports" => [ "title", "editor", "thumbnail" ],
-		"show_in_graphql" => false,
-	];
-
-	register_post_type( "edital", $args );
-}
-
-add_action( 'init', 'cptui_register_my_cpts_edital' );
 
 add_action( 'acf/include_fields', function() {
 	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
