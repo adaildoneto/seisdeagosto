@@ -1,2 +1,11 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Arquivos só de desenvolvimento: ficam fora do .zip gerado com git archive.
+/dev export-ignore
+/composer.json export-ignore
+/composer.lock export-ignore
+/phpcs.xml.dist export-ignore
+/.git-blame-ignore-revs export-ignore
+/.gitignore export-ignore
+/.gitattributes export-ignore

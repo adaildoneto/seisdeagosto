@@ -277,3 +277,19 @@ composer lint:fix           # corrige automaticamente o que for possível (forma
 ```
 
 > A pasta `vendor/` não vai para o servidor: o tema não depende dela para funcionar.
+
+### Testar o tema localmente (WordPress Playground)
+
+Sobe um WordPress completo, sem MySQL nem servidor, com o tema montado direto desta pasta
+(alterações nos arquivos aparecem na hora):
+
+```bash
+npx @wp-playground/cli server \
+  --mount=.:/wordpress/wp-content/themes/seisdeagosto \
+  --blueprint=dev/blueprint.json
+```
+
+Abra http://127.0.0.1:9400. O `debug.log` fica no WordPress virtual
+(`/wordpress/wp-content/debug.log`). A capa usa o template `front-page.html`, que
+mostra o conteúdo de uma página: em **Configurações → Leitura**, escolha uma página
+estática com os blocos do tema como página inicial.
