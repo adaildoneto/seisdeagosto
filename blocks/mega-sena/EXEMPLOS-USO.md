@@ -342,8 +342,24 @@ add_action('verificar_loteria_ganhador', 'verificar_e_notificar_ganhador');
 Pelo painel: administradores veem o item **"Limpar cache das loterias"** na barra
 de administração (ação protegida por nonce, substitui o antigo `clear-cache.php`).
 
-Falhas da API da Caixa ficam em cache por 5 minutos, para que a API fora do ar não
-deixe cada visita esperando até 15 segundos.
+### Como o tema evita que a API da Caixa deixe o site lento
+
+- **Cache:** 30 minutos para o último concurso; 30 dias para concursos passados (não mudam).
+- **Último resultado válido:** guardado na option `seisdeagosto_loteria_last_{modalidade}`.
+  Quando o cache expira ou a API falha, ele é mostrado na hora e a atualização roda em
+  segundo plano pelo WP-Cron (`seisdeagosto_refresh_loteria`). Se ele tiver mais de 2 horas
+  (por exemplo, WP-Cron desativado), a página busca direto.
+- **Disjuntor:** depois de uma falha de conexão (ou HTTP 5xx/403/429), a API não é chamada
+  por 5 minutos (transient `seisdeagosto_loteria_api_down`).
+- **Limites de tempo:** 5 s por requisição e no máximo ~8 s de chamadas por carregamento de
+  página. O que passar disso é agendado para o WP-Cron.
+
+Os limites podem ser ajustados por filtro:
+
+```php
+add_filter( 'seisdeagosto_loteria_timeout', fn() => 3 );          // segundos por requisição
+add_filter( 'seisdeagosto_loteria_request_budget', fn() => 5 );   // segundos por página
+```
 
 ```php
 <?php

@@ -8,11 +8,18 @@
  */
 
 /**
- * Busca o resultado de uma loteria específica
+ * Busca o resultado de uma loteria específica.
  *
- * @param string $modalidade Nome da modalidade (megasena, lotofacil, quina, etc)
- * @param int    $concurso Número do concurso (opcional, se não informado pega o último)
- * @return array|false Dados do concurso ou false em caso de erro
+ * Estratégia para nunca deixar a página presa esperando a API da Caixa:
+ * 1. Cache "fresco" (transient): 30 min para o último concurso, 30 dias para concursos passados.
+ * 2. Último resultado válido guardado em option: se o cache expirou ou a API falhou, ele é
+ *    devolvido na hora e a atualização é agendada no WP-Cron (segundo plano).
+ * 3. Disjuntor: após uma falha de conexão, a API não é chamada de novo por 5 minutos.
+ * 4. Orçamento por requisição: no máximo ~8 s de chamadas síncronas por carregamento de página.
+ *
+ * @param string $modalidade Nome da modalidade (megasena, lotofacil, quina, etc).
+ * @param int    $concurso   Número do concurso (opcional; sem ele pega o último).
+ * @return array Dados do concurso ou array( 'error' => mensagem ).
  */
 function seisdeagosto_get_loteria_result( $modalidade = 'megasena', $concurso = null ) {
 	// Aceita apenas modalidades conhecidas: o valor compõe a URL da API e a chave de cache.
@@ -21,47 +28,162 @@ function seisdeagosto_get_loteria_result( $modalidade = 'megasena', $concurso = 
 		return array( 'error' => 'Modalidade de loteria inválida.' );
 	}
 
-	$concurso = absint( $concurso );
+	$concurso  = absint( $concurso );
+	$cache_key = seisdeagosto_loteria_cache_key( $modalidade, $concurso );
 
-	// Cache key
-	$cache_key = 'loteria_' . $modalidade;
-	if ( $concurso ) {
-		$cache_key .= '_' . $concurso;
+	$fresh = get_transient( $cache_key );
+	if ( false !== $fresh && ! isset( $fresh['error'] ) ) {
+		return $fresh;
 	}
 
-	// Verifica cache (30 minutos para sucesso, 5 minutos para falhas)
-	$cached_data = get_transient( $cache_key );
-	if ( false !== $cached_data ) {
-		return $cached_data;
+	// Último resultado válido (só para "último concurso"; concursos passados não mudam).
+	$last      = $concurso ? false : seisdeagosto_get_last_loteria( $modalidade );
+	$stale     = $last ? $last['data'] : false;
+	$stale_age = $last ? time() - $last['time'] : 0;
+
+	// Falha recente já registrada para esta chave: não tenta de novo agora.
+	if ( false !== $fresh ) {
+		return $stale ? $stale : $fresh;
 	}
 
-	// Monta a URL da API
+	if ( ! wp_doing_cron() ) {
+		$api_down     = (bool) get_transient( 'seisdeagosto_loteria_api_down' );
+		$over_budget  = seisdeagosto_loteria_budget_spent() >= (float) apply_filters( 'seisdeagosto_loteria_request_budget', 8 );
+		$stale_recent = $stale && $stale_age < 2 * HOUR_IN_SECONDS;
+
+		// Há resultado para mostrar: devolve na hora e atualiza em segundo plano.
+		// Se ele já tem mais de 2 h (WP-Cron pode não estar rodando), busca direto,
+		// desde que a API esteja respondendo e o orçamento de tempo permita.
+		if ( $stale && ( $stale_recent || $api_down || $over_budget ) ) {
+			seisdeagosto_schedule_loteria_refresh( $modalidade, $concurso );
+			return $stale;
+		}
+
+		if ( $api_down ) {
+			seisdeagosto_schedule_loteria_refresh( $modalidade, $concurso );
+			return array( 'error' => 'API da Caixa indisponível no momento. Tente novamente em alguns minutos.' );
+		}
+
+		if ( $over_budget ) {
+			seisdeagosto_schedule_loteria_refresh( $modalidade, $concurso );
+			return array( 'error' => 'Resultado sendo atualizado. Recarregue a página em instantes.' );
+		}
+	}
+
+	return seisdeagosto_fetch_loteria( $modalidade, $concurso );
+}
+
+/**
+ * Último resultado válido guardado para uma modalidade.
+ *
+ * @param string $modalidade Modalidade já validada.
+ * @return array|false array( 'time' => timestamp, 'data' => dados ) ou false.
+ */
+function seisdeagosto_get_last_loteria( $modalidade ) {
+	$last = get_option( 'seisdeagosto_loteria_last_' . $modalidade, false );
+	if ( ! is_array( $last ) || empty( $last['data'] ) || ! is_array( $last['data'] ) ) {
+		return false;
+	}
+	$last['time'] = isset( $last['time'] ) ? (int) $last['time'] : 0;
+	return $last;
+}
+
+/**
+ * Chave de cache de uma modalidade/concurso.
+ *
+ * @param string $modalidade Modalidade já validada.
+ * @param int    $concurso   Número do concurso ou 0.
+ * @return string
+ */
+function seisdeagosto_loteria_cache_key( $modalidade, $concurso = 0 ) {
+	return 'loteria_' . $modalidade . ( $concurso ? '_' . $concurso : '' );
+}
+
+/**
+ * Soma (e opcionalmente acumula) o tempo gasto em chamadas à API nesta requisição.
+ *
+ * @param float $add Segundos a somar.
+ * @return float Total gasto até agora.
+ */
+function seisdeagosto_loteria_budget_spent( $add = 0.0 ) {
+	static $spent = 0.0;
+	$spent       += (float) $add;
+	return $spent;
+}
+
+/**
+ * Agenda a atualização de uma modalidade no WP-Cron (uma vez por modalidade/concurso).
+ *
+ * @param string $modalidade Modalidade já validada.
+ * @param int    $concurso   Número do concurso ou 0.
+ */
+function seisdeagosto_schedule_loteria_refresh( $modalidade, $concurso = 0 ) {
+	$args = array( $modalidade, (int) $concurso );
+	if ( ! wp_next_scheduled( 'seisdeagosto_refresh_loteria', $args ) ) {
+		wp_schedule_single_event( time(), 'seisdeagosto_refresh_loteria', $args );
+	}
+}
+
+/**
+ * Tarefa do WP-Cron: busca o resultado na API e atualiza os caches.
+ *
+ * @param string $modalidade Modalidade.
+ * @param int    $concurso   Número do concurso ou 0.
+ */
+function seisdeagosto_cron_refresh_loteria( $modalidade, $concurso = 0 ) {
+	$modalidade = sanitize_key( (string) $modalidade );
+	if ( ! array_key_exists( $modalidade, seisdeagosto_get_loteria_modalidades() ) ) {
+		return;
+	}
+	// Respeita o disjuntor também no cron, para não insistir com a API fora do ar.
+	if ( get_transient( 'seisdeagosto_loteria_api_down' ) ) {
+		return;
+	}
+	seisdeagosto_fetch_loteria( $modalidade, absint( $concurso ) );
+	delete_transient( 'todas_loterias' );
+}
+add_action( 'seisdeagosto_refresh_loteria', 'seisdeagosto_cron_refresh_loteria', 10, 2 );
+
+/**
+ * Faz a requisição à API da Caixa e grava os caches.
+ *
+ * @param string $modalidade Modalidade já validada.
+ * @param int    $concurso   Número do concurso ou 0.
+ * @return array Dados do concurso ou array( 'error' => mensagem ).
+ */
+function seisdeagosto_fetch_loteria( $modalidade, $concurso = 0 ) {
+	$cache_key = seisdeagosto_loteria_cache_key( $modalidade, $concurso );
+
 	$url = 'https://servicebus2.caixa.gov.br/portaldeloterias/api/' . rawurlencode( $modalidade );
 	if ( $concurso ) {
 		$url .= '/' . $concurso;
 	}
 
-	// Faz a requisição
+	$started  = microtime( true );
 	$response = wp_remote_get(
 		$url,
 		array(
-			'timeout' => 15,
+			'timeout' => (float) apply_filters( 'seisdeagosto_loteria_timeout', 5 ),
 			'headers' => array(
 				'Accept' => 'application/json',
 			),
 		)
 	);
+	seisdeagosto_loteria_budget_spent( microtime( true ) - $started );
 
-	$error = null;
+	$error    = null;
+	$api_down = false;
 
 	if ( is_wp_error( $response ) ) {
 		error_log( '[Loteria API] Erro: ' . $response->get_error_message() );
-		$error = 'Erro ao conectar com a API: ' . $response->get_error_message();
+		$error    = 'Erro ao conectar com a API: ' . $response->get_error_message();
+		$api_down = true;
 	} else {
-		$status_code = wp_remote_retrieve_response_code( $response );
-		if ( 200 !== (int) $status_code ) {
+		$status_code = (int) wp_remote_retrieve_response_code( $response );
+		if ( 200 !== $status_code ) {
 			error_log( '[Loteria API] Status code: ' . $status_code );
-			$error = 'API retornou status ' . $status_code;
+			$error    = 'API retornou status ' . $status_code;
+			$api_down = $status_code >= 500 || 403 === $status_code || 429 === $status_code;
 		} else {
 			$data = json_decode( wp_remote_retrieve_body( $response ), true );
 			if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $data ) ) {
@@ -72,14 +194,31 @@ function seisdeagosto_get_loteria_result( $modalidade = 'megasena', $concurso = 
 	}
 
 	if ( null !== $error ) {
-		// Guarda a falha por pouco tempo para não repetir a requisição lenta a cada visita.
+		if ( $api_down ) {
+			// Disjuntor: evita repetir chamadas lentas para as outras modalidades.
+			set_transient( 'seisdeagosto_loteria_api_down', 1, 5 * MINUTE_IN_SECONDS );
+		}
 		$result = array( 'error' => $error );
 		set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
-		return $result;
+
+		$last = $concurso ? false : seisdeagosto_get_last_loteria( $modalidade );
+		return $last ? $last['data'] : $result;
 	}
 
-	// Salva no cache por 30 minutos
-	set_transient( $cache_key, $data, 30 * MINUTE_IN_SECONDS );
+	if ( $concurso ) {
+		// Resultado de concurso passado não muda.
+		set_transient( $cache_key, $data, 30 * DAY_IN_SECONDS );
+	} else {
+		set_transient( $cache_key, $data, 30 * MINUTE_IN_SECONDS );
+		update_option(
+			'seisdeagosto_loteria_last_' . $modalidade,
+			array(
+				'time' => time(),
+				'data' => $data,
+			),
+			false
+		);
+	}
 
 	return $data;
 }
@@ -106,18 +245,14 @@ function seisdeagosto_get_loteria_modalidades() {
 }
 
 function seisdeagosto_get_all_loterias() {
-	// Cache key
-	$cache_key = 'todas_loterias';
-
-	// Verifica cache (30 minutos)
+	$cache_key   = 'todas_loterias';
 	$cached_data = get_transient( $cache_key );
 	if ( false !== $cached_data ) {
 		return $cached_data;
 	}
 
 	$modalidades = seisdeagosto_get_loteria_modalidades();
-
-	$resultados = array();
+	$resultados  = array();
 
 	foreach ( $modalidades as $slug => $nome ) {
 		$resultado = seisdeagosto_get_loteria_result( $slug );
@@ -130,8 +265,9 @@ function seisdeagosto_get_all_loterias() {
 		}
 	}
 
-	// Salva no cache por 30 minutos
-	set_transient( $cache_key, $resultados, 30 * MINUTE_IN_SECONDS );
+	// Lista completa: 30 minutos. Incompleta (API falhando ou atualizando): só 2 minutos.
+	$ttl = count( $resultados ) === count( $modalidades ) ? 30 * MINUTE_IN_SECONDS : 2 * MINUTE_IN_SECONDS;
+	set_transient( $cache_key, $resultados, $ttl );
 
 	return $resultados;
 }
@@ -142,15 +278,13 @@ function seisdeagosto_get_all_loterias() {
  * @param string $modalidade Nome da modalidade
  */
 function seisdeagosto_clear_loteria_cache( $modalidade = null ) {
-	if ( $modalidade ) {
-		delete_transient( 'loteria_' . sanitize_key( $modalidade ) );
-	} else {
-		// Limpa todos os caches
-		delete_transient( 'todas_loterias' );
-		foreach ( array_keys( seisdeagosto_get_loteria_modalidades() ) as $mod ) {
-			delete_transient( 'loteria_' . $mod );
-		}
+	$modalidades = $modalidade ? array( sanitize_key( $modalidade ) ) : array_keys( seisdeagosto_get_loteria_modalidades() );
+	foreach ( $modalidades as $mod ) {
+		delete_transient( 'loteria_' . $mod );
+		delete_option( 'seisdeagosto_loteria_last_' . $mod );
 	}
+	delete_transient( 'todas_loterias' );
+	delete_transient( 'seisdeagosto_loteria_api_down' );
 }
 
 /**
