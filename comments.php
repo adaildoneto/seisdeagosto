@@ -32,7 +32,7 @@ if ( post_password_required() ) {
 					printf(
 						/* translators: %s: post title */
 						esc_html_x( 'One thought on &ldquo;%s&rdquo;', 'comments title', 'st2' ),
-						'<span>' . get_the_title() . '</span>'
+						'<span>' . esc_html( get_the_title() ) . '</span>'
 					);
 				} else {
 					printf( // WPCS: XSS OK.
@@ -45,7 +45,7 @@ if ( post_password_required() ) {
 							'st2'
 						) ),
 						number_format_i18n( $comments_number ),
-						'<span>' . get_the_title() . '</span>'
+						'<span>' . esc_html( get_the_title() ) . '</span>'
 					);
 				}
 			?>

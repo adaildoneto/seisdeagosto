@@ -8,7 +8,7 @@
                     <div class="entry-meta">
                         <p>
                             <span><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>" itemprop="datePublished"><?php echo esc_html( get_the_date() ); ?></time></span>
-                            <?php _e( 'por', 'u_correio68' ); ?>
+                            <?php esc_html_e( 'por', 'u_correio68' ); ?>
                             <span itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name"><?php the_author(); ?></span></span>
                             <meta itemprop="dateModified" content="<?php echo esc_attr( get_the_modified_date( DATE_W3C ) ); ?>" />
                         </p>
@@ -53,7 +53,7 @@
                 
                 <footer class="entry-footer">
                     <?php if ( get_field('fonte') ) : ?>
-                        <span class="fonte"><B class="small"><?php _e( 'FONTE:', 'u_correio68' ); ?></B> <a href="<?php echo esc_url( get_field( 'fonte_url' ) ); ?>" class="small"><span><?php echo get_field( 'fonte' ); ?></span></a> </span>
+                        <span class="fonte"><B class="small"><?php esc_html_e( 'FONTE:', 'u_correio68' ); ?></B> <a href="<?php echo esc_url( get_field( 'fonte_url' ) ); ?>" class="small"><span><?php echo esc_html( get_field( 'fonte' ) ); ?></span></a> </span>
                     <?php endif; ?>
                     <?php if ( has_tag() ) : ?>
                         <span class="tags-links"><?php the_tags( 'Tags: ', ', ' ); ?></span>
@@ -63,10 +63,10 @@
             </article>
         <?php endwhile; ?>
     <?php else : ?>
-        <p><?php _e( 'Sorry, no posts matched your criteria.', 'u_correio68' ); ?></p>
+        <p><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'u_correio68' ); ?></p>
     <?php endif; ?>
     <div class="container navigation post-navigation pt-3 pb-3">
-        <h2 class="sr-only"><?php _e( 'Post navigation', 'u_correio68' ); ?></h2>
+        <h2 class="sr-only"><?php esc_html_e( 'Post navigation', 'u_correio68' ); ?></h2>
         <div class="row">
             <div class="col-6">
                 <span class="nav-previous"><?php previous_post_link( '%link', __( '&laquo; %title', 'u_correio68' ) ); ?></span>
@@ -109,7 +109,7 @@
             <?php echo get_avatar( get_the_author_meta( 'ID' ) ); ?> 
         </div>
         <div class="col-md-9">
-            <h3><?php echo get_the_author_meta( 'display_name', false ) ?></h3>
+            <h3><?php echo esc_html( get_the_author_meta( 'display_name' ) ); ?></h3>
             <?php the_author_meta( 'user_description' ); ?>
         </div>
     </div>

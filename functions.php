@@ -1823,7 +1823,7 @@ require_once get_template_directory() . '/inc/icon-picker.php';
             return $value;
         }
         function the_field( $selector, $post_id = false ) {
-            echo get_field( $selector, $post_id );
+            echo wp_kses_post( get_field( $selector, $post_id ) );
         }
     } );
 

@@ -310,7 +310,7 @@ $loterias = seisdeagosto_get_all_loterias();
                         <div class="loteria-numbers">
                             <?php foreach ( $numeros as $numero ) : ?>
                                 <div class="loteria-ball <?php echo esc_attr( $slug ); ?>">
-                                    <?php echo str_pad( $numero, 2, '0', STR_PAD_LEFT ); ?>
+                                    <?php echo esc_html( str_pad( (string) $numero, 2, '0', STR_PAD_LEFT ) ); ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -322,7 +322,7 @@ $loterias = seisdeagosto_get_all_loterias();
                                 <i class="fas fa-exclamation-circle"></i>
                                 Acumulado
                             </div>
-                            <div class="value"><?php echo seisdeagosto_format_currency( $valor_acumulado ); ?></div>
+                            <div class="value"><?php echo esc_html( seisdeagosto_format_currency( $valor_acumulado ) ); ?></div>
                         </div>
                         <?php elseif ( $premio_principal > 0 ) : ?>
                         <div class="loteria-premio">
@@ -330,7 +330,7 @@ $loterias = seisdeagosto_get_all_loterias();
                                 <i class="fas fa-money-bill-wave"></i>
                                 Prêmio Principal
                             </div>
-                            <div class="value"><?php echo seisdeagosto_format_currency( $premio_principal ); ?></div>
+                            <div class="value"><?php echo esc_html( seisdeagosto_format_currency( $premio_principal ) ); ?></div>
                         </div>
                         <?php endif; ?>
 
@@ -351,7 +351,7 @@ $loterias = seisdeagosto_get_all_loterias();
                                         </div>
                                     </div>
                                     <div class="valor">
-                                        <?php echo seisdeagosto_format_currency( $valor ); ?>
+                                        <?php echo esc_html( seisdeagosto_format_currency( $valor ) ); ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>

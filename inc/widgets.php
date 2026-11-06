@@ -163,11 +163,11 @@ class UbberCorreio68_Destaques_Widget extends WP_Widget {
         $category = ! empty( $instance['category'] ) ? $instance['category'] : 0;
         ?>
         <p>
-            <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title:', 'u_correio68' ); ?></label> 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'u_correio68' ); ?></label> 
             <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
         </p>
         <p>
-            <label for="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"><?php _e( 'Category:', 'u_correio68' ); ?></label> 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"><?php esc_html_e( 'Category:', 'u_correio68' ); ?></label> 
             <?php wp_dropdown_categories( array(
                 'show_option_all' => 'All Categories',
                 'name'            => $this->get_field_name( 'category' ),
@@ -259,19 +259,19 @@ class UbberCorreio68_Colunista_Widget extends WP_Widget {
         $category = ! empty( $instance['category'] ) ? $instance['category'] : 0;
         ?>
         <p>
-            <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Coluna (Título):', 'u_correio68' ); ?></label> 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Coluna (Título):', 'u_correio68' ); ?></label> 
             <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
         </p>
         <p>
-            <label for="<?php echo esc_attr( $this->get_field_id( 'author_name' ) ); ?>"><?php _e( 'Nome do Autor:', 'u_correio68' ); ?></label> 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'author_name' ) ); ?>"><?php esc_html_e( 'Nome do Autor:', 'u_correio68' ); ?></label> 
             <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'author_name' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'author_name' ) ); ?>" type="text" value="<?php echo esc_attr( $author_name ); ?>">
         </p>
         <p>
-            <label for="<?php echo esc_attr( $this->get_field_id( 'image_url' ) ); ?>"><?php _e( 'URL da Foto:', 'u_correio68' ); ?></label> 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'image_url' ) ); ?>"><?php esc_html_e( 'URL da Foto:', 'u_correio68' ); ?></label> 
             <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'image_url' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'image_url' ) ); ?>" type="text" value="<?php echo esc_attr( $image_url ); ?>">
         </p>
         <p>
-            <label for="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"><?php _e( 'Categoria:', 'u_correio68' ); ?></label> 
+            <label for="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"><?php esc_html_e( 'Categoria:', 'u_correio68' ); ?></label> 
             <?php wp_dropdown_categories( array(
                 'show_option_all' => 'Select Category',
                 'name'            => $this->get_field_name( 'category' ),

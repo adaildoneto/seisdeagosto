@@ -1002,7 +1002,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                                 
                                 <div class="tituloD">
                                         
-                                        <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><span class="TituloGrande text-white text-shadow"><?php echo get_the_title( $post->ID ); ?></span></a>
+                                        <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><span class="TituloGrande text-white text-shadow"><?php echo esc_html( get_the_title( $post->ID ) ); ?></span></a>
                                     </div>
                                 </div>
                             </div>
@@ -1041,7 +1041,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                                             <?php endif; ?>    
                                     <div class="tituloD">
                                            
-                                            <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><span class="TituloGrande2 text-shadow text-white"><?php echo get_the_title( $post->ID ); ?></span></a>
+                                            <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"><span class="TituloGrande2 text-shadow text-white"><?php echo esc_html( get_the_title( $post->ID ) ); ?></span></a>
                                         </div>
                                     </div>
                                 </div>
@@ -1090,7 +1090,7 @@ function u_correio68_render_destaques_home( $attributes ) {
                                 </span>
                             <?php endif; ?>
                             <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>">
-                                <span class="TituloGrande text-white text-shadow"><?php echo get_the_title( $post->ID ); ?></span>
+                                <span class="TituloGrande text-white text-shadow"><?php echo esc_html( get_the_title( $post->ID ) ); ?></span>
                             </a>
                         </div>
                         <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="stretched-link" aria-label="Abrir destaque"></a>
@@ -1401,7 +1401,7 @@ function u_correio68_render_category_highlight( $attributes ) {
                         <?php endif; ?>
                     </div>
                     <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="text-decoration-none">
-                        <h5 class="mb-3" style="<?php echo esc_attr( $titleStyle ); ?> line-height: 1.35; font-size: 1.25rem; color: #333; font-weight: 700; "><?php echo get_the_title( $post->ID ); ?></h5>
+                        <h5 class="mb-3" style="<?php echo esc_attr( $titleStyle ); ?> line-height: 1.35; font-size: 1.25rem; color: #333; font-weight: 700; "><?php echo esc_html( get_the_title( $post->ID ) ); ?></h5>
                     </a>
                 </div>
             <?php endforeach; wp_reset_postdata(); ?>
@@ -1452,7 +1452,7 @@ function u_correio68_render_category_highlight( $attributes ) {
                             <?php endif; ?>
                             <div class="flex-grow-1">
                                 <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="text-decoration-none">
-                                    <h6 class="mb-1" style="line-height: 1.4; font-size: 0.95rem; color: #333; font-weight: 600; <?php echo esc_attr( $titleStyle ); ?>"><?php echo get_the_title( $post->ID ); ?></h6>
+                                    <h6 class="mb-1" style="line-height: 1.4; font-size: 0.95rem; color: #333; font-weight: 600; <?php echo esc_attr( $titleStyle ); ?>"><?php echo esc_html( get_the_title( $post->ID ) ); ?></h6>
                                 </a>
                             </div>
                         </div>
@@ -1783,7 +1783,7 @@ function u_correio68_render_top_most_read( $attributes ) {
             if ( class_exists( 'PG_Helper' ) ) PG_Helper::rememberShownPost();
             echo '<li class="top-item" id="post-' . get_the_ID() . '">';
             echo '<span class="rank" aria-hidden="true">' . intval($rank) . '</span>';
-            echo '<a href="' . esc_url( get_permalink() ) . '" class="top-link" title="' . esc_attr( get_the_title() ) . '">' . get_the_title() . '</a>';
+            echo '<a href="' . esc_url( get_permalink() ) . '" class="top-link" title="' . esc_attr( get_the_title() ) . '">' . esc_html( get_the_title() ) . '</a>';
             echo '</li>';
             $rank++;
         endwhile;
@@ -2508,7 +2508,7 @@ function u_correio68_render_currency_monitor( $attributes ) {
             ?>
                 <div class="cm-item" style="flex-shrink: 0; text-align: center; padding: 10px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">
                     <?php if ( $show_flags ) : ?>
-                        <div style="font-size: 1.75rem; line-height: 1; margin-bottom: 3px;"><?php echo isset( $info['flag'] ) ? $info['flag'] : '💱'; ?></div>
+                        <div style="font-size: 1.75rem; line-height: 1; margin-bottom: 3px;"><?php echo esc_html( isset( $info['flag'] ) ? $info['flag'] : '💱' ); ?></div>
                     <?php endif; ?>
                     <?php if ( $show_names ) : ?>
                         <div style="font-weight: 700; font-size: 0.9rem; color: #111; margin-bottom: 1px;"><?php echo esc_html( $code ); ?></div>

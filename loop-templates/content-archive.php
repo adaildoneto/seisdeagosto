@@ -23,7 +23,7 @@
                     <?php endwhile; ?>
                 </div>
             <?php else : ?>
-                <p><?php _e( 'Sorry, no posts matched your criteria.', 'u_correio68' ); ?></p>
+                <p><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'u_correio68' ); ?></p>
             <?php endif; ?>
         </div>
     </article>

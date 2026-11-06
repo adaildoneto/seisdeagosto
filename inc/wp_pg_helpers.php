@@ -134,7 +134,7 @@ class PG_Helper {
                 }
             }
         }
-        echo '<!-- PG_FIELDS:'.implode(',', $list).'-->';
+        echo '<!-- PG_FIELDS:' . esc_html( implode( ',', $list ) ) . '-->';
     }
 
     static function getRelationshipFieldValue( $field ) {

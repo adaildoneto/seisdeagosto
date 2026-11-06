@@ -61,14 +61,14 @@ function seisdeagosto_render_info_bar( $attributes, $content, $block ) {
             <?php if ( $show_date ) : ?>
                 <div class="info-bar-item info-date">
                     <i class="fa fa-calendar" aria-hidden="true"></i>
-                    <span><?php echo date_i18n( 'l, j \d\e F \d\e Y' ); ?></span>
+                    <span><?php echo esc_html( date_i18n( 'l, j \d\e F \d\e Y' ) ); ?></span>
                 </div>
             <?php endif; ?>
             
             <?php if ( $show_time ) : ?>
                 <div class="info-bar-item info-time">
                     <i class="fa fa-clock-o" aria-hidden="true"></i>
-                    <span class="current-time" data-timezone="America/Rio_Branco"><?php echo current_time( 'H:i' ); ?></span>
+                    <span class="current-time" data-timezone="America/Rio_Branco"><?php echo esc_html( current_time( 'H:i' ) ); ?></span>
                 </div>
             <?php endif; ?>
         </div>

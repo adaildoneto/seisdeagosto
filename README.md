@@ -258,3 +258,22 @@ Este tema é proprietário e foi desenvolvido especificamente para uso em projet
 **🌳 Seis de Agosto** - *Honrando a Revolução Acreana desde 1902*
 
 </div>
+
+---
+
+## 🛠️ Desenvolvimento: padrões de código
+
+O tema usa o [PHP_CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer) com o
+[WordPress Coding Standards](https://github.com/WordPress/WordPress-Coding-Standards) e o
+[PHPCompatibilityWP](https://github.com/PHPCompatibility/PHPCompatibilityWP) (PHP 7.4+).
+As regras ficam em `phpcs.xml.dist`; bibliotecas de terceiros (Bootstrap, Slick, Pinegrow,
+templates do WooCommerce) são ignoradas.
+
+```bash
+composer install            # instala as ferramentas (só desenvolvimento, pasta vendor/)
+composer lint               # relatório completo
+composer lint:security      # só escape, nonce, sanitização e SQL
+composer lint:fix           # corrige automaticamente o que for possível (formatação)
+```
+
+> A pasta `vendor/` não vai para o servidor: o tema não depende dela para funcionar.

@@ -52,7 +52,7 @@
                 <div class="hfeed site" id="page">
                     <header class="site-header theme-header-shell sticky-top shadow-sm" role="banner">
                         <div itemscope itemtype="http://schema.org/WebSite" id="wrapper-navbar">
-                            <a class="skip-link visually-hidden-focusable" href="#content"><?php _e( 'Skip to content', 'u_correio68' ); ?></a>
+                            <a class="skip-link visually-hidden-focusable" href="#content"><?php esc_html_e( 'Skip to content', 'u_correio68' ); ?></a>
 
                             <nav id="headnev" class="navbar navbar-expand-lg navbar-dark bg-primary headnev topbar theme-topbar" aria-label="<?php esc_attr_e( 'Navegação principal', 'u_correio68' ); ?>">
                                 <div class="container">

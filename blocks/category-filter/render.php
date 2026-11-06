@@ -92,11 +92,11 @@ function seisdeagosto_render_category_filter( $attributes ) {
                             <?php selected( $current_cat_id, $category->term_id ); ?>>
                             <?php 
                             if ( $show_hierarchy && $category->parent > 0 ) {
-                                echo str_repeat( '— ', substr_count( $level_class, 'level-' ) );
+                                echo esc_html( str_repeat( '— ', substr_count( $level_class, 'level-' ) ) );
                             }
                             echo esc_html( $category->name ); 
                             if ( $show_count ) {
-                                echo ' (' . $category->count . ')';
+                                echo ' (' . (int) $category->count . ')';
                             }
                             ?>
                         </option>
@@ -132,7 +132,7 @@ function seisdeagosto_render_category_filter( $attributes ) {
                                 <?php endif; ?>
                                 <?php echo esc_html( $category->name ); ?>
                                 <?php if ( $show_count ): ?>
-                                    <span class="category-filter-count"><?php echo $category->count; ?></span>
+                                    <span class="category-filter-count"><?php echo (int) $category->count; ?></span>
                                 <?php endif; ?>
                             </a>
                         </li>
@@ -153,7 +153,7 @@ function seisdeagosto_render_category_filter( $attributes ) {
                                 <?php endif; ?>
                                 <?php echo esc_html( $category->name ); ?>
                                 <?php if ( $show_count ): ?>
-                                    <span class="category-filter-count"><?php echo $category->count; ?></span>
+                                    <span class="category-filter-count"><?php echo (int) $category->count; ?></span>
                                 <?php endif; ?>
                             </a>
                         </div>
@@ -177,7 +177,7 @@ function seisdeagosto_render_category_filter( $attributes ) {
                             <?php 
                             echo esc_html( $category->name ); 
                             if ( $show_count ) {
-                                echo ' (' . $category->count . ')';
+                                echo ' (' . (int) $category->count . ')';
                             }
                             ?>
                         </a>
