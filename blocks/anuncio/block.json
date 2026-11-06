@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "seisdeagosto/anuncio",
+	"title": "Anúncio (AdSense)",
+	"category": "seisdeagosto",
+	"icon": "megaphone",
+	"description": "Bloco de anúncio do Google AdSense. Usa o ID de editor configurado em Personalizar → AdSense.",
+	"keywords": [ "adsense", "anúncio", "publicidade", "google" ],
+	"textdomain": "u_correio68",
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": true
+	},
+	"attributes": {
+		"slot": {
+			"type": "string",
+			"default": ""
+		},
+		"formato": {
+			"type": "string",
+			"enum": [ "auto", "horizontal", "vertical", "retangulo", "materia" ],
+			"default": "auto"
+		},
+		"posicao": {
+			"type": "string",
+			"default": "bloco"
+		}
+	},
+	"editorScript": "seisdeagosto-anuncio-editor"
+}

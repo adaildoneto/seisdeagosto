@@ -410,6 +410,26 @@ hr,
   height: 0;
 }
 
+/*
+ * Listas do texto das matérias (bloco "Lista" e listas de posts clássicos).
+ * A biblioteca do Pinegrow (components/pg.blocks.wp/css/style-library-1.css), feita para
+ * seções escuras, define globalmente "ul li, ol li { color: #f3f3f8 }" e
+ * "ul { list-style: none }": no texto das matérias os itens ficavam quase brancos sobre
+ * branco (contraste 1,1:1) e sem marcador. Aqui só as listas do conteúdo voltam ao
+ * normal; as listas internas dos blocos do tema não são afetadas.
+ */
+:is(ul, ol).wp-block-list,
+.wp-block-post-content > :is(ul, ol):not([class]),
+.wp-block-post-content > :is(ul, ol):not([class]) :is(ul, ol) {
+  list-style: revert;
+  padding-left: 1.5em;
+}
+:is(ul, ol).wp-block-list li,
+.wp-block-post-content > :is(ul, ol):not([class]) li {
+  color: inherit;
+  font-size: inherit;
+}
+
 /* Destaque Misto: list layout across all screens */
 .destaque-misto-wrapper .list-item {
   display: flex;
@@ -419,7 +439,7 @@ hr,
 .destaque-misto-wrapper .list-thumb {
   flex: 0 0 25%;
   max-width: 25%;
-  aspect-ratio: 3 / 5;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 4px;
 }
@@ -445,6 +465,21 @@ hr,
 .destaque-misto-wrapper .list-item:not(:has(.list-thumb)) .list-content {
   flex: 1 1 100%;
   max-width: 100%;
+}
+/* Texto ocupa o espaço que sobra ao lado da miniatura (25% + 75% + gap passava do item). */
+/* (:has e não "+": um anúncio automático inserido entre a miniatura e o texto não pode quebrar a regra.) */
+.destaque-misto-wrapper .list-item:has(> .list-thumb) > .list-content {
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 0;
+}
+/* Selo de chamada longo não transborda para o card vizinho. */
+.destaque-misto-wrapper .list-content .badge {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
 }
 img.wp-post-image,
 article img,
@@ -2229,7 +2264,7 @@ body {
   .destaque-misto-wrapper .list-thumb {
     width: 25%;
     max-width: 160px;
-    aspect-ratio: 3 / 5;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: 4px;
   }
@@ -3294,6 +3329,10 @@ body {
   left: 12px;
   top: 12px;
   z-index: 10;
+  /* Selo longo não passa da borda do card (cortado com reticências). */
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Destaque Misto: garantir que gradiente apareça sobre a imagem */
@@ -3313,6 +3352,17 @@ body {
 /* Mobile slider cards */
 .destaques-home-mobile-slider .position-relative {
   background-color: var(--u68-badge-color, #ec940d) !important;
+}
+
+/*
+ * Antes de o Slick iniciar, os destaques apareciam empilhados (3 x 360 px) e, ao
+ * iniciar, o carrossel encolhia para 360 px, empurrando a página toda para cima
+ * (CLS ~0,26 no celular). Até a inicialização, mostra só o primeiro destaque: o
+ * mesmo tamanho do carrossel pronto. Depois, o Slick envolve os itens em
+ * .slick-list e esta regra deixa de se aplicar.
+ */
+.destaques-home-mobile-slider:not(.slick-initialized) > :not(:first-child) {
+  display: none;
 }
 
 /* Destaque Home: badge positioning - always top left */
