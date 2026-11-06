@@ -1325,15 +1325,11 @@ function u_correio68_register_custom_blocks() {
 						'render_callback' => $callback,
 					)
 				);
-				// Debug: Log successful registration
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $result ) {
-					error_log( sprintf( 'Block registered: %s with callback %s', $result->name, $callback ) );
-				}
 			} else {
 				$result = register_block_type( $path );
 				// Debug: Log registration without callback
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					error_log( sprintf( 'Block registered: seisdeagosto/%s (no callback found for %s)', $slug, $callback ) );
+					error_log( sprintf( 'Bloco seisdeagosto/%s registrado sem render_callback (%s não existe)', $slug, $callback ) );
 				}
 			}
 		} else {

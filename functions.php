@@ -1982,27 +1982,26 @@ require_once get_template_directory() . '/inc/icon-picker.php';
 	// Removed invalid filter hook name.
 
 	// Fallback shims for Advanced Custom Fields only if plugin is not active
-	add_action(
-		'plugins_loaded',
-		function () {
-			if ( function_exists( 'get_field' ) ) {
-				return; // ACF available, no shim needed
+	// Os plugins já foram carregados quando o tema carrega, então function_exists() aqui
+	// detecta corretamente o ACF. (Antes isto ficava num hook 'plugins_loaded', que já
+	// tinha disparado e nunca rodava: sem ACF, blocos como Destaques Home davam erro fatal.)
+	if ( ! function_exists( 'get_field' ) ) {
+		function get_field( $selector, $post_id = false, $format_value = true ) {
+			$value = '';
+			if ( $format_value ) {
+				// Permite que filtros como acf/format_value* apliquem fallback de tema
+				$name  = is_string( $selector ) ? $selector : '';
+				$field = array( 'name' => $name );
+				$value = apply_filters( "acf/format_value/name={$name}", $value, $post_id, $field );
 			}
-			function get_field( $selector, $post_id = false, $format_value = true ) {
-				$value = '';
-				if ( $format_value ) {
-					// Permite que filtros como acf/format_value* apliquem fallback de tema
-					$name  = is_string( $selector ) ? $selector : '';
-					$field = array( 'name' => $name );
-					$value = apply_filters( "acf/format_value/name={$name}", $value, $post_id, $field );
-				}
-				return $value;
-			}
-			function the_field( $selector, $post_id = false ) {
-				echo wp_kses_post( get_field( $selector, $post_id ) );
-			}
+			return $value;
 		}
-	);
+	}
+	if ( ! function_exists( 'the_field' ) ) {
+		function the_field( $selector, $post_id = false ) {
+			echo wp_kses_post( get_field( $selector, $post_id ) );
+		}
+	}
 
 	/**
 	 * Helper: obtém dados da badge (texto, cor, ícone) com fallbacks do tema.
