@@ -3334,6 +3334,17 @@ body {
   background-color: var(--u68-badge-color, #ec940d) !important;
 }
 
+/*
+ * Antes de o Slick iniciar, os destaques apareciam empilhados (3 x 360 px) e, ao
+ * iniciar, o carrossel encolhia para 360 px, empurrando a página toda para cima
+ * (CLS ~0,26 no celular). Até a inicialização, mostra só o primeiro destaque: o
+ * mesmo tamanho do carrossel pronto. Depois, o Slick envolve os itens em
+ * .slick-list e esta regra deixa de se aplicar.
+ */
+.destaques-home-mobile-slider:not(.slick-initialized) > :not(:first-child) {
+  display: none;
+}
+
 /* Destaque Home: badge positioning - always top left */
 .destaques-home-wrapper .badge,
 .destaques-home-wrapper-single .badge,
