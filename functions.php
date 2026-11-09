@@ -1426,6 +1426,25 @@ if ( ! function_exists( 'u_seisbarra8_enqueue_scripts' ) ) :
 			// City Selector for Weather Widget
 			wp_enqueue_style( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/css/city-selector.css', array(), '1.0.0' );
 			wp_enqueue_script( 'u_seisbarra8-city-selector', get_template_directory_uri() . '/assets/js/city-selector.js', array( 'jquery' ), '1.0.0', true );
+
+			// Banner Lottie (ex.: banner da home). O script só carrega a
+			// biblioteca quando existe um banner na página.
+			wp_enqueue_script(
+				'u_seisbarra8-lottie-banner',
+				get_template_directory_uri() . '/assets/js/lottie-banner.js',
+				array(),
+				u_seisbarra8_asset_version( 'assets/js/lottie-banner.js' ),
+				true
+			);
+			wp_localize_script(
+				'u_seisbarra8-lottie-banner',
+				'u68LottieBanner',
+				array(
+					'baseUrl'    => get_template_directory_uri() . '/assets/lottie/',
+					'libraryUrl' => get_template_directory_uri() . '/lottie.min.js',
+					'fallback'   => 'wb-banner-1280x200.json',
+				)
+			);
 		}
 
 		/* Pinegrow generated Enqueue Scripts End */
