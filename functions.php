@@ -1710,37 +1710,6 @@ function u_seisbarra8_ensure_fontawesome() {
 add_action( 'wp_enqueue_scripts', 'u_seisbarra8_ensure_fontawesome', 1 );
 add_action( 'admin_enqueue_scripts', 'u_seisbarra8_ensure_fontawesome', 1 );
 
-/**
- * Preload the fonts used by the first screen.
- *
- * Only WOFF2 files are preloaded (same URL as the @font-face rules, no query
- * string) so the browser does not download the same font twice.
- */
-function u68_preload_local_fonts() {
-	if ( is_admin() || ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) ) {
-		return;
-	}
-
-	$uri  = get_template_directory_uri() . '/assets/fonts';
-	$dir  = get_template_directory() . '/assets/fonts';
-	$list = array(
-		'open-sans/OpenSans-Variable.woff2',
-		'lato/Lato-Bold.woff2',
-		'lato/Lato-Regular.woff2',
-	);
-
-	foreach ( $list as $relative ) {
-		if ( ! file_exists( $dir . '/' . $relative ) ) {
-			continue;
-		}
-		printf(
-			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">' . "\n",
-			esc_url( $uri . '/' . $relative )
-		);
-	}
-}
-add_action( 'wp_head', 'u68_preload_local_fonts', 2 );
-
 // Load key styles AND scripts (Bootstrap, theme, icons, layout) in both frontend and Site Editor to keep header/footer styled and functional.
 function u_seisbarra8_enqueue_block_assets() {
 	$theme_uri = get_template_directory_uri();

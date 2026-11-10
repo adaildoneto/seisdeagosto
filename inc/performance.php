@@ -53,19 +53,35 @@ function u68_move_jquery_dependents_to_footer() {
 	}
 
 	$jquery_handles = array( 'jquery', 'jquery-core', 'jquery-migrate' );
+	$footer         = $jquery_handles;
 
-	foreach ( (array) $scripts->queue as $handle ) {
-		if ( in_array( $handle, $jquery_handles, true ) ) {
-			continue;
+	// Fecha a lista com dependentes indiretos (ex.: script que depende do
+	// Bootstrap, que depende do jQuery), para não quebrar a ordem de execução.
+	do {
+		$added = false;
+
+		foreach ( (array) $scripts->queue as $handle ) {
+			if ( in_array( $handle, $footer, true ) ) {
+				continue;
+			}
+
+			$item = isset( $scripts->registered[ $handle ] ) ? $scripts->registered[ $handle ] : null;
+
+			if ( ! $item || empty( $item->deps ) ) {
+				continue;
+			}
+
+			if ( ! array_intersect( (array) $item->deps, $footer ) ) {
+				continue;
+			}
+
+			$footer[] = $handle;
+			$added    = true;
 		}
+	} while ( $added );
 
-		$item = isset( $scripts->registered[ $handle ] ) ? $scripts->registered[ $handle ] : null;
-
-		if ( ! $item || empty( $item->deps ) ) {
-			continue;
-		}
-
-		if ( ! array_intersect( (array) $item->deps, $jquery_handles ) ) {
+	foreach ( $footer as $handle ) {
+		if ( ! $scripts->query( $handle, 'registered' ) ) {
 			continue;
 		}
 
@@ -73,6 +89,9 @@ function u68_move_jquery_dependents_to_footer() {
 			continue;
 		}
 
+		// Garante o rodapé também para a própria biblioteca: o hook
+		// `wp_default_scripts` pode já ter disparado antes do tema carregar
+		// (plugin que chama wp_scripts() cedo) e o grupo nunca seria aplicado.
 		$scripts->add_data( $handle, 'group', 1 );
 	}
 }
@@ -144,6 +163,33 @@ function u68_custom_logo_attributes( $attr, $attachment, $size ) {
 add_filter( 'wp_get_attachment_image_attributes', 'u68_custom_logo_attributes', 10, 3 );
 
 /**
+ * Garante os atributos do logo no HTML final.
+ *
+ * O WordPress pode adicionar fetchpriority="high" depois do filtro de
+ * atributos, e o filtro legado do tema troca a classe custom-logo. Esta
+ * segunda passagem evita que o logo concorra com a imagem LCP.
+ *
+ * @param string $html HTML do logo.
+ * @return string
+ */
+function u68_optimize_custom_logo_markup( $html ) {
+	if ( ! is_string( $html ) || false === stripos( $html, '<img' ) ) {
+		return $html;
+	}
+
+	$html = preg_replace( '/\s+fetchpriority=(?:"[^"]*"|\'[^\']*\')/i', '', $html );
+
+	if ( preg_match( '/\ssizes=/i', $html ) ) {
+		$html = preg_replace( '/\ssizes=(?:"[^"]*"|\'[^\']*\')/i', ' sizes="(max-width: 480px) 70px, (max-width: 991px) 150px, 210px"', $html, 1 );
+	} else {
+		$html = preg_replace( '/<img\b/i', '<img sizes="(max-width: 480px) 70px, (max-width: 991px) 150px, 210px"', $html, 1 );
+	}
+
+	return preg_replace( '/<img\b/i', '<img fetchpriority="low"', $html, 1 );
+}
+add_filter( 'get_custom_logo', 'u68_optimize_custom_logo_markup', 99 );
+
+/**
  * Pré-conecta ao domínio das miniaturas do YouTube.
  *
  * Só um dns-prefetch: as miniaturas são lazy e ficam abaixo da dobra, então
@@ -177,7 +223,7 @@ function u68_youtube_facade( $html ) {
 		return $html;
 	}
 
-	$pattern = '#<iframe\b[^>]*\bsrc=(["\'])(?:https?:)?//(?:www\.)?(?:youtube(?:-nocookie)?\.com/embed/|youtu\.be/)([A-Za-z0-9_-]{6,})[^"\']*\1[^>]*>\s*</iframe>#i';
+	$pattern = '#<iframe\b[^>]*\bsrc=(["\'])(?:https?:)?//(?:www\.)?(?:youtube(?:-nocookie)?\.com/(?:embed|shorts|live)/|youtu\.be/)([A-Za-z0-9_-]{6,})[^"\']*\1[^>]*>\s*</iframe>#i';
 
 	return preg_replace_callback(
 		$pattern,
@@ -358,9 +404,13 @@ function u68_print_delayed_script_loader() {
 		['scroll', 'pointerdown', 'touchstart', 'keydown', 'wheel'].forEach(function (eventName) {
 			window.addEventListener(eventName, loadAds, { passive: true, once: true });
 		});
+		function loadAnalytics() { loadGroup('analytics'); }
+		['scroll', 'pointerdown', 'touchstart', 'keydown', 'wheel'].forEach(function (eventName) {
+			window.addEventListener(eventName, loadAnalytics, { passive: true, once: true });
+		});
 		window.addEventListener('load', function () {
-			setTimeout(function () { loadGroup('analytics'); }, 2000);
-			setTimeout(loadAds, 6000);
+			setTimeout(loadAnalytics, 15000);
+			setTimeout(loadAds, 30000);
 		});
 	})();
 	</script>
