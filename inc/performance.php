@@ -36,6 +36,25 @@ function u68_move_jquery_to_footer( $scripts ) {
 add_action( 'wp_default_scripts', 'u68_move_jquery_to_footer' );
 
 /**
+ * Coloca a fonte móvel do sistema no próprio HTML crítico.
+ *
+ * O Jetpack Boost carrega a folha completa de forma assíncrona. Manter esta
+ * regra apenas no main.css faria o navegador iniciar Lato/Open Sans antes de
+ * descobrir a substituição móvel.
+ */
+function u68_print_mobile_system_fonts() {
+	if ( is_admin() || ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) ) {
+		return;
+	}
+	?>
+	<style id="u68-mobile-system-fonts">
+	@media (max-width:767.98px){body,body *:not(.fa):not(.dashicons):not([class^="icon-"]):not([class*=" icon-"]),body h1,body h2,body h3,body h4,body h5,body h6,body .h1,body .h2,body .h3,body .h4,body .h5,body .h6{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important}}
+	</style>
+	<?php
+}
+add_action( 'wp_head', 'u68_print_mobile_system_fonts', 99 );
+
+/**
  * Coloca no rodapé os scripts que dependem do jQuery.
  *
  * Assim a biblioteca e seus dependentes continuam na mesma leva (e na ordem
