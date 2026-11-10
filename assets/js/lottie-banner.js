@@ -101,11 +101,34 @@
 	}
 
 	function boot() {
-		if (!getBanners().length) {
+		var banners = getBanners();
+
+		if (!banners.length) {
 			return;
 		}
 
-		ensureLibrary();
+		// A biblioteca (e o JSON) só é baixada quando o banner se aproxima da
+		// viewport: o banner fica abaixo da dobra na maioria das páginas.
+		if (!('IntersectionObserver' in window)) {
+			window.addEventListener('load', function () {
+				window.setTimeout(ensureLibrary, 1500);
+			});
+			return;
+		}
+
+		var observer = new IntersectionObserver(function (entries) {
+			for (var i = 0; i < entries.length; i++) {
+				if (entries[i].isIntersecting) {
+					observer.disconnect();
+					ensureLibrary();
+					return;
+				}
+			}
+		}, { rootMargin: '400px 0px' });
+
+		Array.prototype.forEach.call(banners, function (element) {
+			observer.observe(element);
+		});
 
 		// A biblioteca externa pode terminar de carregar depois deste script.
 		window.addEventListener('load', start);
