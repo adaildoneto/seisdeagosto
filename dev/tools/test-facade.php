@@ -27,3 +27,7 @@ echo ( false === strpos( $out3, '<iframe' ) ? "OK: nocookie substituido\n" : "no
 $logo = '<a class="navbar-brand custom-logo-link"><img width="521" class="img-fluid" fetchpriority="high" sizes="100vw" src="logo.png"></a>';
 $logo = u68_optimize_custom_logo_markup( $logo );
 echo ( false !== strpos( $logo, 'fetchpriority="low"' ) && false === strpos( $logo, 'fetchpriority="high"' ) && false === strpos( $logo, 'sizes="100vw"' ) ? "OK: logo otimizado\n" : "FALHOU: logo nao otimizado\n" );
+
+$lcp = '<img class="imagem-destaque-misto wp-post-image" src="lcp.jpg" sizes="100vw">';
+$lcp = u68_optimize_lcp_markup( $lcp );
+echo ( false !== strpos( $lcp, 'sizes="(max-width: 480px) 220px, (max-width: 768px) 360px, 343px"' ) ? "OK: sizes do LCP otimizado\n" : "FALHOU: sizes do LCP nao otimizado\n" );

@@ -312,6 +312,29 @@ function u68_lazy_iframes( $html ) {
 }
 
 /**
+ * Corrige o `sizes` da imagem LCP no HTML final, depois do Image CDN.
+ *
+ * @param string $html HTML da página.
+ * @return string
+ */
+function u68_optimize_lcp_markup( $html ) {
+	return preg_replace_callback(
+		'#<img\b[^>]*\bclass=(["\'])[^"\']*imagem-destaque-misto[^"\']*\1[^>]*>#i',
+		function ( $matches ) {
+			$tag   = $matches[0];
+			$sizes = '(max-width: 480px) 220px, (max-width: 768px) 360px, 343px';
+
+			if ( preg_match( '#\ssizes=(["\']).*?\1#i', $tag ) ) {
+				return preg_replace( '#\ssizes=(["\']).*?\1#i', ' sizes="' . $sizes . '"', $tag, 1 );
+			}
+
+			return preg_replace( '#\s*/?>$#', ' sizes="' . $sizes . '"$0', $tag, 1 );
+		},
+		$html
+	);
+}
+
+/**
  * Inicia o buffer de saída para reescrever scripts de terceiros.
  */
 function u68_start_output_buffer() {
@@ -330,7 +353,9 @@ function u68_start_output_buffer() {
 
 	ob_start( 'u68_rewrite_third_party_markup' );
 }
-add_action( 'template_redirect', 'u68_start_output_buffer', 1 );
+// Precisa envolver o buffer do Jetpack para receber o HTML já otimizado por
+// ele. O primeiro buffer aberto é o último callback executado.
+add_action( 'template_redirect', 'u68_start_output_buffer', PHP_INT_MIN );
 
 /**
  * Remove/adia marcações de terceiros no HTML final.
@@ -347,6 +372,7 @@ function u68_rewrite_third_party_markup( $html ) {
 	// e template parts, que não passam por `the_content`).
 	$html = u68_youtube_facade( $html );
 	$html = u68_lazy_iframes( $html );
+	$html = u68_optimize_lcp_markup( $html );
 
 	// Banner Lottie do WordBlaster: remove a biblioteca externa (1,9 s de main
 	// thread no mobile) e a inicialização inline; o tema assume o banner via
