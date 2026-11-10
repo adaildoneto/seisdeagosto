@@ -708,6 +708,7 @@ legend {
    desktop, mas deixam de disputar a conexão móvel com a imagem LCP. */
 @media (max-width: 767.98px) {
   body,
+  body *:not(.fa):not(.dashicons):not([class^="icon-"]):not([class*=" icon-"]),
   body h1,
   body h2,
   body h3,

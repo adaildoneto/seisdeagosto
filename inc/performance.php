@@ -272,6 +272,43 @@ function u68_lazy_iframes( $html ) {
 }
 
 /**
+ * Adia imagens nativamente lazy até elas se aproximarem da área visível.
+ *
+ * O Chrome começa a baixar imagens loading="lazy" ainda muito longe da dobra.
+ * Na home isso incluía miniaturas pesadas durante o carregamento do LCP.
+ *
+ * @param string $html HTML da página.
+ * @return string
+ */
+function u68_defer_lazy_images( $html ) {
+	if ( empty( $html ) ) {
+		return $html;
+	}
+
+	return preg_replace_callback(
+		'#<img\b[^>]*>#i',
+		function ( $matches ) {
+			$tag = $matches[0];
+
+			if ( ! preg_match( '#\bloading=(["\'])lazy\1#i', $tag ) || false !== stripos( $tag, 'data-u68-src=' ) ) {
+				return $tag;
+			}
+
+			$tag = preg_replace( '#\ssrcset=(["\'])(.*?)\1#i', ' data-u68-srcset=$1$2$1', $tag, 1 );
+			$tag = preg_replace(
+				'#\ssrc=(["\'])(.*?)\1#i',
+				' data-u68-src=$1$2$1 src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="',
+				$tag,
+				1
+			);
+
+			return $tag;
+		},
+		$html
+	);
+}
+
+/**
  * Inicia o buffer de saída para reescrever scripts de terceiros.
  */
 function u68_start_output_buffer() {
@@ -307,6 +344,7 @@ function u68_rewrite_third_party_markup( $html ) {
 	// e template parts, que não passam por `the_content`).
 	$html = u68_youtube_facade( $html );
 	$html = u68_lazy_iframes( $html );
+	$html = u68_defer_lazy_images( $html );
 
 	// Banner Lottie do WordBlaster: remove a biblioteca externa (1,9 s de main
 	// thread no mobile) e a inicialização inline; o tema assume o banner via
@@ -417,6 +455,46 @@ function u68_print_delayed_script_loader() {
 	<?php
 }
 add_action( 'wp_footer', 'u68_print_delayed_script_loader', 99 );
+
+/**
+ * Restaura imagens lazy quando elas se aproximam da viewport.
+ */
+function u68_print_lazy_image_loader() {
+	if ( is_admin() || is_feed() || is_customize_preview() ) {
+		return;
+	}
+	?>
+	<script>
+	(function () {
+		var images = Array.prototype.slice.call(document.querySelectorAll('img[data-u68-src]'));
+		if (!images.length) { return; }
+		function load(image) {
+			if (!image.hasAttribute('data-u68-src')) { return; }
+			if (image.hasAttribute('data-u68-srcset')) {
+				image.srcset = image.getAttribute('data-u68-srcset');
+				image.removeAttribute('data-u68-srcset');
+			}
+			image.src = image.getAttribute('data-u68-src');
+			image.removeAttribute('data-u68-src');
+		}
+		if (!('IntersectionObserver' in window)) {
+			images.forEach(load);
+			return;
+		}
+		var observer = new IntersectionObserver(function (entries) {
+			entries.forEach(function (entry) {
+				if (!entry.isIntersecting) { return; }
+				observer.unobserve(entry.target);
+				load(entry.target);
+			});
+		}, { rootMargin: '400px 0px' });
+		images.forEach(function (image) { observer.observe(image); });
+		setTimeout(function () { images.forEach(load); observer.disconnect(); }, 10000);
+	})();
+	</script>
+	<?php
+}
+add_action( 'wp_footer', 'u68_print_lazy_image_loader', 97 );
 
 /**
  * Fachada de vídeo: troca a imagem pelo iframe do YouTube no clique.
