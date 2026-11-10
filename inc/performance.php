@@ -36,6 +36,21 @@ function u68_move_jquery_to_footer( $scripts ) {
 add_action( 'wp_default_scripts', 'u68_move_jquery_to_footer' );
 
 /**
+ * Antecipa apenas o subconjunto de 1 KB usado pelos ícones da primeira tela.
+ */
+function u68_preload_critical_icon_font() {
+	if ( is_admin() || ( function_exists( 'u_seisbarra8_is_amp' ) && u_seisbarra8_is_amp() ) ) {
+		return;
+	}
+
+	printf(
+		'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">' . "\n",
+		esc_url( get_template_directory_uri() . '/assets/vendor/font-awesome-4.7/fonts/fontawesome-critical.woff2' )
+	);
+}
+add_action( 'wp_head', 'u68_preload_critical_icon_font', 2 );
+
+/**
  * Coloca a fonte móvel do sistema no próprio HTML crítico.
  *
  * O Jetpack Boost carrega a folha completa de forma assíncrona. Manter esta
