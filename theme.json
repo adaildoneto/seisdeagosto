@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "https://schemas.wp.org/wp/6.5/theme.json",
   "version": 2,
   "settings": {
@@ -27,12 +27,12 @@
           "name": "Lato",
           "fontFamily": "\"Lato\", sans-serif",
           "fontFace": [
-            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "300", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Light.woff2", "file:./assets/fonts/lato/Lato-Light.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "300", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-LightItalic.woff2", "file:./assets/fonts/lato/Lato-LightItalic.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "400", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Regular.woff2", "file:./assets/fonts/lato/Lato-Regular.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "400", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Italic.woff2", "file:./assets/fonts/lato/Lato-Italic.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "700", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Bold.woff2", "file:./assets/fonts/lato/Lato-Bold.ttf" ] },
-            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "700", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-BoldItalic.woff2", "file:./assets/fonts/lato/Lato-BoldItalic.ttf" ] }
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "300", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Light.woff2" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "300", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-LightItalic.woff2" ] },
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "400", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Regular.woff2" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "400", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Italic.woff2" ] },
+            { "fontFamily": "Lato", "fontStyle": "normal", "fontWeight": "700", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-Bold.woff2" ] },
+            { "fontFamily": "Lato", "fontStyle": "italic", "fontWeight": "700", "fontDisplay": "swap", "src": [ "file:./assets/fonts/lato/Lato-BoldItalic.woff2" ] }
           ]
         },
         {
@@ -40,8 +40,8 @@
           "name": "Open Sans",
           "fontFamily": "\"Open Sans\", sans-serif",
           "fontFace": [
-            { "fontFamily": "Open Sans", "fontStyle": "normal", "fontWeight": "300 800", "fontDisplay": "swap", "src": [ "file:./assets/fonts/open-sans/OpenSans-Variable.woff2", "file:./assets/fonts/open-sans/OpenSans-Variable.ttf" ] },
-            { "fontFamily": "Open Sans", "fontStyle": "italic", "fontWeight": "300 800", "fontDisplay": "swap", "src": [ "file:./assets/fonts/open-sans/OpenSans-Italic-Variable.woff2", "file:./assets/fonts/open-sans/OpenSans-Italic-Variable.ttf" ] }
+            { "fontFamily": "Open Sans", "fontStyle": "normal", "fontWeight": "300 800", "fontDisplay": "swap", "src": [ "file:./assets/fonts/open-sans/OpenSans-Variable.woff2" ] },
+            { "fontFamily": "Open Sans", "fontStyle": "italic", "fontWeight": "300 800", "fontDisplay": "swap", "src": [ "file:./assets/fonts/open-sans/OpenSans-Italic-Variable.woff2" ] }
           ]
         }
       ],

@@ -36,40 +36,49 @@ function u68_move_jquery_to_footer( $scripts ) {
 add_action( 'wp_default_scripts', 'u68_move_jquery_to_footer' );
 
 /**
- * Rede de segurança do jQuery no rodapé.
+ * Coloca no rodapé os scripts que dependem do jQuery.
  *
- * Se algum plugin registrar no <head> um script que depende do jQuery, o
- * navegador tentaria executá-lo antes da biblioteca. Nesse caso, o jQuery
- * volta para o <head> em vez de quebrar a página.
+ * Assim a biblioteca e seus dependentes continuam na mesma leva (e na ordem
+ * certa), sem precisar reservar o <head> para o jQuery.
  */
-function u68_jquery_group_guard() {
+function u68_move_jquery_dependents_to_footer() {
 	if ( is_admin() ) {
 		return;
 	}
 
 	$scripts = wp_scripts();
 
-	if ( ! $scripts instanceof WP_Scripts || ! $scripts->query( 'jquery', 'enqueued' ) ) {
+	if ( ! $scripts instanceof WP_Scripts ) {
 		return;
 	}
 
-	foreach ( (array) $scripts->registered as $handle => $item ) {
+	$jquery_handles = array( 'jquery', 'jquery-core', 'jquery-migrate' );
+
+	foreach ( (array) $scripts->queue as $handle ) {
+		if ( in_array( $handle, $jquery_handles, true ) ) {
+			continue;
+		}
+
+		$item = isset( $scripts->registered[ $handle ] ) ? $scripts->registered[ $handle ] : null;
+
+		if ( ! $item || empty( $item->deps ) ) {
+			continue;
+		}
+
+		if ( ! array_intersect( (array) $item->deps, $jquery_handles ) ) {
+			continue;
+		}
+
 		if ( $scripts->get_data( $handle, 'group' ) ) {
 			continue;
 		}
-		if ( empty( $item->deps ) || ! in_array( 'jquery', (array) $item->deps, true ) ) {
-			continue;
-		}
 
-		// Existe dependente no <head>: mantém a biblioteca onde está.
-		foreach ( array( 'jquery', 'jquery-core', 'jquery-migrate' ) as $jquery_handle ) {
-			$scripts->add_data( $jquery_handle, 'group', 0 );
-		}
-
-		return;
+		$scripts->add_data( $handle, 'group', 1 );
 	}
 }
-add_action( 'wp_print_scripts', 'u68_jquery_group_guard', 1 );
+add_action( 'wp_enqueue_scripts', 'u68_move_jquery_dependents_to_footer', 999 );
+add_action( 'wp_print_scripts', 'u68_move_jquery_dependents_to_footer', 1 );
+add_action( 'wp_footer', 'u68_move_jquery_dependents_to_footer', 1 );
 
 /**
  * Remove o script de emojis do WordPress.
@@ -110,6 +119,31 @@ add_filter( 'jetpack_photon_pre_args', 'u68_image_cdn_quality', 10, 1 );
 add_filter( 'image_cdn_pre_args', 'u68_image_cdn_quality', 10, 1 );
 
 /**
+ * Ajusta a imagem do logo do site.
+ *
+ * O CSS do tema exibe o logo em ~65px no celular e ~200px no desktop, mas o
+ * WordPress declara `sizes="100vw"` e o navegador baixa a versão de 521px
+ * (128 KB). Com `sizes` correto o celular recebe a versão de 300px.
+ *
+ * @param array $attr       Atributos da imagem.
+ * @param int   $attachment ID do anexo.
+ * @param mixed $size       Tamanho solicitado.
+ * @return array
+ */
+function u68_custom_logo_attributes( $attr, $attachment, $size ) {
+	if ( empty( $attr['class'] ) || false === strpos( $attr['class'], 'custom-logo' ) ) {
+		return $attr;
+	}
+
+	$attr['sizes']        = '(max-width: 480px) 70px, (max-width: 991px) 150px, 210px';
+	$attr['fetchpriority'] = 'low';
+	$attr['decoding']      = 'async';
+
+	return $attr;
+}
+add_filter( 'wp_get_attachment_image_attributes', 'u68_custom_logo_attributes', 10, 3 );
+
+/**
  * Pré-conecta ao domínio das miniaturas do YouTube.
  *
  * Só um dns-prefetch: as miniaturas são lazy e ficam abaixo da dobra, então
@@ -131,12 +165,16 @@ add_filter( 'wp_resource_hints', 'u68_resource_hints', 10, 2 );
 /**
  * Substitui iframes do YouTube por uma fachada que só carrega o player no clique.
  *
- * @param string $content Conteúdo do post.
+ * Roda no HTML final (buffer de saída) e não em `the_content`: assim também
+ * alcança vídeos que vêm de blocos reutilizados, template parts e widgets,
+ * que não passam pelo filtro de conteúdo do post.
+ *
+ * @param string $html HTML da página.
  * @return string
  */
-function u68_youtube_facade( $content ) {
-	if ( is_admin() || is_feed() || is_customize_preview() || empty( $content ) ) {
-		return $content;
+function u68_youtube_facade( $html ) {
+	if ( empty( $html ) ) {
+		return $html;
 	}
 
 	$pattern = '#<iframe\b[^>]*\bsrc=(["\'])(?:https?:)?//(?:www\.)?(?:youtube(?:-nocookie)?\.com/embed/|youtu\.be/)([A-Za-z0-9_-]{6,})[^"\']*\1[^>]*>\s*</iframe>#i';
@@ -160,20 +198,19 @@ function u68_youtube_facade( $content ) {
 				. '<span class="u68-video-play" aria-hidden="true"></span>'
 				. '</button>';
 		},
-		$content
+		$html
 	);
 }
-add_filter( 'the_content', 'u68_youtube_facade', 99 );
 
 /**
- * Adiciona loading="lazy" a iframes que restarem no conteúdo.
+ * Adiciona loading="lazy" a iframes que restarem no HTML final.
  *
- * @param string $content Conteúdo.
+ * @param string $html HTML da página.
  * @return string
  */
-function u68_lazy_iframes( $content ) {
-	if ( is_admin() || is_feed() || is_customize_preview() || empty( $content ) ) {
-		return $content;
+function u68_lazy_iframes( $html ) {
+	if ( empty( $html ) ) {
+		return $html;
 	}
 
 	return preg_replace_callback(
@@ -184,10 +221,9 @@ function u68_lazy_iframes( $content ) {
 			}
 			return '<iframe' . $matches[1] . ' loading="lazy">';
 		},
-		$content
+		$html
 	);
 }
-add_filter( 'the_content', 'u68_lazy_iframes', 98 );
 
 /**
  * Inicia o buffer de saída para reescrever scripts de terceiros.
@@ -220,6 +256,11 @@ function u68_rewrite_third_party_markup( $html ) {
 	if ( ! is_string( $html ) || '' === $html ) {
 		return $html;
 	}
+
+	// Fachada de vídeo + lazy em iframes restantes (cobre blocos reutilizados
+	// e template parts, que não passam por `the_content`).
+	$html = u68_youtube_facade( $html );
+	$html = u68_lazy_iframes( $html );
 
 	// Banner Lottie do WordBlaster: remove a biblioteca externa (1,9 s de main
 	// thread no mobile) e a inicialização inline; o tema assume o banner via
