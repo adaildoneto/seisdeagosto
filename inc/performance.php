@@ -198,7 +198,9 @@ function u68_lcp_image_sizes( $attr ) {
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'u68_lcp_image_sizes', 999 );
+// Executa depois do Image CDN/Jetpack, que também recalcula `sizes` em uma
+// prioridade alta.
+add_filter( 'wp_get_attachment_image_attributes', 'u68_lcp_image_sizes', PHP_INT_MAX );
 
 /**
  * Garante os atributos do logo no HTML final.
