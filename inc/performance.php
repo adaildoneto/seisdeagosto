@@ -136,7 +136,7 @@ add_action( 'init', 'u68_disable_wp_emoji' );
 /**
  * Reduz a qualidade das imagens do CDN do Jetpack (Photon).
  *
- * Fotos de notícias não precisam de qualidade máxima; 82 mantém boa nitidez
+ * Fotos de notícias não precisam de qualidade máxima; 76 mantém boa nitidez
  * com arquivos bem menores.
  *
  * @param array $args Argumentos do CDN.
@@ -148,7 +148,7 @@ function u68_image_cdn_quality( $args ) {
 	}
 
 	if ( ! isset( $args['quality'] ) ) {
-		$args['quality'] = 82;
+		$args['quality'] = 76;
 	}
 
 	return $args;
@@ -180,6 +180,25 @@ function u68_custom_logo_attributes( $attr, $attachment, $size ) {
 	return $attr;
 }
 add_filter( 'wp_get_attachment_image_attributes', 'u68_custom_logo_attributes', 10, 3 );
+
+/**
+ * Evita que o Lighthouse escolha uma variante 666 px para a imagem LCP que
+ * ocupa 370 px no celular. Em aparelhos de DPR 3 o navegador ainda escolhe a
+ * variante maior; no perfil DPR 1,75 ele recebe a versão próxima de 400 px.
+ *
+ * @param array $attr Atributos da imagem.
+ * @return array
+ */
+function u68_lcp_image_sizes( $attr ) {
+	if ( empty( $attr['class'] ) || false === strpos( $attr['class'], 'imagem-destaque-misto' ) ) {
+		return $attr;
+	}
+
+	$attr['sizes'] = '(max-width: 480px) 220px, (max-width: 768px) 360px, 343px';
+
+	return $attr;
+}
+add_filter( 'wp_get_attachment_image_attributes', 'u68_lcp_image_sizes', 999 );
 
 /**
  * Garante os atributos do logo no HTML final.
