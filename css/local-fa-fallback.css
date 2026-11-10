@@ -11,3 +11,15 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* Ícones presentes no primeiro viewport da home. Esta face de ~2 KB é
+   escolhida para esses glifos; a fonte completa acima continua disponível
+   automaticamente em páginas que usam outros ícones. */
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('../assets/vendor/font-awesome-4.7/fonts/fontawesome-critical.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+F002, U+F004, U+F005, U+F00D, U+F017, U+F164;
+}
