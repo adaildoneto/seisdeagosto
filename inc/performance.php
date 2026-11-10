@@ -290,7 +290,12 @@ function u68_defer_lazy_images( $html ) {
 		function ( $matches ) {
 			$tag = $matches[0];
 
-			if ( ! preg_match( '#\bloading=(["\'])lazy\1#i', $tag ) || false !== stripos( $tag, 'data-u68-src=' ) ) {
+			if (
+				! preg_match( '#\bloading=(["\'])lazy\1#i', $tag )
+				|| false !== stripos( $tag, 'data-u68-src=' )
+				|| false !== stripos( $tag, 'data-jp-lcp-optimized' )
+				|| preg_match( '#\bfetchpriority=(["\'])high\1#i', $tag )
+			) {
 				return $tag;
 			}
 
