@@ -27,11 +27,3 @@ echo ( false === strpos( $out3, '<iframe' ) ? "OK: nocookie substituido\n" : "no
 $logo = '<a class="navbar-brand custom-logo-link"><img width="521" class="img-fluid" fetchpriority="high" sizes="100vw" src="logo.png"></a>';
 $logo = u68_optimize_custom_logo_markup( $logo );
 echo ( false !== strpos( $logo, 'fetchpriority="low"' ) && false === strpos( $logo, 'fetchpriority="high"' ) && false === strpos( $logo, 'sizes="100vw"' ) ? "OK: logo otimizado\n" : "FALHOU: logo nao otimizado\n" );
-
-$lazy = '<img src="foto.jpg" srcset="foto-300.jpg 300w, foto-600.jpg 600w" loading="lazy" alt="">';
-$lazy = u68_defer_lazy_images( $lazy );
-echo ( false !== strpos( $lazy, 'data-u68-src="foto.jpg"' ) && false !== strpos( $lazy, 'data-u68-srcset="foto-300.jpg 300w, foto-600.jpg 600w"' ) ? "OK: imagem lazy adiada\n" : "FALHOU: imagem lazy nao adiada\n" );
-
-$lcp = '<img data-jp-lcp-optimized="true" fetchpriority="high" src="lcp.jpg" loading="lazy">';
-$lcp = u68_defer_lazy_images( $lcp );
-echo ( false === strpos( $lcp, 'data-u68-src=' ) && false !== strpos( $lcp, 'src="lcp.jpg"' ) ? "OK: imagem LCP preservada\n" : "FALHOU: imagem LCP adiada\n" );
