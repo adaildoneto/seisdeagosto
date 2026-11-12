@@ -841,6 +841,38 @@ function u_correio68_sanitize_font_name( $value ) {
 /**
  * Generate custom CSS from Customizer settings
  */
+/**
+ * Cor de texto legível (branco ou quase preto) sobre uma cor de fundo.
+ *
+ * Escolhe a que tiver maior contraste pela fórmula da WCAG. Usada nos números sobre
+ * selos e círculos, cujas cores de fundo vêm do Personalizador.
+ *
+ * @param string $background Cor de fundo em hexadecimal (#rgb ou #rrggbb).
+ * @return string '#ffffff' ou '#111111'.
+ */
+function u_correio68_contrast_text_color( $background ) {
+	$hex = ltrim( (string) sanitize_hex_color( $background ), '#' );
+	if ( 3 === strlen( $hex ) ) {
+		$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	}
+	if ( 6 !== strlen( $hex ) ) {
+		return '#ffffff';
+	}
+	$luminance = function ( $rgb ) {
+		$c = array();
+		foreach ( $rgb as $v ) {
+			$v   = $v / 255;
+			$c[] = $v <= 0.03928 ? $v / 12.92 : pow( ( $v + 0.055 ) / 1.055, 2.4 );
+		}
+		return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
+	};
+	$bg       = $luminance( array( hexdec( substr( $hex, 0, 2 ) ), hexdec( substr( $hex, 2, 2 ) ), hexdec( substr( $hex, 4, 2 ) ) ) );
+	$white    = 1.05 / ( $bg + 0.05 );
+	$dark_lum = $luminance( array( 17, 17, 17 ) );
+	$dark     = ( max( $bg, $dark_lum ) + 0.05 ) / ( min( $bg, $dark_lum ) + 0.05 );
+	return $white >= $dark ? '#ffffff' : '#111111';
+}
+
 function u_correio68_customizer_css() {
 	$primary_color    = get_theme_mod( 'u_correio68_primary_color', '#0a4579' );
 	$badge_color      = get_theme_mod( 'u_correio68_badge_color', '#ec940d' );
@@ -875,6 +907,8 @@ function u_correio68_customizer_css() {
 			--u68-primary-color: <?php echo esc_attr( $primary_color ); ?>;
 			--u68-badge-color: <?php echo esc_attr( $badge_color ); ?>;
 			--u68-badge-text-color: <?php echo esc_attr( $badge_text_color ); ?>;
+			--u68-primary-contrast: <?php echo esc_attr( u_correio68_contrast_text_color( $primary_color ) ); ?>;
+			--u68-badge-contrast: <?php echo esc_attr( u_correio68_contrast_text_color( $badge_color ) ); ?>;
 			--u68-highlight-bg: <?php echo esc_attr( $highlight_bg ); ?>;
 			--u68-team-bg: <?php echo esc_attr( $team_bg ); ?>;
 			--u68-header-bg: <?php echo esc_attr( $header_bg ); ?>;
