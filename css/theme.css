@@ -411,23 +411,52 @@ hr,
 }
 
 /*
- * Listas do texto das matérias (bloco "Lista" e listas de posts clássicos).
+ * Listas do texto (matérias, páginas e editor de blocos).
+ *
  * A biblioteca do Pinegrow (components/pg.blocks.wp/css/style-library-1.css), feita para
- * seções escuras, define globalmente "ul li, ol li { color: #f3f3f8 }" e
- * "ul { list-style: none }": no texto das matérias os itens ficavam quase brancos sobre
- * branco (contraste 1,1:1) e sem marcador. Aqui só as listas do conteúdo voltam ao
- * normal; as listas internas dos blocos do tema não são afetadas.
+ * seções escuras, define globalmente "ul li, ol li { color: #f3f3f8; font-size: 14px }" e
+ * "ul { list-style: none }". E o tema decora toda lista numerada com um círculo
+ * ("ol li::before", mais abaixo), que flutuava à esquerda (itens em "escada") e se somava
+ * ao número nativo (numeração duplicada).
+ *
+ * Aqui, dentro do conteúdo:
+ * - o texto de QUALQUER item de lista herda a cor do texto (inclusive em grupos,
+ *   citações, colunas e listas com classe);
+ * - listas com marcador voltam a ter marcador;
+ * - listas numeradas mostram só o círculo, posicionado no recuo do item, com o número
+ *   do contador nativo (respeita start, reversed e value) e cor de texto calculada
+ *   para contrastar com a cor primária.
+ * As listas dos blocos do tema (ex.: Mais lidas) mantêm o próprio estilo.
  */
-:is(ul, ol).wp-block-list,
-.wp-block-post-content > :is(ul, ol):not([class]),
-.wp-block-post-content > :is(ul, ol):not([class]) :is(ul, ol) {
+/* :is() e não :where(): precisa de especificidade maior que "ul li" da biblioteca, que carrega depois. */
+:is(.wp-block-post-content, .entry-content, .is-root-container) li {
+  color: inherit;
+}
+:where(.wp-block-post-content, .entry-content, .is-root-container) :is(.wp-block-list, ul:not([class]), ol:not([class]), ol.listanumero) li {
+  font-size: inherit;
+}
+:where(.wp-block-post-content, .entry-content, .is-root-container) :is(ul.wp-block-list, ul:not([class])) {
   list-style: revert;
   padding-left: 1.5em;
 }
-:is(ul, ol).wp-block-list li,
-.wp-block-post-content > :is(ul, ol):not([class]) li {
-  color: inherit;
-  font-size: inherit;
+:where(.wp-block-post-content, .entry-content, .is-root-container) ol:not(.top-most-read) {
+  list-style: none;
+  padding-left: 0;
+}
+:where(.wp-block-post-content, .entry-content, .is-root-container) ol:not(.top-most-read) > li {
+  position: relative;
+  min-height: 2.4em;
+  margin-bottom: 0.6em;
+  padding-left: 2.9em;
+}
+:where(.wp-block-post-content, .entry-content, .is-root-container) ol:not(.top-most-read) > li::before {
+  content: counter(list-item);
+  position: absolute;
+  left: 0;
+  top: 0;
+  float: none;
+  margin: 0;
+  color: var(--u68-primary-contrast, #ffffff);
 }
 
 /* Destaque Misto: list layout across all screens */
@@ -612,7 +641,7 @@ p {
   -webkit-margin-after: 5px;
           margin-block-end: 5px; }
 
-ol .listanumero {
+ol.listanumero {
   list-style: none;
   counter-reset: steps; }
 
@@ -623,7 +652,7 @@ ol li::before {
   content: counter(steps);
   margin-right: 0.5rem;
   background: var(--u68-primary-color, #0a4579);
-  color: white;
+  color: var(--u68-primary-contrast, #ffffff);
   width: 1.15em;
   height: 1.15em;
   border-radius: 50%;
